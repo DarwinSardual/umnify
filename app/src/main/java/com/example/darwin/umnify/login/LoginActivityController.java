@@ -101,8 +101,8 @@ class LoginActivityController {
                         .appendQueryParameter(AuthenticationKeys.IDENTIFICATION_KEY, AuthenticationKeys.IDENTIFICATION_VALUE)
                         .appendQueryParameter(AuthenticationKeys.USERNAME_KEY, AuthenticationKeys.USERNAME_VALUE)
                         .appendQueryParameter(AuthenticationKeys.PASSWORD_KEY, AuthenticationKeys.PASSWORD_VALUE)
-                        .appendQueryParameter(AuthenticationKeys.USER_ID_KEY, layout.getUsernameField().getText().toString())
-                        .appendQueryParameter(AuthenticationKeys.USER_PASSWORD_KEY, layout.getPasswordField().getText().toString());
+                        .appendQueryParameter(AuthenticationKeys.USER_ID_KEY, strings[0])
+                        .appendQueryParameter(AuthenticationKeys.USER_PASSWORD_KEY, strings[1]);
                 String query = builder.build().getEncodedQuery();
 
                 setRequest(query);
@@ -167,8 +167,8 @@ class LoginActivityController {
                     activity.startActivity(intent);
                 }else if(code == AuthenticationCodes.INVALID_USER_ID_PASSWORD){
 
-                    Snackbar.make(source, "Hello Snackbar!",
-                            Snackbar.LENGTH_LONG).show();
+                    Snackbar.make(source, "User not authenticated!",
+                            Snackbar.LENGTH_SHORT).show();
                 }
 
 
