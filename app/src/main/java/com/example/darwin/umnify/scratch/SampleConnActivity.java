@@ -1,5 +1,6 @@
 package com.example.darwin.umnify.scratch;
 
+import android.content.Intent;
 import android.os.AsyncTask;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
@@ -20,7 +21,14 @@ public class SampleConnActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_sample_conn);
 
+        String str = getIntent().getStringExtra("SAMPLE_KEY");
+
         //sample();
+
+        TextView sample = (TextView) findViewById(R.id.sample_text);
+        sample.setText(str);
+
+
 
 
     }

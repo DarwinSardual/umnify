@@ -1,6 +1,7 @@
 package com.example.darwin.umnify.login;
 
 import android.app.Activity;
+import android.support.design.widget.CoordinatorLayout;
 import android.widget.Button;
 import android.widget.EditText;
 import com.example.darwin.umnify.R;
@@ -11,6 +12,7 @@ class LoginActivityLayout{
     private EditText usernameField;
     private EditText passwordField;
     private Activity activity;
+    private CoordinatorLayout mainContainer;
 
     public LoginActivityLayout(Activity activity){
 
@@ -22,7 +24,7 @@ class LoginActivityLayout{
 
     public void init(){
         setLoginButton();
-        setPasswordField();
+        setUsernameField();
         setPasswordField();
     }
 
@@ -38,6 +40,8 @@ class LoginActivityLayout{
         passwordField = (EditText) activity.findViewById(R.id.login_password_field);
     }
 
+    private void setMainContainer(){ mainContainer = (CoordinatorLayout) activity.findViewById(R.id.login_main_container);}
+
     public Button getLoginButton(){
 
         return login;
@@ -50,5 +54,9 @@ class LoginActivityLayout{
 
     public EditText getPasswordField() {
         return passwordField;
+    }
+
+    public CoordinatorLayout getMainContainer() {
+        return mainContainer;
     }
 }

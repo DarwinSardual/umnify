@@ -17,7 +17,7 @@ public class LoginActivity extends AppCompatActivity {
         layout = new LoginActivityLayout(LoginActivity.this);
         layout.init();
 
-        controller = new LoginActivityController(layout);
+        controller = new LoginActivityController(LoginActivity.this, layout);
 
     }
 
