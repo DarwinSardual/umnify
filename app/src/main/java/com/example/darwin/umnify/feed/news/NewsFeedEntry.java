@@ -23,6 +23,13 @@ public class NewsFeedEntry {
         imageList.add(image);
     }
 
+    // dummy constructor, remove this after testing
+    public NewsFeedEntry(String text, String str){
+
+        this.text = text;
+
+    }
+
     public void setText(String text){
         this.text = text;
     }

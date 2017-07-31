@@ -82,7 +82,7 @@ class LoginActivityController {
             this.layout = layout;
             this.source = source;
 
-            urlAddress = "http://192.168.0.100/~darwin/UMnifyMobileScripts/login/authenticate_login.php";
+            urlAddress = "http://192.168.122.1/~darwin/UMnifyMobileScripts/login/authenticate_login.php";
         }
 
         @Override
@@ -163,7 +163,11 @@ class LoginActivityController {
 
                 if(code == AuthenticationCodes.USER_AUTHENTICATED){
                     Intent intent = new Intent(activity, HomeActivity.class);
-                    //intent.putExtra("SAMPLE_KEY", Integer.toString(code));
+
+                    JSONObject data = new JSONObject(json.getString("data"));
+                    intent.putExtra("USER_ID", data.getString("id"));
+                    intent.putExtra("USER_TYPE", data.getString("type"));
+
                     activity.startActivity(intent);
                 }else if(code == AuthenticationCodes.INVALID_USER_ID_PASSWORD){
 
