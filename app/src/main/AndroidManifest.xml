@@ -2,7 +2,7 @@
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
           package="com.example.darwin.umnify">
 
-    <uses-permission android:name="android.permission.INTERNET" />
+    <uses-permission android:name="android.permission.INTERNET"/>
 
     <application
             android:allowBackup="true"
@@ -27,6 +27,8 @@
         <activity android:name=".calendar.CalendarActivity">
         </activity>
         <activity android:name=".scratch.SampleConnActivity">
+        </activity>
+        <activity android:name=".feed.blogs.BlogActivity">
         </activity>
     </application>
 

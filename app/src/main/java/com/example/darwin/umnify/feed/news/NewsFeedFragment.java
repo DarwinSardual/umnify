@@ -4,13 +4,10 @@ import android.os.Bundle;
 import android.support.v4.app.Fragment;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
-import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 
-import android.widget.LinearLayout;
-import android.widget.TextView;
 import com.example.darwin.umnify.R;
 
 
@@ -31,7 +28,7 @@ public class NewsFeedFragment extends Fragment{
 
 
 
-        NewsFeedEntryManager manager = new NewsFeedEntryManager(getActivity());
+        NewsFeedManager manager = new NewsFeedManager(getActivity());
         recyclerView.setAdapter(manager);
         recyclerView.setHasFixedSize(true);
         final LinearLayoutManager layoutManager = new LinearLayoutManager(getActivity());

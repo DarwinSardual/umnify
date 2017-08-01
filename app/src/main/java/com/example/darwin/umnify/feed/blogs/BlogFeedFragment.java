@@ -26,7 +26,7 @@ public class BlogFeedFragment extends Fragment{
 
         recyclerView = (RecyclerView) inflater.inflate(R.layout.recycler_view, container, false);
 
-        BlogFeedEntryManager manager = new BlogFeedEntryManager(getActivity());
+        BlogFeedManager manager = new BlogFeedManager(getActivity());
         recyclerView.setAdapter(manager);
 
         recyclerView.setHasFixedSize(true);

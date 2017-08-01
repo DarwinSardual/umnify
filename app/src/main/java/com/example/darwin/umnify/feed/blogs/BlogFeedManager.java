@@ -1,20 +1,23 @@
-package com.example.darwin.umnify.feed.news;
+package com.example.darwin.umnify.feed.blogs;
 
 import android.content.Context;
+import android.content.Intent;
 import android.net.Uri;
 import android.os.AsyncTask;
+import android.support.v7.widget.RecyclerView;
 import android.util.Log;
 import android.view.LayoutInflater;
+import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ImageView;
+import android.widget.RelativeLayout;
 import android.widget.TextView;
-
-import android.support.v4.content.ContextCompat;
-import android.support.v7.widget.RecyclerView;
 
 import com.example.darwin.umnify.R;
 import com.example.darwin.umnify.authentication.AuthenticationKeys;
-import com.example.darwin.umnify.feed.blogs.BlogFeedEntry;
+import org.json.JSONArray;
+import org.json.JSONException;
+import org.json.JSONObject;
 
 import java.io.*;
 import java.net.HttpURLConnection;
@@ -22,36 +25,38 @@ import java.net.URL;
 import java.util.ArrayList;
 import java.util.List;
 
-public class NewsFeedEntryManager extends RecyclerView.Adapter<NewsFeedEntryManager.ViewHolder> {
+public class BlogFeedManager extends RecyclerView.Adapter<BlogFeedManager.ViewHolder>{
 
-    private int feedCount = 0;
-    private List<NewsFeedEntry> feedEntryList;
-    private NewsFeedAsyc newsHandler;
+    private List<Blog> feedEntryList;
+    private int feedCount;
+    private BlogFeedAsyc blogsHandler;
 
+    public BlogFeedManager(Context context){
 
-    public NewsFeedEntryManager(Context context) {
+        feedCount = 0;
 
-        feedEntryList = new ArrayList<NewsFeedEntry>();
+        feedEntryList = new ArrayList<>();
 
-        //fetch data
-
-        newsHandler = new NewsFeedAsyc();
-        newsHandler.execute("5", "desc");
+        blogsHandler = new BlogFeedAsyc();
+        blogsHandler.execute("5", "desc");
 
     }
 
     /* Template for the View */
 
-    public final class ViewHolder extends RecyclerView.ViewHolder {
+    public final class ViewHolder extends RecyclerView.ViewHolder{
 
-        private TextView newsEntryTextView;
-        private ImageView newsEntryImageView;
+        private TextView blogTileHeadingView;
+        private ImageView blogTileImageView;
+        private RelativeLayout container;
 
-        private ViewHolder(LayoutInflater inflater, ViewGroup parent) {
-            super(inflater.inflate(R.layout.feed_news, parent, false));
+        private ViewHolder(LayoutInflater inflater, ViewGroup parent){
+            super(inflater.inflate(R.layout.feed_blogs, parent, false));
 
-            newsEntryTextView = (TextView) itemView.findViewById(R.id.news_entry_text);
-            newsEntryImageView = (ImageView) itemView.findViewById(R.id.news_entry_image);
+            container = (RelativeLayout) itemView.findViewById(R.id.blog_tile_container);
+            blogTileHeadingView = (TextView) itemView.findViewById(R.id.blog_tile_heading);
+            blogTileImageView = (ImageView) itemView.findViewById(R.id.blog_tile_image);
+
         }
     }
 
@@ -59,27 +64,52 @@ public class NewsFeedEntryManager extends RecyclerView.Adapter<NewsFeedEntryMana
     public ViewHolder onCreateViewHolder(ViewGroup parent, int viewType) {
 
         return new ViewHolder(LayoutInflater.from(parent.getContext()), parent);
-
     }
-
 
     @Override
     public void onBindViewHolder(ViewHolder holder, int position) {
 
+        if(position < feedCount){
+
+            final Blog blog = feedEntryList.get(position);
+            holder.blogTileHeadingView.setText(blog.getHeading());
+
+            holder.container.setOnClickListener(new View.OnClickListener() {
+                @Override
+                public void onClick(View view) {
+                    Intent intent = new Intent(view.getContext(), BlogActivity.class);
+                    intent.putExtra("id", blog.getId());
+                    view.getContext().startActivity(intent);
+                }
+            });
+
+        }
 
 
     }
 
-    public void addView(){
-        feedCount++;
-        notifyItemInserted(feedCount - 1);
+    private void addEntries(String data) throws JSONException{
+
+        JSONArray dataList = new JSONArray(data);
+        for(int i = 0; i < dataList.length(); i++){
+
+            JSONObject blogData = new JSONObject(dataList.getString(i));
+            Blog blog = new Blog(blogData);
+            feedEntryList.add(blog);
+            notifyItemInserted(feedCount);
+            feedCount++;
+
+        }
+
+
+
     }
 
     private boolean isFeedEmpty(){
         return feedCount == 0? true : false;
     }
 
-    private class NewsFeedAsyc extends AsyncTask<String, Void, String> {
+    private class BlogFeedAsyc extends AsyncTask<String, Void, String>{
 
         private final String urlAddress;
         private final int READ_TIMEOUT = 10000;
@@ -90,10 +120,9 @@ public class NewsFeedEntryManager extends RecyclerView.Adapter<NewsFeedEntryMana
         private HttpURLConnection urlConnection;
         private Uri.Builder builder;
 
+        public BlogFeedAsyc(){
 
-        public NewsFeedAsyc(){
-
-            urlAddress = "http://192.168.122.1/~darwin/UMnifyMobileScripts/feed/news/fetch_news.php";
+            urlAddress = "http://192.168.0.100/~darwin/UMnifyMobileScripts/feed/blogs/fetch_blogs.php";
         }
 
         @Override
@@ -103,7 +132,6 @@ public class NewsFeedEntryManager extends RecyclerView.Adapter<NewsFeedEntryMana
 
         @Override
         protected String doInBackground(String... strings) {
-
             try{
 
                 setUpConnection();
@@ -131,7 +159,7 @@ public class NewsFeedEntryManager extends RecyclerView.Adapter<NewsFeedEntryMana
             return null;
         }
 
-        private void setUpConnection() throws IOException{
+        private void setUpConnection() throws IOException {
 
             url = new URL(urlAddress);
             urlConnection = (HttpURLConnection) url.openConnection();
@@ -165,10 +193,19 @@ public class NewsFeedEntryManager extends RecyclerView.Adapter<NewsFeedEntryMana
         }
 
         @Override
-        protected void onPostExecute(String blogFeedEntries) {
+        protected void onPostExecute(String response) {
             //super.onPostExecute(blogFeedEntries);
 
-            Log.e("Response", blogFeedEntries);
+            try {
+                JSONObject str = new JSONObject(response);
+                String data = str.getString("data");
+
+                addEntries(data);
+
+            }catch (JSONException e){
+                e.printStackTrace();
+            }
+
         }
     }
 

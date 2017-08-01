@@ -93,6 +93,7 @@ public class HomeActivity extends AppCompatActivity {
 
         private void setUpViewPager(){
             viewPager = (ViewPager) activity.findViewById(R.id.home_viewpager);
+            viewPager.setOffscreenPageLimit(3);
             setUpViewPagerAdapter();
         }
 
@@ -163,7 +164,7 @@ public class HomeActivity extends AppCompatActivity {
 
     private class Adapter extends FragmentPagerAdapter {
 
-        private int size = 0;
+        private final int size = 3;
         private final List<Fragment> tabFragments = new ArrayList<Fragment>();
         private final List<String> tabFragmentTitles = new ArrayList<String>();
 
@@ -181,7 +182,7 @@ public class HomeActivity extends AppCompatActivity {
 
             tabFragments.add(fragment);
             tabFragmentTitles.add(title);
-            size++;
+            //size++;
         }
 
         @Override

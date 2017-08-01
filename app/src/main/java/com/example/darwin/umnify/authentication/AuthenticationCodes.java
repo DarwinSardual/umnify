@@ -9,4 +9,6 @@ public class AuthenticationCodes {
 
     public final static int INVALID_USER_ID_PASSWORD = 55;
     public final static int USER_AUTHENTICATED = 56;
+
+    public final static int FETCH_OK = 57;
 }
