@@ -27,7 +27,7 @@ import java.util.List;
 
 public class BlogFeedManager extends RecyclerView.Adapter<BlogFeedManager.ViewHolder>{
 
-    private List<Blog> feedEntryList;
+    private List<BlogTile> feedEntryList;
     private int feedCount;
     private BlogFeedAsyc blogsHandler;
 
@@ -38,7 +38,7 @@ public class BlogFeedManager extends RecyclerView.Adapter<BlogFeedManager.ViewHo
         feedEntryList = new ArrayList<>();
 
         blogsHandler = new BlogFeedAsyc();
-        blogsHandler.execute("5", "desc");
+        blogsHandler.execute("tile", "5", "desc");
 
     }
 
@@ -71,14 +71,17 @@ public class BlogFeedManager extends RecyclerView.Adapter<BlogFeedManager.ViewHo
 
         if(position < feedCount){
 
-            final Blog blog = feedEntryList.get(position);
-            holder.blogTileHeadingView.setText(blog.getHeading());
+            final BlogTile blogTile = feedEntryList.get(position);
+            holder.blogTileHeadingView.setText(blogTile.getHeading());
 
             holder.container.setOnClickListener(new View.OnClickListener() {
                 @Override
                 public void onClick(View view) {
                     Intent intent = new Intent(view.getContext(), BlogActivity.class);
-                    intent.putExtra("id", blog.getId());
+                    intent.putExtra("BLOG_TILE_ID", blogTile.getId());
+                    intent.putExtra("BLOG_TILE_HEADING", blogTile.getHeading());
+                    intent.putExtra("BLOG_TILE_IMAGE","");
+
                     view.getContext().startActivity(intent);
                 }
             });
@@ -94,15 +97,12 @@ public class BlogFeedManager extends RecyclerView.Adapter<BlogFeedManager.ViewHo
         for(int i = 0; i < dataList.length(); i++){
 
             JSONObject blogData = new JSONObject(dataList.getString(i));
-            Blog blog = new Blog(blogData);
-            feedEntryList.add(blog);
+            BlogTile blogTile = new BlogTile(blogData);
+            feedEntryList.add(blogTile);
             notifyItemInserted(feedCount);
             feedCount++;
 
         }
-
-
-
     }
 
     private boolean isFeedEmpty(){
@@ -140,8 +140,9 @@ public class BlogFeedManager extends RecyclerView.Adapter<BlogFeedManager.ViewHo
                         .appendQueryParameter(AuthenticationKeys.IDENTIFICATION_KEY, AuthenticationKeys.IDENTIFICATION_VALUE)
                         .appendQueryParameter(AuthenticationKeys.USERNAME_KEY, AuthenticationKeys.USERNAME_VALUE)
                         .appendQueryParameter(AuthenticationKeys.PASSWORD_KEY, AuthenticationKeys.PASSWORD_VALUE)
-                        .appendQueryParameter("limit", strings[0])
-                        .appendQueryParameter("order", strings[1]);
+                        .appendQueryParameter("type", strings[0])
+                        .appendQueryParameter("limit", strings[1])
+                        .appendQueryParameter("order", strings[2]);
                 String query = builder.build().getEncodedQuery();
 
                 setRequest(query);
@@ -199,6 +200,8 @@ public class BlogFeedManager extends RecyclerView.Adapter<BlogFeedManager.ViewHo
             try {
                 JSONObject str = new JSONObject(response);
                 String data = str.getString("data");
+
+                Log.e("Response", response);
 
                 addEntries(data);
 

@@ -12,10 +12,7 @@ public class Blog {
     private int author;
     private String publishedDate;
     private int signature;
-
     private Drawable image;
-
-    private JSONObject data;
 
     public Blog(int id, String heading, String content, int author, String publishedDate, Drawable image, int signaure){
 
@@ -31,14 +28,6 @@ public class Blog {
 
     public Blog(JSONObject data)throws JSONException{
 
-        this.data = data;
-
-        setFieldsFromJSON();
-
-    }
-
-    private void setFieldsFromJSON() throws JSONException{
-
         id = data.getInt("id");
         heading = data.getString("heading");
         content = data.getString("content");
@@ -46,6 +35,20 @@ public class Blog {
         publishedDate = data.getString("published_date");
         this.image = null;
         this.signature = data.getInt("signature");
+
+    }
+
+    public Blog(BlogTile blogTile, JSONObject restOfData) throws JSONException{
+
+        this.id = blogTile.getId();
+        this.heading = blogTile.getHeading();
+        this.image = blogTile.getImage();
+
+        content = restOfData.getString("content");
+        author = restOfData.getInt("author");
+        publishedDate = restOfData.getString("published_date");
+        this.signature = restOfData.getInt("signature");
+
 
 
     }
