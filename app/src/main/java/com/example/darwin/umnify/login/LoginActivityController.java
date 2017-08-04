@@ -82,7 +82,7 @@ class LoginActivityController {
             this.layout = layout;
             this.source = source;
 
-            urlAddress = "http://192.168.0.100/~darwin/UMnifyMobileScripts/login/authenticate_login.php";
+            urlAddress = "http://192.168.122.1/~darwin/UMnifyMobileScripts/login/authenticate_login.php";
         }
 
         @Override

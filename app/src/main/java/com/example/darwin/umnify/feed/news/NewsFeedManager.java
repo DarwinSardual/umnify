@@ -125,7 +125,7 @@ public class NewsFeedManager extends RecyclerView.Adapter<NewsFeedManager.ViewHo
 
         public NewsFeedAsyc(){
 
-            urlAddress = "http://192.168.0.100/~darwin/UMnifyMobileScripts/feed/news/fetch_news.php";
+            urlAddress = "http://192.168.122.1/~darwin/UMnifyMobileScripts/feed/news/fetch_news.php";
         }
 
         @Override
