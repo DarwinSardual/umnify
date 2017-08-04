@@ -4,6 +4,7 @@ import android.os.Bundle;
 import android.support.v4.app.Fragment;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -28,7 +29,7 @@ public class NewsFeedFragment extends Fragment{
 
 
 
-        NewsFeedManager manager = new NewsFeedManager(getActivity());
+        final NewsFeedManager manager = new NewsFeedManager(getActivity());
         recyclerView.setAdapter(manager);
         recyclerView.setHasFixedSize(true);
         final LinearLayoutManager layoutManager = new LinearLayoutManager(getActivity());
@@ -37,7 +38,12 @@ public class NewsFeedFragment extends Fragment{
         recyclerView.addOnScrollListener(new RecyclerView.OnScrollListener() {
             @Override
             public void onScrollStateChanged(RecyclerView recyclerView, int newState) {
-               // Log.e("Scrolled", recyclerView.get + "");
+
+                if(!recyclerView.canScrollVertically(1)){
+                    manager.updateFeed(1);
+                }else if(!recyclerView.canScrollVertically(-1)){
+                    manager.updateFeed(-1);
+                }
             }
         });
 

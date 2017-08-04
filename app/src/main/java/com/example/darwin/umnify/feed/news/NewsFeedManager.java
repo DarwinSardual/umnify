@@ -27,19 +27,18 @@ import java.util.List;
 
 public class NewsFeedManager extends RecyclerView.Adapter<NewsFeedManager.ViewHolder> {
 
-    private int feedCount;
-    private List<News> feedEntryList;
+    private List<News> feedList;
     private NewsFeedAsyc newsHandler;
 
+    private boolean isFetching = false;
 
     public NewsFeedManager(Context context) {
 
-        feedCount = 0;
+        feedList = new ArrayList<News>();
 
-        feedEntryList = new ArrayList<News>();
-
-        newsHandler = new NewsFeedAsyc();
-        newsHandler.execute("5", "desc");
+        newsHandler = new NewsFeedAsyc(1);
+        isFetching = true;
+        newsHandler.execute("desc", feedList.size() + "", "5", "-1");
 
     }
 
@@ -57,22 +56,6 @@ public class NewsFeedManager extends RecyclerView.Adapter<NewsFeedManager.ViewHo
             newsContentView = (TextView) itemView.findViewById(R.id.news_content);
             newsAuthorView = (TextView) itemView.findViewById(R.id.news_author);
             newsImageView = (ImageView) itemView.findViewById(R.id.news_image);
-
-            CardView card = (CardView) itemView.findViewById(R.id.card_view);
-
-            newsContentView.setOnClickListener(new View.OnClickListener() {
-                @Override
-                public void onClick(View view) {
-                    Log.e("View", "Clicked content");
-                }
-            });
-
-            card.setOnClickListener(new View.OnClickListener() {
-                @Override
-                public void onClick(View view) {
-                    Log.e("View", "Clicked Card");
-                }
-            });
         }
     }
 
@@ -87,29 +70,67 @@ public class NewsFeedManager extends RecyclerView.Adapter<NewsFeedManager.ViewHo
     @Override
     public void onBindViewHolder(ViewHolder holder, int position) {
 
-        if(position < feedCount){
+        if(position < feedList.size()){
 
-            News news = feedEntryList.get(position);
+            News news = feedList.get(position);
             holder.newsAuthorView.setText(news.getAuthor() + "");
             holder.newsContentView.setText(news.getContent());
         }
 
     }
 
+    //refactor this two methods
+
     private void addEntries(String data) throws JSONException{
 
         JSONArray dataList = new JSONArray(data);
+        int tempSize = feedList.size();
 
         for(int i = 0; i < dataList.length(); i++){
 
             JSONObject newsData = new JSONObject(dataList.getString(i));
             News news = new News(newsData);
-            feedEntryList.add(news);
-            notifyItemInserted(feedCount);
-            feedCount++;
+            feedList.add(news);
 
         }
+        notifyItemRangeInserted(tempSize, dataList.length());
     }
+
+    private void addEntriesReverse(String data) throws  JSONException{
+
+        JSONArray dataList = new JSONArray(data);
+
+        for(int i = (dataList.length() - 1); i >= 0; i--){
+
+            JSONObject newsData = new JSONObject(dataList.getString(i));
+            News news = new News(newsData);
+            feedList.add(0, news);
+
+        }
+        notifyItemRangeInserted(0, dataList.length());
+
+    }
+
+
+    public void updateFeed(int direction){
+
+        if(isFetching) return;
+
+        if(direction == 1){
+
+            newsHandler = new NewsFeedAsyc(1);
+            isFetching = true;
+            newsHandler.execute("desc", feedList.size() + "", "5", "-1");
+
+        }else if(direction == -1){
+            newsHandler = new NewsFeedAsyc(-1);
+            isFetching = true;
+            int id = feedList.get(0).getId();
+            newsHandler.execute("desc", 0 + "", "5", id + "");
+        }
+
+    }
+
 
     private class NewsFeedAsyc extends AsyncTask<String, Void, String> {
 
@@ -122,10 +143,13 @@ public class NewsFeedManager extends RecyclerView.Adapter<NewsFeedManager.ViewHo
         private HttpURLConnection urlConnection;
         private Uri.Builder builder;
 
+        private final int DIRECTION;
 
-        public NewsFeedAsyc(){
 
-            urlAddress = "http://192.168.122.1/~darwin/UMnifyMobileScripts/feed/news/fetch_news.php";
+        public NewsFeedAsyc(int DIRECTION){
+
+            urlAddress = "http://192.168.0.100/~darwin/UMnifyMobileScripts/feed/news/fetch_news.php";
+            this.DIRECTION = DIRECTION;
         }
 
         @Override
@@ -144,8 +168,10 @@ public class NewsFeedManager extends RecyclerView.Adapter<NewsFeedManager.ViewHo
                         .appendQueryParameter(AuthenticationKeys.IDENTIFICATION_KEY, AuthenticationKeys.IDENTIFICATION_VALUE)
                         .appendQueryParameter(AuthenticationKeys.USERNAME_KEY, AuthenticationKeys.USERNAME_VALUE)
                         .appendQueryParameter(AuthenticationKeys.PASSWORD_KEY, AuthenticationKeys.PASSWORD_VALUE)
-                        .appendQueryParameter("limit", strings[0])
-                        .appendQueryParameter("order", strings[1]);
+                        .appendQueryParameter("order", strings[0])
+                        .appendQueryParameter("offset", strings[1])
+                        .appendQueryParameter("limit", strings[2])
+                        .appendQueryParameter("id", strings[3]);
                 String query = builder.build().getEncodedQuery();
 
                 setRequest(query);
@@ -203,7 +229,13 @@ public class NewsFeedManager extends RecyclerView.Adapter<NewsFeedManager.ViewHo
                 JSONObject str = new JSONObject(response);
                 String data = str.getString("data");
 
-                addEntries(data);
+                if(DIRECTION == 1)
+                    addEntries(data);
+                else if(DIRECTION == -1)
+                    addEntriesReverse(data);
+
+
+                isFetching = false;
 
             }catch (JSONException e){
                 e.printStackTrace();
@@ -213,6 +245,6 @@ public class NewsFeedManager extends RecyclerView.Adapter<NewsFeedManager.ViewHo
 
     @Override
     public int getItemCount() {
-        return feedCount;
+        return feedList.size();
     }
 }

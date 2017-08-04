@@ -52,7 +52,7 @@ public class BlogActivity extends AppCompatActivity {
 
         public BlogActivityAsync(){
 
-            urlAddress = "http://192.168.122.1/~darwin/UMnifyMobileScripts/feed/blogs/fetch_blogs.php";
+            urlAddress = "http://192.168.0.100/~darwin/UMnifyMobileScripts/feed/blogs/fetch_blogs.php";
         }
 
         @Override

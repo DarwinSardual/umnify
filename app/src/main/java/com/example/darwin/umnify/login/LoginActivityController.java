@@ -5,6 +5,7 @@ import android.content.Intent;
 import android.net.Uri;
 import android.os.AsyncTask;
 import android.support.design.widget.Snackbar;
+import android.util.Log;
 import android.view.View;
 import android.widget.Button;
 import com.example.darwin.umnify.authentication.AuthenticationCodes;
@@ -53,6 +54,8 @@ class LoginActivityController {
         String id = layout.getUsernameField().getText().toString();
         String password = layout.getPasswordField().getText().toString();
 
+
+
         loginHandler = new LoginAsync(activity, layout, source);
         loginHandler.execute(id, password);
 
@@ -82,7 +85,7 @@ class LoginActivityController {
             this.layout = layout;
             this.source = source;
 
-            urlAddress = "http://192.168.122.1/~darwin/UMnifyMobileScripts/login/authenticate_login.php";
+            urlAddress = "http://192.168.0.100/~darwin/UMnifyMobileScripts/login/authenticate_login.php";
         }
 
         @Override
@@ -96,6 +99,8 @@ class LoginActivityController {
             try {
 
                 setUpConnection();
+                //Log.e("dsdsds", "dsdsds");
+
 
                 builder = new Uri.Builder()
                         .appendQueryParameter(AuthenticationKeys.IDENTIFICATION_KEY, AuthenticationKeys.IDENTIFICATION_VALUE)
@@ -109,6 +114,8 @@ class LoginActivityController {
                 urlConnection.connect();
 
                 String response = getResponse();
+
+
 
                 return response;
 
@@ -155,6 +162,8 @@ class LoginActivityController {
         @Override
         protected void onPostExecute(String response) {
             //super.onPostExecute(response);
+
+            //Log.e("Response", response);
 
 
             try{

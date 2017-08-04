@@ -122,7 +122,7 @@ public class BlogFeedManager extends RecyclerView.Adapter<BlogFeedManager.ViewHo
 
         public BlogFeedAsyc(){
 
-            urlAddress = "http://192.168.122.1/~darwin/UMnifyMobileScripts/feed/blogs/fetch_blogs.php";
+            urlAddress = "http://192.168.0.100/~darwin/UMnifyMobileScripts/feed/blogs/fetch_blogs.php";
         }
 
         @Override
