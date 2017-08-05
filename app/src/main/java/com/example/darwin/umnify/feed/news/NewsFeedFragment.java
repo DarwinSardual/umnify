@@ -2,6 +2,7 @@ package com.example.darwin.umnify.feed.news;
 
 import android.os.Bundle;
 import android.support.v4.app.Fragment;
+import android.support.v4.widget.SwipeRefreshLayout;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.util.Log;
@@ -25,8 +26,13 @@ public class NewsFeedFragment extends Fragment{
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState){
 
-        recyclerView = (RecyclerView) inflater.inflate(R.layout.recycler_view, container, false);
 
+
+        //recyclerView = (RecyclerView) inflater.inflate(R.layout.recycler_view, container, false);
+
+        View view = inflater.inflate(R.layout.recycler_view, container, false);
+        SwipeRefreshLayout layout = (SwipeRefreshLayout) view.findViewById(R.id.swiperefresh);
+        recyclerView = (RecyclerView) view.findViewById(R.id.my_recycler_view);
 
 
         final NewsFeedManager manager = new NewsFeedManager(getActivity());
@@ -42,13 +48,13 @@ public class NewsFeedFragment extends Fragment{
                 if(!recyclerView.canScrollVertically(1)){
                     manager.updateFeed(1);
                 }else if(!recyclerView.canScrollVertically(-1)){
-                    manager.updateFeed(-1);
+                    //manager.updateFeed(-1);
                 }
             }
         });
 
 
-        return recyclerView;
+        return view;
 
 
     }
