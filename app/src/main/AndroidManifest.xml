@@ -30,6 +30,8 @@
         </activity>
         <activity android:name=".feed.blogs.BlogActivity">
         </activity>
+        <activity android:name=".feed.news.NewsActivity">
+        </activity>
     </application>
 
 </manifest>

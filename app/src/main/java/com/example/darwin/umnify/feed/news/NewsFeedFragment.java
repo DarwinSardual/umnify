@@ -5,7 +5,6 @@ import android.support.v4.app.Fragment;
 import android.support.v4.widget.SwipeRefreshLayout;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
-import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -16,6 +15,7 @@ import com.example.darwin.umnify.R;
 public class NewsFeedFragment extends Fragment{
 
     private RecyclerView recyclerView;
+    private SwipeRefreshLayout swipeRefreshLayout;
 
     @Override
     public void onCreate(Bundle savedInstanceState){
@@ -26,16 +26,14 @@ public class NewsFeedFragment extends Fragment{
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState){
 
+        View view = inflater.inflate(R.layout.feed_view, container, false);
+
+        swipeRefreshLayout = (SwipeRefreshLayout) view.findViewById(R.id.swipe_refresher_layout);
+        recyclerView = (RecyclerView) view.findViewById(R.id.recycler_view);
 
 
-        //recyclerView = (RecyclerView) inflater.inflate(R.layout.recycler_view, container, false);
+        final NewsFeedManager manager = new NewsFeedManager(getActivity(), swipeRefreshLayout, recyclerView);
 
-        View view = inflater.inflate(R.layout.recycler_view, container, false);
-        SwipeRefreshLayout layout = (SwipeRefreshLayout) view.findViewById(R.id.swiperefresh);
-        recyclerView = (RecyclerView) view.findViewById(R.id.my_recycler_view);
-
-
-        final NewsFeedManager manager = new NewsFeedManager(getActivity());
         recyclerView.setAdapter(manager);
         recyclerView.setHasFixedSize(true);
         final LinearLayoutManager layoutManager = new LinearLayoutManager(getActivity());
@@ -43,16 +41,24 @@ public class NewsFeedFragment extends Fragment{
 
         recyclerView.addOnScrollListener(new RecyclerView.OnScrollListener() {
             @Override
-            public void onScrollStateChanged(RecyclerView recyclerView, int newState) {
+            public void onScrolled(RecyclerView recyclerView, int dx, int dy) {
 
-                if(!recyclerView.canScrollVertically(1)){
-                    manager.updateFeed(1);
-                }else if(!recyclerView.canScrollVertically(-1)){
-                    //manager.updateFeed(-1);
+                if(dy > 0){
+                    if(!recyclerView.canScrollVertically(1)){
+                        manager.updateFeed(1);
+                    }
                 }
             }
         });
 
+
+        swipeRefreshLayout.setOnRefreshListener(new SwipeRefreshLayout.OnRefreshListener() {
+            @Override
+            public void onRefresh() {
+                manager.updateFeed(-1);
+
+            }
+        });
 
         return view;
 

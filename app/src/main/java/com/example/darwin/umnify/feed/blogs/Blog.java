@@ -9,17 +9,22 @@ public class Blog {
     private int id;
     private String heading;
     private String content;
-    private int author;
     private String publishedDate;
     private int signature;
     private Drawable image;
 
-    public Blog(int id, String heading, String content, int author, String publishedDate, Drawable image, int signaure){
+    private int authorId;
+    private String authorFirstname;
+    private String authorLastname;
+    private String authorImage;
+
+
+    public Blog(int id, String heading, String content, int authorId, String publishedDate, Drawable image, int signaure){
 
         this.id = id;
         this.content = content;
         this.heading = heading;
-        this.author = author;
+        this.authorId = authorId;
         this.publishedDate = publishedDate;
         this.image = image;
         this.signature = signature;
@@ -31,7 +36,7 @@ public class Blog {
         id = data.getInt("id");
         heading = data.getString("heading");
         content = data.getString("content");
-        author = data.getInt("author");
+        authorId = data.getInt("author");
         publishedDate = data.getString("published_date");
         this.image = null;
         this.signature = data.getInt("signature");
@@ -45,17 +50,19 @@ public class Blog {
         this.image = blogTile.getImage();
 
         content = restOfData.getString("content");
-        author = restOfData.getInt("author");
+        authorId = restOfData.getInt("author");
         publishedDate = restOfData.getString("published_date");
         this.signature = restOfData.getInt("signature");
 
-
+        authorFirstname = restOfData.getString("firstname");
+        authorLastname = restOfData.getString("lastname");
+        authorImage = restOfData.getString("author_image");
 
     }
 
     public int getId(){ return id;}
 
-    public String content(){
+    public String getContent(){
         return content;
     }
 
@@ -63,7 +70,7 @@ public class Blog {
         return heading;
     }
 
-    public int getAuthor(){return author;}
+    public int getAuthorId(){return authorId;}
 
     public String getPublishedDate(){ return publishedDate; }
 
@@ -72,4 +79,16 @@ public class Blog {
     }
 
     public int getSignature(){ return signature; }
+
+    public String getAuthorFirstname() {
+        return authorFirstname;
+    }
+
+    public String getAuthorLastname() {
+        return authorLastname;
+    }
+
+    public String getAuthorImage() {
+        return authorImage;
+    }
 }

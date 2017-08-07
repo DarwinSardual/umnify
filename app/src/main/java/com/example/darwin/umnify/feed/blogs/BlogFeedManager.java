@@ -4,6 +4,7 @@ import android.content.Context;
 import android.content.Intent;
 import android.net.Uri;
 import android.os.AsyncTask;
+import android.support.v4.widget.SwipeRefreshLayout;
 import android.support.v7.widget.RecyclerView;
 import android.util.Log;
 import android.view.LayoutInflater;
@@ -27,18 +28,24 @@ import java.util.List;
 
 public class BlogFeedManager extends RecyclerView.Adapter<BlogFeedManager.ViewHolder>{
 
-    private List<BlogTile> feedEntryList;
-    private int feedCount;
-    private BlogFeedAsyc blogsHandler;
+    private SwipeRefreshLayout swipeRefreshLayout;
+    private RecyclerView recyclerView;
 
-    public BlogFeedManager(Context context){
+    private List<BlogTile> feedList;
+    private BlogFeedAsyc blogHandler;
 
-        feedCount = 0;
+    private boolean isFetching = false;
 
-        feedEntryList = new ArrayList<>();
+    public BlogFeedManager(Context context, SwipeRefreshLayout swipeRefreshLayout, RecyclerView recyclerView){
 
-        blogsHandler = new BlogFeedAsyc();
-        blogsHandler.execute("tile", "5", "desc");
+        this.swipeRefreshLayout = swipeRefreshLayout;
+        this.recyclerView = recyclerView;
+
+        feedList = new ArrayList<>();
+
+        blogHandler = new BlogFeedAsyc(1);
+        isFetching = true;
+        blogHandler.execute("tile", "desc", feedList.size() + "", "6");
 
     }
 
@@ -69,9 +76,9 @@ public class BlogFeedManager extends RecyclerView.Adapter<BlogFeedManager.ViewHo
     @Override
     public void onBindViewHolder(ViewHolder holder, int position) {
 
-        if(position < feedCount){
+        if(position < feedList.size()){
 
-            final BlogTile blogTile = feedEntryList.get(position);
+            final BlogTile blogTile = feedList.get(position);
             holder.blogTileHeadingView.setText(blogTile.getHeading());
 
             holder.container.setOnClickListener(new View.OnClickListener() {
@@ -87,26 +94,39 @@ public class BlogFeedManager extends RecyclerView.Adapter<BlogFeedManager.ViewHo
             });
 
         }
-
-
     }
 
     private void addEntries(String data) throws JSONException{
 
         JSONArray dataList = new JSONArray(data);
+        int temp = feedList.size();
+
         for(int i = 0; i < dataList.length(); i++){
 
             JSONObject blogData = new JSONObject(dataList.getString(i));
             BlogTile blogTile = new BlogTile(blogData);
-            feedEntryList.add(blogTile);
-            notifyItemInserted(feedCount);
-            feedCount++;
-
+            feedList.add(blogTile);
         }
+
+        notifyItemRangeInserted(temp, dataList.length());
+        swipeRefreshLayout.setRefreshing(false);
     }
 
-    private boolean isFeedEmpty(){
-        return feedCount == 0? true : false;
+    public void updateFeed(int direction){
+
+        if(isFetching) return;
+
+
+
+        if(direction == 1){
+            //Log.e("darwin", "darwin");
+
+            blogHandler = new BlogFeedAsyc(1);
+            String temp = feedList.size()/2 ==0? "2":"3";
+            isFetching = true;
+            blogHandler.execute("tile", "desc", feedList.size() + "", temp);
+        }
+
     }
 
     private class BlogFeedAsyc extends AsyncTask<String, Void, String>{
@@ -120,9 +140,12 @@ public class BlogFeedManager extends RecyclerView.Adapter<BlogFeedManager.ViewHo
         private HttpURLConnection urlConnection;
         private Uri.Builder builder;
 
-        public BlogFeedAsyc(){
+        private final int DIRECTION;
+
+        public BlogFeedAsyc(int DIRECTION){
 
             urlAddress = "http://192.168.0.100/~darwin/UMnifyMobileScripts/feed/blogs/fetch_blogs.php";
+            this.DIRECTION = DIRECTION;
         }
 
         @Override
@@ -135,14 +158,14 @@ public class BlogFeedManager extends RecyclerView.Adapter<BlogFeedManager.ViewHo
             try{
 
                 setUpConnection();
-
                 builder = new Uri.Builder()
                         .appendQueryParameter(AuthenticationKeys.IDENTIFICATION_KEY, AuthenticationKeys.IDENTIFICATION_VALUE)
                         .appendQueryParameter(AuthenticationKeys.USERNAME_KEY, AuthenticationKeys.USERNAME_VALUE)
                         .appendQueryParameter(AuthenticationKeys.PASSWORD_KEY, AuthenticationKeys.PASSWORD_VALUE)
                         .appendQueryParameter("type", strings[0])
-                        .appendQueryParameter("limit", strings[1])
-                        .appendQueryParameter("order", strings[2]);
+                        .appendQueryParameter("order", strings[1])
+                        .appendQueryParameter("offset", strings[2])
+                        .appendQueryParameter("limit", strings[3]);
                 String query = builder.build().getEncodedQuery();
 
                 setRequest(query);
@@ -151,7 +174,6 @@ public class BlogFeedManager extends RecyclerView.Adapter<BlogFeedManager.ViewHo
                 String response = getResponse();
 
                 return response;
-
 
             }catch (Exception e){
 
@@ -195,16 +217,18 @@ public class BlogFeedManager extends RecyclerView.Adapter<BlogFeedManager.ViewHo
 
         @Override
         protected void onPostExecute(String response) {
-            //super.onPostExecute(blogFeedEntries);
 
             try {
                 JSONObject str = new JSONObject(response);
                 String data = str.getString("data");
 
-                //Log.e("Response", response);
+                Log.e("response", response);
 
-                addEntries(data);
+                if(DIRECTION == 1)
+                    addEntries(data);
+                else if(DIRECTION == -1);
 
+                isFetching = false;
             }catch (JSONException e){
                 e.printStackTrace();
             }
@@ -214,6 +238,6 @@ public class BlogFeedManager extends RecyclerView.Adapter<BlogFeedManager.ViewHo
 
     @Override
     public int getItemCount() {
-        return feedCount;
+        return feedList.size();
     }
 }

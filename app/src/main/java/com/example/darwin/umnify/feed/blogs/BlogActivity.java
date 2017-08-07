@@ -127,7 +127,7 @@ public class BlogActivity extends AppCompatActivity {
         protected void onPostExecute(String response) {
             //super.onPostExecute(aVoid);
 
-            Log.e("Response", response);
+            //Log.e("Response", response);
         }
 
     }

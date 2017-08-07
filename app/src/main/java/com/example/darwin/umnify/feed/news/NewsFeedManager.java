@@ -1,8 +1,12 @@
 package com.example.darwin.umnify.feed.news;
 
 import android.content.Context;
+import android.content.Intent;
+import android.graphics.Bitmap;
+import android.graphics.BitmapFactory;
 import android.net.Uri;
 import android.os.AsyncTask;
+import android.support.v4.widget.SwipeRefreshLayout;
 import android.support.v7.widget.CardView;
 import android.util.Log;
 import android.view.LayoutInflater;
@@ -23,22 +27,31 @@ import java.io.*;
 import java.net.HttpURLConnection;
 import java.net.URL;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
 
 public class NewsFeedManager extends RecyclerView.Adapter<NewsFeedManager.ViewHolder> {
+
+    private SwipeRefreshLayout swipeRefreshLayout;
+    private RecyclerView recyclerView;
+
+    private final int MAX_FEED_SIZE = 50;
 
     private List<News> feedList;
     private NewsFeedAsyc newsHandler;
 
     private boolean isFetching = false;
 
-    public NewsFeedManager(Context context) {
+    public NewsFeedManager(Context context, SwipeRefreshLayout swipeRefreshLayout, RecyclerView recyclerView) {
+
+        this.swipeRefreshLayout = swipeRefreshLayout;
+        this.recyclerView = recyclerView;
 
         feedList = new ArrayList<News>();
 
         newsHandler = new NewsFeedAsyc(1);
         isFetching = true;
-        newsHandler.execute("desc", feedList.size() + "", "5", "-1");
+        newsHandler.execute("desc", feedList.size() + "", "7", "-1");
 
     }
 
@@ -49,13 +62,17 @@ public class NewsFeedManager extends RecyclerView.Adapter<NewsFeedManager.ViewHo
         private TextView newsContentView;
         private ImageView newsImageView;
         private TextView newsAuthorView;
+        private ImageView newsAuthorImageView;
+        private CardView container;
 
         private ViewHolder(LayoutInflater inflater, ViewGroup parent) {
             super(inflater.inflate(R.layout.feed_news, parent, false));
 
+            container = (CardView) itemView.findViewById(R.id.news_card_container);
             newsContentView = (TextView) itemView.findViewById(R.id.news_content);
             newsAuthorView = (TextView) itemView.findViewById(R.id.news_author);
             newsImageView = (ImageView) itemView.findViewById(R.id.news_image);
+            newsAuthorImageView = (ImageView) itemView.findViewById(R.id.author_image);
         }
     }
 
@@ -73,10 +90,19 @@ public class NewsFeedManager extends RecyclerView.Adapter<NewsFeedManager.ViewHo
         if(position < feedList.size()){
 
             News news = feedList.get(position);
-            holder.newsAuthorView.setText(news.getAuthor() + "");
+            holder.newsAuthorView.setText(news.getAuthorFirstname() + " " + news.getAuthorLastname());
             holder.newsContentView.setText(news.getContent());
-        }
+            holder.newsAuthorImageView.setImageBitmap(news.getAuthorImage());
 
+            /*holder.container.setOnClickListener(new View.OnClickListener() {
+                @Override
+                public void onClick(View view) {
+
+                    Intent intent = new Intent(view.getContext(), NewsActivity.class);
+                    view.getContext().startActivity(intent);
+                }
+            });*/
+        }
     }
 
     //refactor this two methods
@@ -84,16 +110,21 @@ public class NewsFeedManager extends RecyclerView.Adapter<NewsFeedManager.ViewHo
     private void addEntries(String data) throws JSONException{
 
         JSONArray dataList = new JSONArray(data);
-        int tempSize = feedList.size();
+        int temp = feedList.size();
 
         for(int i = 0; i < dataList.length(); i++){
 
             JSONObject newsData = new JSONObject(dataList.getString(i));
-            News news = new News(newsData);
+            News news = new News(newsData, feedList.size(), this);
             feedList.add(news);
 
         }
-        notifyItemRangeInserted(tempSize, dataList.length());
+        notifyItemRangeInserted(temp, dataList.length());
+
+        for(int i = temp; i < feedList.size(); i++){
+            feedList.get(i).fetchImage();
+        }
+        swipeRefreshLayout.setRefreshing(false);
     }
 
     private void addEntriesReverse(String data) throws  JSONException{
@@ -102,15 +133,18 @@ public class NewsFeedManager extends RecyclerView.Adapter<NewsFeedManager.ViewHo
 
         for(int i = (dataList.length() - 1); i >= 0; i--){
 
-            JSONObject newsData = new JSONObject(dataList.getString(i));
-            News news = new News(newsData);
-            feedList.add(0, news);
+            //JSONObject newsData = new JSONObject(dataList.getString(i));
+            //News news = new News(newsData);
+            //feedList.add(0, news);
 
         }
+
         notifyItemRangeInserted(0, dataList.length());
+        recyclerView.scrollToPosition(0);
+        swipeRefreshLayout.setRefreshing(false);
+
 
     }
-
 
     public void updateFeed(int direction){
 
@@ -120,17 +154,20 @@ public class NewsFeedManager extends RecyclerView.Adapter<NewsFeedManager.ViewHo
 
             newsHandler = new NewsFeedAsyc(1);
             isFetching = true;
-            newsHandler.execute("desc", feedList.size() + "", "5", "-1");
+            newsHandler.execute("desc", feedList.size() + "", "3", "-1");
 
         }else if(direction == -1){
-            newsHandler = new NewsFeedAsyc(-1);
-            isFetching = true;
-            int id = feedList.get(0).getId();
-            newsHandler.execute("desc", 0 + "", "5", id + "");
-        }
 
+            feedList.clear();
+            notifyDataSetChanged();
+
+            newsHandler = new NewsFeedAsyc(1);
+            isFetching = true;
+            newsHandler.execute("desc", 0 + "", "7", "-1");
+        }
     }
 
+    //refactor this two classes
 
     private class NewsFeedAsyc extends AsyncTask<String, Void, String> {
 
@@ -180,8 +217,6 @@ public class NewsFeedManager extends RecyclerView.Adapter<NewsFeedManager.ViewHo
                 String response = getResponse();
 
                 return response;
-
-
             }catch (Exception e){
 
             }
@@ -229,15 +264,13 @@ public class NewsFeedManager extends RecyclerView.Adapter<NewsFeedManager.ViewHo
                 JSONObject str = new JSONObject(response);
                 String data = str.getString("data");
 
-                if(DIRECTION == 1)
+               if(DIRECTION == 1)
                     addEntries(data);
                 else if(DIRECTION == -1)
                     addEntriesReverse(data);
 
-
                 isFetching = false;
-
-            }catch (JSONException e){
+            }catch (Exception e){
                 e.printStackTrace();
             }
         }
