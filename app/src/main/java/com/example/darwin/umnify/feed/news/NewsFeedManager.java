@@ -94,14 +94,14 @@ public class NewsFeedManager extends RecyclerView.Adapter<NewsFeedManager.ViewHo
             holder.newsContentView.setText(news.getContent());
             holder.newsAuthorImageView.setImageBitmap(news.getAuthorImage());
 
-            /*holder.container.setOnClickListener(new View.OnClickListener() {
+            holder.container.setOnClickListener(new View.OnClickListener() {
                 @Override
                 public void onClick(View view) {
 
                     Intent intent = new Intent(view.getContext(), NewsActivity.class);
                     view.getContext().startActivity(intent);
                 }
-            });*/
+            });
         }
     }
 

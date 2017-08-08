@@ -23,18 +23,33 @@
 
     <LinearLayout
             android:layout_width="match_parent"
-            android:layout_height="wrap_content">
+            android:layout_height="wrap_content"
+            android:background="@drawable/bottom_border_newsfeed"
+            android:padding="3dp"
+            >
 
-        <ImageView
+        <!--<ImageView
                 android:layout_width="30dp"
                 android:layout_height="30dp"
                 android:id="@+id/author_image"
-                android:scaleType="fitXY"/>
+                android:scaleType="fitXY"/> -->
+
+        <de.hdodenhof.circleimageview.CircleImageView
+                xmlns:app="http://schemas.android.com/apk/res-auto"
+                android:id="@+id/author_image"
+                android:layout_width="30dp"
+                android:layout_height="30dp"
+                app:civ_border_width="2dp"
+                app:civ_border_color="#8E8989"/>
 
         <TextView
-                android:layout_width="wrap_content"
+                android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:id="@+id/news_author"
+                android:maxLines="3"
+                android:layout_marginLeft="6dp"
+                android:textColor="#000000"
+                android:layout_gravity="center_vertical"
                  />
     </LinearLayout>
 
@@ -51,7 +66,8 @@
                 android:ellipsize="end"
                 android:singleLine="true"
                 android:textColor="#000"
-                android:textSize="12dp" />
+                android:paddingTop="6dp"
+                android:textSize="14dp" />
 
         <ImageView
                 android:id="@+id/news_image"
