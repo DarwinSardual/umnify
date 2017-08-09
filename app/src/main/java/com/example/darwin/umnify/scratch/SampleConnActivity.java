@@ -21,13 +21,13 @@ public class SampleConnActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_sample_conn);
 
-        String str = getIntent().getStringExtra("USER_ID");
-        str = str + " " + getIntent().getStringExtra("USER_TYPE");
+        //String str = getIntent().getStringExtra("USER_ID");
+        //str = str + " " + getIntent().getStringExtra("USER_TYPE");
 
         //sample();
 
-        TextView sample = (TextView) findViewById(R.id.sample_text);
-        sample.setText(str);
+        //TextView sample = (TextView) findViewById(R.id.sample_text);
+        //sample.setText(str);
 
 
 
