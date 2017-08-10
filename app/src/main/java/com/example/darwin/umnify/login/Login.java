@@ -2,18 +2,24 @@ package com.example.darwin.umnify.login;
 
 public class Login {
 
-    private String username;
+    private int id;
+    private int type;
     private String password;
 
-    public Login(String username, String password){
+    public Login(int id, int type, String password){
 
-        this.username = username;
+        this.id = id;
+        this.type = type;
         this.password = password;
 
     }
 
-    public String getUsername(){
-        return username;
+    public int getId() {
+        return id;
+    }
+
+    public int getType() {
+        return type;
     }
 
     public String getPassword(){

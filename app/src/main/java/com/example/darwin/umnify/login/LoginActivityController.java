@@ -8,7 +8,10 @@ import android.support.design.widget.Snackbar;
 import android.util.Log;
 import android.view.View;
 import android.widget.Button;
+import com.example.darwin.umnify.async.RemoteDbConn;
+import com.example.darwin.umnify.authentication.AuthenticationAddress;
 import com.example.darwin.umnify.authentication.AuthenticationCodes;
+import com.example.darwin.umnify.database.UMnifyDbHelper;
 import com.example.darwin.umnify.home.HomeActivity;
 import com.example.darwin.umnify.scratch.SampleConnActivity;
 
@@ -20,6 +23,7 @@ import java.net.MalformedURLException;
 import java.net.ProtocolException;
 import java.net.URL;
 
+import org.json.JSONException;
 import org.json.JSONObject;
 
 class LoginActivityController {
@@ -27,11 +31,14 @@ class LoginActivityController {
     private LoginActivityLayout layout;
     private LoginAsync loginHandler;
     private Activity activity;
+    private UMnifyDbHelper databaseConnection;
 
     public LoginActivityController(Activity activity, LoginActivityLayout layout){
 
         this.layout = layout;
         this.activity = activity;
+        databaseConnection = UMnifyDbHelper.getInstance(activity);
+
         setUpLoginButton();
     }
 
@@ -48,44 +55,29 @@ class LoginActivityController {
         });
     }
 
-
     private void authenticateLogin(View source){
 
         String id = layout.getUsernameField().getText().toString();
         String password = layout.getPasswordField().getText().toString();
+        String urlAddress = AuthenticationAddress.AUTHENTICATE_LOGIN;
 
-
-
-        loginHandler = new LoginAsync(activity, layout, source);
+        loginHandler = new LoginAsync(urlAddress, layout, source);
         loginHandler.execute(id, password);
 
     }
 
+    private class LoginAsync extends RemoteDbConn<String, Void, String>{
 
-
-    private class LoginAsync extends AsyncTask<String, Void, String> {
-
-        private final String urlAddress;
-        private Activity activity;
-        private final int READ_TIMEOUT = 10000;
-        private final int CONNECT_TIMEOUT = 15000;
-        private final String REQUEST_METHOD = "POST";
-
-        private URL url;
-        private HttpURLConnection urlConnection;
-        private Uri.Builder builder;
-
+        private final String urlAddres;
         private LoginActivityLayout layout;
         private View source;
 
+        public LoginAsync(String urlAddres, LoginActivityLayout layout, View source){
 
-        public LoginAsync(Activity activity, LoginActivityLayout layout, View source){
-
-            this.activity = activity;
+            super(urlAddres);
+            this.urlAddres = urlAddres;
             this.layout = layout;
             this.source = source;
-
-            urlAddress = "http://192.168.0.100/~darwin/UMnifyMobileScripts/login/authenticate_login.php";
         }
 
         @Override
@@ -96,82 +88,35 @@ class LoginActivityController {
         @Override
         protected String doInBackground(String... strings) {
 
-            try {
-
-                setUpConnection();
-                //Log.e("dsdsds", "dsdsds");
-
-
-                builder = new Uri.Builder()
-                        .appendQueryParameter(AuthenticationKeys.IDENTIFICATION_KEY, AuthenticationKeys.IDENTIFICATION_VALUE)
-                        .appendQueryParameter(AuthenticationKeys.USERNAME_KEY, AuthenticationKeys.USERNAME_VALUE)
-                        .appendQueryParameter(AuthenticationKeys.PASSWORD_KEY, AuthenticationKeys.PASSWORD_VALUE)
-                        .appendQueryParameter(AuthenticationKeys.USER_ID_KEY, strings[0])
+            try{
+                super.setUpConnection();
+                Uri.Builder queryBuilder = super.getQueryBuilder();
+                queryBuilder.appendQueryParameter(AuthenticationKeys.USER_ID_KEY, strings[0])
                         .appendQueryParameter(AuthenticationKeys.USER_PASSWORD_KEY, strings[1]);
-                String query = builder.build().getEncodedQuery();
 
-                setRequest(query);
-                urlConnection.connect();
+                super.setRequest(queryBuilder.build().getEncodedQuery());
+                super.getUrlConnection().connect();
 
-                String response = getResponse();
-
-
+                String response = super.getRequest();
 
                 return response;
 
+            }catch (IOException e){
 
-            } catch (Exception e) {
-
-
-                return null;
             }
-        }
-
-        private void setUpConnection() throws IOException{
-
-            url = new URL(urlAddress);
-            urlConnection = (HttpURLConnection) url.openConnection();
-
-            urlConnection.setReadTimeout(READ_TIMEOUT);
-            urlConnection.setConnectTimeout(CONNECT_TIMEOUT);
-            urlConnection.setRequestMethod(REQUEST_METHOD);
-
-            urlConnection.setDoInput(true);
-            urlConnection.setDoOutput(true);
-        }
-
-        private void setRequest(String query) throws IOException{
-
-            OutputStream stream = urlConnection.getOutputStream();
-            BufferedWriter writer = new BufferedWriter(
-                    new OutputStreamWriter(stream, "UTF-8"));
-
-            writer.write(query);
-            writer.flush();
-            writer.close();
-            stream.close();
-        }
-
-        private String getResponse() throws  IOException{
-
-            BufferedReader reader = new BufferedReader(new InputStreamReader(urlConnection.getInputStream()));
-            return reader.readLine();
-
+            return null;
         }
 
         @Override
         protected void onPostExecute(String response) {
-            //super.onPostExecute(response);
-
-            //Log.e("Response", response);
-
 
             try{
+
                 JSONObject json = new JSONObject(response);
                 int code = json.getInt("code");
 
                 if(code == AuthenticationCodes.USER_AUTHENTICATED){
-                    Intent intent = new Intent(activity, HomeActivity.class);
+                    Intent intent = new Intent(LoginActivityController.this.activity, HomeActivity.class);
 
                     JSONObject data = new JSONObject(json.getString("data"));
                     intent.putExtra("USER_ID", data.getString("id"));
@@ -184,15 +129,9 @@ class LoginActivityController {
                             Snackbar.LENGTH_SHORT).show();
                 }
 
+            }catch (JSONException e){
 
-            }catch (Exception e){
-                e.printStackTrace();
             }
-
-
-
-
-
         }
     }
 }
