@@ -98,7 +98,7 @@ public class StartActivity extends AppCompatActivity {
         private String urlAddress;
 
         public CheckUserAsync(String urlAddress){
-            super(urlAddress);
+            super(urlAddress, StartActivity.this);
             this.urlAddress = urlAddress;
         }
 

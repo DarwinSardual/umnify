@@ -51,6 +51,7 @@ class LoginActivityController {
             public void onClick(View view) {
 
                 authenticateLogin(view);
+                //Log.e("User dir", System.getProperty("user.dir"));
             }
         });
     }
@@ -74,7 +75,7 @@ class LoginActivityController {
 
         public LoginAsync(String urlAddres, LoginActivityLayout layout, View source){
 
-            super(urlAddres);
+            super(urlAddres, LoginActivityController.this.activity);
             this.urlAddres = urlAddres;
             this.layout = layout;
             this.source = source;
@@ -102,7 +103,7 @@ class LoginActivityController {
                 return response;
 
             }catch (IOException e){
-
+                e.printStackTrace();
             }
             return null;
         }
@@ -110,7 +111,9 @@ class LoginActivityController {
         @Override
         protected void onPostExecute(String response) {
 
-            try{
+            Log.e("Response", response);
+
+            /*try{
 
                 JSONObject json = new JSONObject(response);
                 int code = json.getInt("code");
@@ -131,7 +134,7 @@ class LoginActivityController {
 
             }catch (JSONException e){
 
-            }
+            }*/
         }
     }
 }
