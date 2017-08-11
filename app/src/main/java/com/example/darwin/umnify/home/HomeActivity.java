@@ -100,8 +100,8 @@ public class HomeActivity extends AppCompatActivity {
         private void setUpViewPagerAdapter(){
             Adapter adapter = new Adapter(getSupportFragmentManager());
             adapter.addFragment(new NewsFeedFragment(), "News Feed");
-            adapter.addFragment(new BlogFeedFragment(), "Blogs");
-            adapter.addFragment(new NotificationsFeedFragment(), "Notification");
+            //adapter.addFragment(new BlogFeedFragment(), "Blogs");
+            //adapter.addFragment(new NotificationsFeedFragment(), "Notification");
 
             viewPager.setAdapter(adapter);
         }
@@ -113,8 +113,8 @@ public class HomeActivity extends AppCompatActivity {
             tabLayout.setupWithViewPager(viewPager);
 
             tabLayout.getTabAt(0).setIcon(R.drawable.newsfeed_icon);
-            tabLayout.getTabAt(1).setIcon(R.drawable.blogfeed_icon);
-            tabLayout.getTabAt(2).setIcon(R.drawable.notificationsfeed_icon);
+            //tabLayout.getTabAt(1).setIcon(R.drawable.blogfeed_icon);
+            //tabLayout.getTabAt(2).setIcon(R.drawable.notificationsfeed_icon);
         }
 
         private void setUpNavigationView(){
@@ -164,7 +164,7 @@ public class HomeActivity extends AppCompatActivity {
 
     private class Adapter extends FragmentPagerAdapter {
 
-        private final int size = 3;
+        private final int size = 1;
         private final List<Fragment> tabFragments = new ArrayList<Fragment>();
         private final List<String> tabFragmentTitles = new ArrayList<String>();
 

@@ -6,6 +6,7 @@ import android.graphics.drawable.Drawable;
 import android.net.Uri;
 import android.os.AsyncTask;
 import android.support.v7.widget.RecyclerView;
+import com.example.darwin.umnify.authentication.AuthenticationAddress;
 import org.json.JSONException;
 import org.json.JSONObject;
 
@@ -90,7 +91,7 @@ public class News {
 
         public ImageAsync(String filename){
 
-            urlAddress = "http://192.168.0.100/~darwin/UMnifyMobileScripts/images/avatar/";
+            urlAddress = AuthenticationAddress.DOMAIN_NAME + AuthenticationAddress.ROOT_FOLDER + "/images/avatar/";
             urlAddress += filename;
 
         }
@@ -123,8 +124,6 @@ public class News {
 
         @Override
         protected void onPostExecute(Bitmap bitmap) {
-            //super.onPostExecute(bitmap);
-
             authorImage = bitmap;
             manager.notifyItemChanged(index);
 

@@ -51,7 +51,6 @@ class LoginActivityController {
             public void onClick(View view) {
 
                 authenticateLogin(view);
-                //Log.e("User dir", System.getProperty("user.dir"));
             }
         });
     }
@@ -62,22 +61,18 @@ class LoginActivityController {
         String password = layout.getPasswordField().getText().toString();
         String urlAddress = AuthenticationAddress.AUTHENTICATE_LOGIN;
 
-        loginHandler = new LoginAsync(urlAddress, layout, source);
+        loginHandler = new LoginAsync(urlAddress, source);
         loginHandler.execute(id, password);
 
     }
 
     private class LoginAsync extends RemoteDbConn<String, Void, String>{
 
-        private final String urlAddres;
-        private LoginActivityLayout layout;
         private View source;
 
-        public LoginAsync(String urlAddres, LoginActivityLayout layout, View source){
+        public LoginAsync(String urlAddres, View source){
 
             super(urlAddres, LoginActivityController.this.activity);
-            this.urlAddres = urlAddres;
-            this.layout = layout;
             this.source = source;
         }
 
@@ -111,9 +106,7 @@ class LoginActivityController {
         @Override
         protected void onPostExecute(String response) {
 
-            Log.e("Response", response);
-
-            /*try{
+            try{
 
                 JSONObject json = new JSONObject(response);
                 int code = json.getInt("code");
@@ -134,7 +127,7 @@ class LoginActivityController {
 
             }catch (JSONException e){
 
-            }*/
+            }
         }
     }
 }

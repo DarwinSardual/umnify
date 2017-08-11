@@ -33,12 +33,12 @@ public abstract class RemoteDbConn <Parameters, Progess, Result> extends AsyncTa
     private final String REQUEST_METHOD = "POST";
 
     private URL url;
-    private HttpsURLConnection urlConnection;
+    private HttpURLConnection urlConnection;
     private Uri.Builder builder;
 
     private Activity activity;
 
-    //SSLContext context;
+    SSLContext context;
 
     public RemoteDbConn(String urlAddress, Activity activity){
 
@@ -54,25 +54,19 @@ public abstract class RemoteDbConn <Parameters, Progess, Result> extends AsyncTa
 
     private final void trustCertificate(){
 
-    }
-
-    protected final void setUpConnection() throws IOException{
-
         try {
 
             CertificateFactory cf = CertificateFactory.getInstance("X.509");
             AssetManager am = activity.getAssets();
-            //InputStream caInput = new BufferedInputStream(new FileInputStream(new File("ssl.crt")));
             InputStream caInput = am.open("ssl.crt");
 
             Certificate ca;
             try{
                 ca = cf.generateCertificate(caInput);
-                System.out.println("ca=" + ((X509Certificate) ca).getSubjectDN());
+                //System.out.println("ca=" + ((X509Certificate) ca).getSubjectDN());
             }finally {
                 caInput.close();
             }
-
 
             String keyStoreType = KeyStore.getDefaultType();
             KeyStore keyStore = KeyStore.getInstance(keyStoreType);
@@ -83,19 +77,8 @@ public abstract class RemoteDbConn <Parameters, Progess, Result> extends AsyncTa
             TrustManagerFactory tmf = TrustManagerFactory.getInstance(tmfAlgorithm);
             tmf.init(keyStore);
 
-            SSLContext context = SSLContext.getInstance("TLS");
+            context = SSLContext.getInstance("TLS");
             context.init(null, tmf.getTrustManagers(), null);
-
-            url = new URL(urlAddress);
-            urlConnection = (HttpsURLConnection) url.openConnection();
-            urlConnection.setSSLSocketFactory(context.getSocketFactory());
-
-            urlConnection.setReadTimeout(READ_TIMEOUT);
-            urlConnection.setConnectTimeout(CONNECT_TIMEOUT);
-            urlConnection.setRequestMethod(REQUEST_METHOD);
-
-            urlConnection.setDoInput(true);
-            urlConnection.setDoOutput(true);
 
         }catch(CertificateException e){
             e.printStackTrace();
@@ -110,9 +93,28 @@ public abstract class RemoteDbConn <Parameters, Progess, Result> extends AsyncTa
         }catch (KeyManagementException e){
             e.printStackTrace();
         }
+    }
 
+    protected final void setUpConnection() throws IOException{
 
+        url = new URL(urlAddress);
+        //urlConnection = (HttpsURLConnection) url.openConnection();
+        urlConnection = (HttpURLConnection) url.openConnection();
+        //urlConnection.setSSLSocketFactory(context.getSocketFactory());
+        /*urlConnection.setHostnameVerifier(new HostnameVerifier()
+        {
+            public boolean verify(String hostname, SSLSession session)
+            {
+                return true;
+            }
+        });*/
 
+        urlConnection.setReadTimeout(READ_TIMEOUT);
+        urlConnection.setConnectTimeout(CONNECT_TIMEOUT);
+        urlConnection.setRequestMethod(REQUEST_METHOD);
+
+        urlConnection.setDoInput(true);
+        urlConnection.setDoOutput(true);
 
     }
 
@@ -128,11 +130,18 @@ public abstract class RemoteDbConn <Parameters, Progess, Result> extends AsyncTa
         stream.close();
     }
 
+    protected final String getUrlAddress() {
+        return urlAddress;
+    }
+
     protected final Uri.Builder getQueryBuilder() {
         return builder;
     }
 
-    protected final HttpsURLConnection getUrlConnection(){
+    /*protected final HttpsURLConnection getUrlConnection(){
+        return urlConnection;
+    }*/
+    protected final HttpURLConnection getUrlConnection(){
         return urlConnection;
     }
 
