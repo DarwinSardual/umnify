@@ -1,15 +1,18 @@
 package com.example.darwin.umnify.feed.news;
 
+import android.app.Activity;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.graphics.drawable.Drawable;
 import android.net.Uri;
 import android.os.AsyncTask;
 import android.support.v7.widget.RecyclerView;
+import com.example.darwin.umnify.async.RemoteDbConn;
 import com.example.darwin.umnify.authentication.AuthenticationAddress;
 import org.json.JSONException;
 import org.json.JSONObject;
 
+import java.io.IOException;
 import java.io.InputStream;
 import java.net.HttpURLConnection;
 import java.net.URL;
@@ -77,62 +80,46 @@ public class News {
         authorImage = null;
     }
 
-    private class ImageAsync extends AsyncTask<String, Void, Bitmap> {
+    private class ImageAsync extends RemoteDbConn<String, Void, Bitmap>{
 
-        public String urlAddress;
+        public ImageAsync(String urlAddress, Activity activity){
+            super(urlAddress, activity);
+        }
 
-        private final int READ_TIMEOUT = 10000;
-        private final int CONNECT_TIMEOUT = 15000;
-        private final String REQUEST_METHOD = "POST";
-
-        private URL url;
-        private HttpURLConnection urlConnection;
-        private Uri.Builder builder;
-
-        public ImageAsync(String filename){
-
-            urlAddress = AuthenticationAddress.DOMAIN_NAME + AuthenticationAddress.ROOT_FOLDER + "/images/avatar/";
-            urlAddress += filename;
-
+        @Override
+        protected void onPreExecute() {
+            super.onPreExecute();
         }
 
         @Override
         protected Bitmap doInBackground(String... strings) {
 
             try{
+                super.setUpConnection();
+                super.getUrlConnection().connect();
 
-                url = new URL(urlAddress);
-                urlConnection = (HttpURLConnection) url.openConnection();
-
-                urlConnection.setReadTimeout(READ_TIMEOUT);
-                urlConnection.setConnectTimeout(CONNECT_TIMEOUT);
-                urlConnection.setRequestMethod(REQUEST_METHOD);
-                urlConnection.setDoInput(true);
-
-                urlConnection.connect();
-
-                InputStream imageStream = urlConnection.getInputStream();
+                InputStream imageStream = getUrlConnection().getInputStream();
                 Bitmap image = BitmapFactory.decodeStream(imageStream);
 
                 return image;
-            }catch (Exception e){
+
+            }catch (IOException e){
                 e.printStackTrace();
             }
-
             return null;
         }
 
         @Override
         protected void onPostExecute(Bitmap bitmap) {
+            //super.onPostExecute(bitmap);
             authorImage = bitmap;
             manager.notifyItemChanged(index);
-
         }
     }
 
-    public void fetchImage(){
+    public void fetchImage(Activity activity){
 
-        ImageAsync imageAsync = new ImageAsync(authorImageFile);
+        ImageAsync imageAsync = new ImageAsync(AuthenticationAddress.DOMAIN_NAME + AuthenticationAddress.ROOT_FOLDER + "/images/avatar/" + authorImageFile, activity);
         imageAsync.execute();
 
     }

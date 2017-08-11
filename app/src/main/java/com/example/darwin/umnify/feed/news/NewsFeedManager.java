@@ -123,7 +123,7 @@ public class NewsFeedManager extends RecyclerView.Adapter<NewsFeedManager.ViewHo
         notifyItemRangeInserted(temp, dataList.length());
 
         for(int i = temp; i < feedList.size(); i++){
-            feedList.get(i).fetchImage();
+            feedList.get(i).fetchImage(activity);
         }
         swipeRefreshLayout.setRefreshing(false);
     }

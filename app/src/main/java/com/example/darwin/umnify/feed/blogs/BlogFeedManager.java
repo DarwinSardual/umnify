@@ -1,5 +1,6 @@
 package com.example.darwin.umnify.feed.blogs;
 
+import android.app.Activity;
 import android.content.Context;
 import android.content.Intent;
 import android.net.Uri;
@@ -15,6 +16,8 @@ import android.widget.RelativeLayout;
 import android.widget.TextView;
 
 import com.example.darwin.umnify.R;
+import com.example.darwin.umnify.async.RemoteDbConn;
+import com.example.darwin.umnify.authentication.AuthenticationAddress;
 import com.example.darwin.umnify.authentication.AuthenticationKeys;
 import org.json.JSONArray;
 import org.json.JSONException;
@@ -32,24 +35,25 @@ public class BlogFeedManager extends RecyclerView.Adapter<BlogFeedManager.ViewHo
     private RecyclerView recyclerView;
 
     private List<BlogTile> feedList;
-    private BlogFeedAsyc blogHandler;
+    private BlogFeedAsync blogHandler;
 
     private boolean isFetching = false;
 
-    public BlogFeedManager(Context context, SwipeRefreshLayout swipeRefreshLayout, RecyclerView recyclerView){
+    private Activity activity;
 
+    public BlogFeedManager(Activity activity, SwipeRefreshLayout swipeRefreshLayout, RecyclerView recyclerView){
+
+        this.activity = activity;
         this.swipeRefreshLayout = swipeRefreshLayout;
         this.recyclerView = recyclerView;
 
         feedList = new ArrayList<>();
 
-        blogHandler = new BlogFeedAsyc(1);
+        blogHandler = new BlogFeedAsync(AuthenticationAddress.FETCH_BLOGS);
         isFetching = true;
         blogHandler.execute("tile", "desc", feedList.size() + "", "6");
 
     }
-
-    /* Template for the View */
 
     public final class ViewHolder extends RecyclerView.ViewHolder{
 
@@ -116,20 +120,77 @@ public class BlogFeedManager extends RecyclerView.Adapter<BlogFeedManager.ViewHo
 
         if(isFetching) return;
 
-
-
         if(direction == 1){
-            //Log.e("darwin", "darwin");
 
-            blogHandler = new BlogFeedAsyc(1);
+            blogHandler = new BlogFeedAsync(AuthenticationAddress.FETCH_BLOGS);
             String temp = feedList.size()/2 ==0? "2":"3";
             isFetching = true;
             blogHandler.execute("tile", "desc", feedList.size() + "", temp);
+        }else if(direction == -1){
+
         }
 
     }
 
-    private class BlogFeedAsyc extends AsyncTask<String, Void, String>{
+    private class BlogFeedAsync extends RemoteDbConn<String, Void, String>{
+
+        public BlogFeedAsync(String urlAdress){
+            super(urlAdress, BlogFeedManager.this.activity);
+
+        }
+
+        @Override
+        protected void onPreExecute() {
+            super.onPreExecute();
+        }
+
+        @Override
+        protected String doInBackground(String... strings) {
+
+            try{
+
+                setUpConnection();
+                Uri.Builder queryBuilder = super.getQueryBuilder();
+                queryBuilder.appendQueryParameter("type", strings[0])
+                        .appendQueryParameter("order", strings[1])
+                        .appendQueryParameter("offset", strings[2])
+                        .appendQueryParameter("limit", strings[3]);
+
+                super.setRequest(queryBuilder.build().getEncodedQuery());
+                super.getUrlConnection().connect();
+
+                String response = super.getRequest();
+
+                return response;
+            }catch (IOException e){
+                e.printStackTrace();
+            }
+
+            return null;
+        }
+
+        @Override
+        protected void onPostExecute(String response) {
+            //super.onPostExecute(s);
+
+            try {
+                JSONObject str = new JSONObject(response);
+                String data = str.getString("data");
+
+                Log.e("response", response);
+
+               // if(DIRECTION == 1)
+                    addEntries(data);
+                //else if(DIRECTION == -1);
+
+                isFetching = false;
+            }catch (JSONException e){
+                e.printStackTrace();
+            }
+        }
+    }
+
+    /*private class BlogFeedAsyc extends AsyncTask<String, Void, String>{
 
         private final String urlAddress;
         private final int READ_TIMEOUT = 10000;
@@ -234,7 +295,7 @@ public class BlogFeedManager extends RecyclerView.Adapter<BlogFeedManager.ViewHo
             }
 
         }
-    }
+    }*/
 
     @Override
     public int getItemCount() {
