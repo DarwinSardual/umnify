@@ -118,6 +118,8 @@ class LoginActivityController {
                     intent.putExtra("USER_ID", data.getString("id"));
                     intent.putExtra("USER_TYPE", data.getString("type"));
 
+                    //store database credentials here
+
                     activity.startActivity(intent);
                 }else if(code == AuthenticationCodes.INVALID_USER_ID_PASSWORD){
 
