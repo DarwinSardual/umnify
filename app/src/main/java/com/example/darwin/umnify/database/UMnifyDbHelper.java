@@ -6,9 +6,9 @@ import android.database.sqlite.SQLiteOpenHelper;
 
 public class UMnifyDbHelper extends SQLiteOpenHelper{
 
-    public static UMnifyDbHelper databaseConnection = null;
+    private static UMnifyDbHelper databaseConnection = null;
     public static final String DATABASE_NAME = "UMnify.db";
-    public static int DATABASE_VERSION = 1;
+    private static int DATABASE_VERSION = 1;
 
     private static final String CREATE_TABLE_PERSON =
         "CREATE TABLE " + UMnifyContract.UMnifyColumns.Person.TABLE_NAME.toString() + "(" +

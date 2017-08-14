@@ -5,6 +5,7 @@ import android.content.pm.ActivityInfo;
 import android.content.res.AssetManager;
 import android.net.Uri;
 import android.os.AsyncTask;
+import android.util.Log;
 import com.example.darwin.umnify.authentication.AuthenticationKeys;
 
 import java.io.*;
@@ -27,7 +28,7 @@ import javax.net.ssl.TrustManagerFactory;
 
 public abstract class RemoteDbConn <Parameters, Progess, Result> extends AsyncTask <Parameters, Progess, Result>{
 
-    private final String urlAddress;
+    private String urlAddress;
     private final int READ_TIMEOUT = 10000;
     private final int CONNECT_TIMEOUT = 15000;
     private final String REQUEST_METHOD = "POST";
@@ -128,6 +129,10 @@ public abstract class RemoteDbConn <Parameters, Progess, Result> extends AsyncTa
         writer.flush();
         writer.close();
         stream.close();
+    }
+
+    protected final void resetUrl(String urlAddress){
+        this.urlAddress = urlAddress;
     }
 
     protected final String getUrlAddress() {

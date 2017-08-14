@@ -1,5 +1,6 @@
 package com.example.darwin.umnify.feed.news;
 
+import android.content.Intent;
 import android.os.Bundle;
 import android.support.v4.app.Fragment;
 import android.support.v4.widget.SwipeRefreshLayout;
@@ -16,6 +17,11 @@ public class NewsFeedFragment extends Fragment{
 
     private RecyclerView recyclerView;
     private SwipeRefreshLayout swipeRefreshLayout;
+    private NewsFeedManager manager;
+
+    private int USER_ID;
+    private int USER_TYPE;
+    private String USER_PASSWORD;
 
     @Override
     public void onCreate(Bundle savedInstanceState){
@@ -31,8 +37,7 @@ public class NewsFeedFragment extends Fragment{
         swipeRefreshLayout = (SwipeRefreshLayout) view.findViewById(R.id.swipe_refresher_layout);
         recyclerView = (RecyclerView) view.findViewById(R.id.recycler_view);
 
-
-        final NewsFeedManager manager = new NewsFeedManager(getActivity(), swipeRefreshLayout, recyclerView);
+        manager = new NewsFeedManager(getActivity(), swipeRefreshLayout, recyclerView);
 
         recyclerView.setAdapter(manager);
         recyclerView.setHasFixedSize(true);
@@ -61,8 +66,13 @@ public class NewsFeedFragment extends Fragment{
         });
 
         return view;
+    }
 
+    public void addNews(Intent data){
 
+        Bundle args = getArguments();
+
+        manager.addNews(data, args);
     }
 
 }

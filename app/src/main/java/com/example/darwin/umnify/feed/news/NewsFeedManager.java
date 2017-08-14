@@ -7,6 +7,7 @@ import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.net.Uri;
 import android.os.AsyncTask;
+import android.os.Bundle;
 import android.support.v4.widget.SwipeRefreshLayout;
 import android.support.v7.widget.CardView;
 import android.util.Log;
@@ -47,13 +48,15 @@ public class NewsFeedManager extends RecyclerView.Adapter<NewsFeedManager.ViewHo
 
     private boolean isFetching = false;
 
+
+
     public NewsFeedManager(Activity activity, SwipeRefreshLayout swipeRefreshLayout, RecyclerView recyclerView) {
 
         this.activity = activity;
         this.swipeRefreshLayout = swipeRefreshLayout;
         this.recyclerView = recyclerView;
 
-        feedList = new ArrayList<News>();
+        feedList = new ArrayList<>();
 
         newsHandler = new NewsFeedAsync(AuthenticationAddress.FETCH_NEWS);
         isFetching = true;
@@ -84,7 +87,6 @@ public class NewsFeedManager extends RecyclerView.Adapter<NewsFeedManager.ViewHo
     public ViewHolder onCreateViewHolder(ViewGroup parent, int viewType) {
 
         return new ViewHolder(LayoutInflater.from(parent.getContext()), parent);
-
     }
 
     @Override
@@ -108,6 +110,11 @@ public class NewsFeedManager extends RecyclerView.Adapter<NewsFeedManager.ViewHo
         }
     }
 
+    @Override
+    public int getItemCount() {
+        return feedList.size();
+    }
+
     private void addEntries(String data) throws JSONException{
 
         JSONArray dataList = new JSONArray(data);
@@ -116,15 +123,11 @@ public class NewsFeedManager extends RecyclerView.Adapter<NewsFeedManager.ViewHo
         for(int i = 0; i < dataList.length(); i++){
 
             JSONObject newsData = new JSONObject(dataList.getString(i));
-            News news = new News(newsData, feedList.size(), this);
+            News news = NewsHelper.createNewsFromJSON(newsData, feedList.size());
+            NewsHelper.fetchImage(news, this, activity);
             feedList.add(news);
-
         }
         notifyItemRangeInserted(temp, dataList.length());
-
-        for(int i = temp; i < feedList.size(); i++){
-            feedList.get(i).fetchImage(activity);
-        }
         swipeRefreshLayout.setRefreshing(false);
     }
 
@@ -176,13 +179,11 @@ public class NewsFeedManager extends RecyclerView.Adapter<NewsFeedManager.ViewHo
                 super.getUrlConnection().connect();
 
                 String response = super.getRequest();
-
                 return  response;
 
             }catch (IOException e){
                 e.printStackTrace();
             }
-
             return null;
         }
 
@@ -193,8 +194,7 @@ public class NewsFeedManager extends RecyclerView.Adapter<NewsFeedManager.ViewHo
                 JSONObject str = new JSONObject(response);
                 String data = str.getString("data");
 
-                    addEntries(data);
-
+                addEntries(data);
                 isFetching = false;
             }catch (Exception e){
                 e.printStackTrace();
@@ -202,8 +202,78 @@ public class NewsFeedManager extends RecyclerView.Adapter<NewsFeedManager.ViewHo
         }
     }
 
-    @Override
-    public int getItemCount() {
-        return feedList.size();
+    /* Handle adding of news here */
+
+    public void addNews(Intent data, Bundle userData){
+
+        //int authorId =
+
+
+
+        DataWrapper newsWrapper = new DataWrapper(data.getStringExtra("ADD_NEWS_CONTENT"),
+                null, userData.getInt("USER_ID"), null);
+
     }
+
+    private class DataWrapper{
+
+        private String content;
+        private Bitmap image;
+        private int authorId;
+        private String imageFile;
+
+        public DataWrapper(String content, String imageFile, int authorId, Bitmap image){
+            this.content = content;
+            this.image = image;
+            this.authorId = authorId;
+            this.imageFile = imageFile;
+        }
+
+        public String getContent() {
+            return content;
+        }
+
+        public int getAuthorId() {
+            return authorId;
+        }
+
+        public Bitmap getImage() {
+            return image;
+        }
+
+        public String getImageFile() {
+            return imageFile;
+        }
+    }
+
+    private class AddNewsAsync extends RemoteDbConn<DataWrapper, Void, String>{
+
+        public AddNewsAsync(String urlAddress, Activity activity){
+            super(urlAddress, activity);
+        }
+
+        @Override
+        protected String doInBackground(DataWrapper... wrapper) {
+
+            try{
+
+                setUpConnection();
+                Uri.Builder queryBuilder = getQueryBuilder();
+                queryBuilder.appendQueryParameter("content", wrapper[0].getContent())
+                        .appendQueryParameter("image", wrapper[0].getImageFile())
+                        .appendQueryParameter("author", wrapper[0].getAuthorId() + "");
+
+                super.setRequest(getQueryBuilder().build().getEncodedQuery());
+                super.getUrlConnection().connect();
+
+
+            }catch (Exception e){
+
+            }
+
+
+            return null;
+        }
+    }
+
 }

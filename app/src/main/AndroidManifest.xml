@@ -12,10 +12,13 @@
             android:supportsRtl="true"
             android:theme="@style/AppTheme">
         <activity android:name=".login.LoginActivity">
-            <!--<intent-filter>
+
+            <!--
+            <intent-filter>
                 <action android:name="android.intent.action.MAIN"/>
                 <category android:name="android.intent.category.LAUNCHER"/>
-            </intent-filter>-->
+            </intent-filter>
+            -->
         </activity>
         <activity android:name=".home.HomeActivity">
         </activity>
@@ -34,13 +37,20 @@
         <activity android:name=".start.StartActivity">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN"/>
+
                 <category android:name="android.intent.category.LAUNCHER"/>
             </intent-filter>
         </activity>
+
         <service
-                android:name="com.example.darwin.umnify.start.UserChecker"
-                android:exported="false"
-                android:enabled="true" />
+                android:name=".start.UserChecker"
+                android:enabled="true"
+                android:exported="false"/>
+
+        <activity android:name=".feed.news.AddNewsActivity">
+        </activity>
+        <activity android:name=".feed.blogs.AddBlogActivity">
+        </activity>
     </application>
 
 </manifest>

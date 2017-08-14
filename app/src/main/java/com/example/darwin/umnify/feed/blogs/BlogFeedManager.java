@@ -177,8 +177,6 @@ public class BlogFeedManager extends RecyclerView.Adapter<BlogFeedManager.ViewHo
                 JSONObject str = new JSONObject(response);
                 String data = str.getString("data");
 
-                Log.e("response", response);
-
                // if(DIRECTION == 1)
                     addEntries(data);
                 //else if(DIRECTION == -1);
@@ -189,113 +187,6 @@ public class BlogFeedManager extends RecyclerView.Adapter<BlogFeedManager.ViewHo
             }
         }
     }
-
-    /*private class BlogFeedAsyc extends AsyncTask<String, Void, String>{
-
-        private final String urlAddress;
-        private final int READ_TIMEOUT = 10000;
-        private final int CONNECT_TIMEOUT = 15000;
-        private final String REQUEST_METHOD = "POST";
-
-        private URL url;
-        private HttpURLConnection urlConnection;
-        private Uri.Builder builder;
-
-        private final int DIRECTION;
-
-        public BlogFeedAsyc(int DIRECTION){
-
-            urlAddress = "http://192.168.0.100/~darwin/UMnifyMobileScripts/feed/blogs/fetch_blogs.php";
-            this.DIRECTION = DIRECTION;
-        }
-
-        @Override
-        protected void onPreExecute() {
-            super.onPreExecute();
-        }
-
-        @Override
-        protected String doInBackground(String... strings) {
-            try{
-
-                setUpConnection();
-                builder = new Uri.Builder()
-                        .appendQueryParameter(AuthenticationKeys.IDENTIFICATION_KEY, AuthenticationKeys.IDENTIFICATION_VALUE)
-                        .appendQueryParameter(AuthenticationKeys.USERNAME_KEY, AuthenticationKeys.USERNAME_VALUE)
-                        .appendQueryParameter(AuthenticationKeys.PASSWORD_KEY, AuthenticationKeys.PASSWORD_VALUE)
-                        .appendQueryParameter("type", strings[0])
-                        .appendQueryParameter("order", strings[1])
-                        .appendQueryParameter("offset", strings[2])
-                        .appendQueryParameter("limit", strings[3]);
-                String query = builder.build().getEncodedQuery();
-
-                setRequest(query);
-                urlConnection.connect();
-
-                String response = getResponse();
-
-                return response;
-
-            }catch (Exception e){
-
-            }
-
-            return null;
-        }
-
-        private void setUpConnection() throws IOException {
-
-            url = new URL(urlAddress);
-            urlConnection = (HttpURLConnection) url.openConnection();
-
-            urlConnection.setReadTimeout(READ_TIMEOUT);
-            urlConnection.setConnectTimeout(CONNECT_TIMEOUT);
-            urlConnection.setRequestMethod(REQUEST_METHOD);
-
-            urlConnection.setDoInput(true);
-            urlConnection.setDoOutput(true);
-
-        }
-
-        private void setRequest(String query) throws IOException{
-
-            OutputStream stream = urlConnection.getOutputStream();
-            BufferedWriter writer = new BufferedWriter(
-                    new OutputStreamWriter(stream, "UTF-8"));
-
-            writer.write(query);
-            writer.flush();
-            writer.close();
-            stream.close();
-        }
-
-        private String getResponse() throws  IOException{
-
-            BufferedReader reader = new BufferedReader(new InputStreamReader(urlConnection.getInputStream()));
-            return reader.readLine();
-
-        }
-
-        @Override
-        protected void onPostExecute(String response) {
-
-            try {
-                JSONObject str = new JSONObject(response);
-                String data = str.getString("data");
-
-                Log.e("response", response);
-
-                if(DIRECTION == 1)
-                    addEntries(data);
-                else if(DIRECTION == -1);
-
-                isFetching = false;
-            }catch (JSONException e){
-                e.printStackTrace();
-            }
-
-        }
-    }*/
 
     @Override
     public int getItemCount() {

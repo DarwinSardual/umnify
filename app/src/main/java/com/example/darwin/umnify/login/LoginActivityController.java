@@ -1,7 +1,10 @@
 package com.example.darwin.umnify.login;
 
 import android.app.Activity;
+import android.content.ContentValues;
 import android.content.Intent;
+import android.database.sqlite.SQLiteDatabase;
+import android.database.sqlite.SQLiteOpenHelper;
 import android.net.Uri;
 import android.os.AsyncTask;
 import android.support.design.widget.Snackbar;
@@ -11,6 +14,7 @@ import android.widget.Button;
 import com.example.darwin.umnify.async.RemoteDbConn;
 import com.example.darwin.umnify.authentication.AuthenticationAddress;
 import com.example.darwin.umnify.authentication.AuthenticationCodes;
+import com.example.darwin.umnify.database.UMnifyContract;
 import com.example.darwin.umnify.database.UMnifyDbHelper;
 import com.example.darwin.umnify.home.HomeActivity;
 import com.example.darwin.umnify.scratch.SampleConnActivity;
@@ -112,15 +116,50 @@ class LoginActivityController {
                 int code = json.getInt("code");
 
                 if(code == AuthenticationCodes.USER_AUTHENTICATED){
-                    Intent intent = new Intent(LoginActivityController.this.activity, HomeActivity.class);
 
-                    JSONObject data = new JSONObject(json.getString("data"));
-                    intent.putExtra("USER_ID", data.getString("id"));
-                    intent.putExtra("USER_TYPE", data.getString("type"));
+
+                    JSONObject user = new JSONObject(json.getString("user"));
+                    JSONObject person = new JSONObject(json.getString("person"));
 
                     //store database credentials here
 
-                    activity.startActivity(intent);
+                    UMnifyDbHelper databaseConnection = UMnifyDbHelper.getInstance(LoginActivityController.this.activity);
+                    SQLiteDatabase databaseConnectionWrite = databaseConnection.getWritableDatabase();
+
+
+                    // insert person data here
+                    ContentValues values = new ContentValues();
+                    values.put(UMnifyContract.UMnifyColumns.Person.ID.toString(), user.getInt("id"));
+                    values.put(UMnifyContract.UMnifyColumns.Person.FIRSTNAME.toString(), person.getString("firstname"));
+                    values.put(UMnifyContract.UMnifyColumns.Person.MIDDLENAME.toString(), person.getString("middlename"));
+                    values.put(UMnifyContract.UMnifyColumns.Person.NAME_EXT.toString(), person.getString("name_ext"));
+                    values.put(UMnifyContract.UMnifyColumns.Person.BIRTHDATE.toString(), person.getString("birthdate"));
+                    values.put(UMnifyContract.UMnifyColumns.Person.GENDER.toString(), person.getString("gender"));
+                    values.put(UMnifyContract.UMnifyColumns.Person.ADDRESS.toString(), person.getString("address"));
+                    values.put(UMnifyContract.UMnifyColumns.Person.CONTACT.toString(), person.getString("contact"));
+                    values.put(UMnifyContract.UMnifyColumns.Person.IMAGE.toString(), person.getString("image"));
+
+                    long person_id  = databaseConnectionWrite.insert(
+                            UMnifyContract.UMnifyColumns.Person.TABLE_NAME.toString(),
+                            null,
+                            values
+                    );
+
+                    //insert user data
+                    values = new ContentValues();
+                    values.put(UMnifyContract.UMnifyColumns.User.ID.toString(), user.getInt("id"));
+                    values.put(UMnifyContract.UMnifyColumns.User.TYPE.toString(), user.getInt("type"));
+                    values.put(UMnifyContract.UMnifyColumns.User.PASSWORD.toString(), user.getString("password"));
+
+                    long user_id = databaseConnectionWrite.insert(
+                            UMnifyContract.UMnifyColumns.User.TABLE_NAME.toString(),
+                            null,
+                            values
+                    );
+
+                    Intent intent = new Intent(LoginActivityController.this.activity, HomeActivity.class);
+                    LoginActivityController.this.activity.startActivity(intent);
+                    LoginActivityController.this.activity.finish();
                 }else if(code == AuthenticationCodes.INVALID_USER_ID_PASSWORD){
 
                     Snackbar.make(source, "User not authenticated!",
@@ -128,7 +167,7 @@ class LoginActivityController {
                 }
 
             }catch (JSONException e){
-
+                e.printStackTrace();
             }
         }
     }
