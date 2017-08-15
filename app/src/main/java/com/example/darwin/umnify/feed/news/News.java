@@ -55,6 +55,10 @@ public class News {
         return id;
     }
 
+    public String getImageFile() {
+        return imageFile;
+    }
+
     public String getContent(){
         return content;
     }

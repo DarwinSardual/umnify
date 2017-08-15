@@ -31,12 +31,12 @@ public class BlogActivity extends AppCompatActivity {
         TextView text = (TextView) findViewById(R.id.blog_activity_heading);
         text.setText(extraData.getInt("BLOG_TILE_ID") + "");
 
-        blogTile = new BlogTile(extraData.getInt("BLOG_TILE_ID"), extraData.getString("BLOG_TILE_HEADING"), null);
+        //blogTile = new BlogTile(extraData.getInt("BLOG_TILE_ID"), extraData.getString("BLOG_TILE_HEADING"), null);
 
-        Log.e("sdsdssds", blogTile.getId() + "");
+       //Log.e("sdsdssds", blogTile.getId() + "");
 
-        blogActivityHandler = new BlogActivityAsync();
-        blogActivityHandler.execute("activity", blogTile.getId() + "");
+       // blogActivityHandler = new BlogActivityAsync();
+       // blogActivityHandler.execute("activity", blogTile.getId() + "");
     }
 
     private class BlogActivityAsync extends AsyncTask<String, Void, String>{

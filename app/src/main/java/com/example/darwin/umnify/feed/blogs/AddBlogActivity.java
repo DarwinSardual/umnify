@@ -81,7 +81,7 @@ public class AddBlogActivity extends AppCompatActivity {
                     setResult(RESULT_OK, data);
                     AddBlogActivity.this.finish();
                 } else if (data == null) {
-                    if (contentField.getText().length() == 0) {
+                    if (contentField.getText().length() == 0 || headingField.getText().length() == 0) {
                         // much better do disable the submit button if content is empty
                         finish();
                     } else {
@@ -93,12 +93,12 @@ public class AddBlogActivity extends AppCompatActivity {
                         AddBlogActivity.this.finish();
                     }
 
-                } else if (view == backButton) {
-                    //check here if there's any data entered and prompt if the user wants to exit
-                    finish();
-                } else if (view == addImageButton) {
-                    showFileChooser();
                 }
+            }else if (view == backButton) {
+                //check here if there's any data entered and prompt if the user wants to exit
+                finish();
+            } else if (view == addImageButton) {
+                showFileChooser();
             }
         }
     }

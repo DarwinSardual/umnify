@@ -17,6 +17,7 @@ public class BlogFeedFragment extends Fragment{
 
     private RecyclerView recyclerView;
     private SwipeRefreshLayout swipeRefreshLayout;
+    private BlogFeedManager manager;
 
 
     @Override
@@ -33,7 +34,7 @@ public class BlogFeedFragment extends Fragment{
         recyclerView = (RecyclerView) view.findViewById(R.id.recycler_view);
         swipeRefreshLayout = (SwipeRefreshLayout) view.findViewById(R.id.swipe_refresher_layout);
 
-        final BlogFeedManager manager = new BlogFeedManager(getActivity(), swipeRefreshLayout, recyclerView);
+        manager = new BlogFeedManager(getActivity(), swipeRefreshLayout, recyclerView);
         recyclerView.setAdapter(manager);
         recyclerView.setHasFixedSize(true);
         recyclerView.setLayoutManager(new GridLayoutManager(getActivity(), 2));
@@ -55,6 +56,8 @@ public class BlogFeedFragment extends Fragment{
     public void addBlog(Intent data){
 
         Bundle args = super.getArguments();
+        manager.addBlog(data, args);
+
 
     }
 

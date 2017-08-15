@@ -4,6 +4,7 @@ import android.app.Activity;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import com.example.darwin.umnify.async.RemoteDbConn;
+import com.example.darwin.umnify.authentication.AuthenticationAddress;
 
 import java.io.IOException;
 import java.io.InputStream;
@@ -25,18 +26,30 @@ class NewsImageAsync extends RemoteDbConn<NewsWrapper, Void, NewsWrapper> {
         try{
             super.setUpConnection();
             super.getUrlConnection().connect();
+            InputStream imageStream;
+            Bitmap image;
 
-            InputStream imageStream = getUrlConnection().getInputStream();
-            Bitmap image = BitmapFactory.decodeStream(imageStream);
+            if(wrapper[0].news.getAuthorImageFile() != null){
+                imageStream = getUrlConnection().getInputStream();
+                image = BitmapFactory.decodeStream(imageStream);
+                wrapper[0].news.setAuthorImage(image);
+            }
 
-            wrapper[0].news.setAuthorImage(image);
+            if(wrapper[0].news.getImageFile() != null){
 
-            return wrapper[0];
+                super.resetUrl(AuthenticationAddress.NEWS_IMAGE_FOLDER + "/" + wrapper[0].news.getImageFile());
+                super.setUpConnection();
+                super.getUrlConnection().connect();
+
+                imageStream = getUrlConnection().getInputStream();
+                image = BitmapFactory.decodeStream(imageStream);
+                wrapper[0].news.setImage(image);
+            }
 
         }catch (IOException e){
             e.printStackTrace();
         }
-        return null;
+        return wrapper[0];
     }
 
     @Override

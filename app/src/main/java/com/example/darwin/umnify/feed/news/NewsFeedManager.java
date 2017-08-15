@@ -105,6 +105,7 @@ public class NewsFeedManager extends RecyclerView.Adapter<NewsFeedManager.ViewHo
             holder.newsAuthorView.setText(news.getAuthorFirstname() + " " + news.getAuthorLastname());
             holder.newsContentView.setText(news.getContent());
             holder.newsAuthorImageView.setImageBitmap(news.getAuthorImage());
+            holder.newsImageView.setImageBitmap(news.getImage());
 
             holder.container.setOnClickListener(new View.OnClickListener() {
                 @Override
@@ -299,10 +300,6 @@ public class NewsFeedManager extends RecyclerView.Adapter<NewsFeedManager.ViewHo
             try{
 
                 setUpConnection();
-
-
-                //
-
                 //edit this when switching to https
                 HttpURLConnection urlConnection = super.getUrlConnection();
 
@@ -398,10 +395,13 @@ public class NewsFeedManager extends RecyclerView.Adapter<NewsFeedManager.ViewHo
 
                 urlConnection.connect();
                 String response = getRequest();
+
+                //BufferedReader reader = new BufferedReader(new InputStreamReader(urlConnection.getInputStream()));
+                //return reader.readLine() + " " + reader.readLine();
                 return  response;
 
             }catch (Exception e){
-
+                e.printStackTrace();
             }
 
 

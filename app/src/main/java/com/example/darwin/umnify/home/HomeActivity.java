@@ -166,6 +166,7 @@ public class HomeActivity extends AppCompatActivity {
             Adapter adapter = new Adapter(getSupportFragmentManager());
 
             adapter.addFragment(newsFragment, "News Feed");
+
             adapter.addFragment(blogFragment, "Blogs");
             adapter.addFragment(notificationsFragment, "Notification");
 
@@ -177,6 +178,7 @@ public class HomeActivity extends AppCompatActivity {
             tabLayout = (TabLayout) activity.findViewById(R.id.home_tablayout);
 
             tabLayout.setupWithViewPager(viewPager);
+
 
             tabLayout.getTabAt(0).setIcon(R.drawable.newsfeed_icon);
             tabLayout.getTabAt(1).setIcon(R.drawable.blogfeed_icon);
@@ -321,8 +323,14 @@ public class HomeActivity extends AppCompatActivity {
 
         }else if(requestCode == HomeActivity.ADD_BLOG_CODE){
 
-            blogFragment.addBlog(data);
+            if(resultCode == RESULT_OK){
+                // add user data
+                // news fragment and trigger news manager to perform adding news
 
+                blogFragment.addBlog(data);
+            }else{
+                Log.e("There is a error", resultCode + "");
+            }
         }
     }
 }

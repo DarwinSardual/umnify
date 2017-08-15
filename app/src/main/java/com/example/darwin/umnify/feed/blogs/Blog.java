@@ -1,5 +1,6 @@
 package com.example.darwin.umnify.feed.blogs;
 
+import android.graphics.Bitmap;
 import android.graphics.drawable.Drawable;
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -11,7 +12,7 @@ public class Blog {
     private String content;
     private String publishedDate;
     private int signature;
-    private Drawable image;
+    private Bitmap image;
 
     private int authorId;
     private String authorFirstname;
@@ -19,7 +20,7 @@ public class Blog {
     private String authorImage;
 
 
-    public Blog(int id, String heading, String content, int authorId, String publishedDate, Drawable image, int signaure){
+    public Blog(int id, String heading, String content, int authorId, String publishedDate, Bitmap image, int signaure){
 
         this.id = id;
         this.content = content;
@@ -74,7 +75,7 @@ public class Blog {
 
     public String getPublishedDate(){ return publishedDate; }
 
-    public Drawable getImage(){
+    public Bitmap getImage(){
         return image;
     }
 

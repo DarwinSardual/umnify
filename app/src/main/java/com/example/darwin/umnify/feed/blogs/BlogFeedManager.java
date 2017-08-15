@@ -3,9 +3,14 @@ package com.example.darwin.umnify.feed.blogs;
 import android.app.Activity;
 import android.content.Context;
 import android.content.Intent;
+import android.database.Cursor;
+import android.graphics.Bitmap;
 import android.net.Uri;
 import android.os.AsyncTask;
 import android.os.Bundle;
+import android.provider.MediaStore;
+import android.provider.OpenableColumns;
+import android.support.v4.widget.CursorAdapter;
 import android.support.v4.widget.SwipeRefreshLayout;
 import android.support.v7.widget.RecyclerView;
 import android.util.Log;
@@ -20,6 +25,8 @@ import com.example.darwin.umnify.R;
 import com.example.darwin.umnify.async.RemoteDbConn;
 import com.example.darwin.umnify.authentication.AuthenticationAddress;
 import com.example.darwin.umnify.authentication.AuthenticationKeys;
+import com.example.darwin.umnify.feed.news.NewsFeedManager;
+
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -30,6 +37,8 @@ import java.net.URL;
 import java.util.ArrayList;
 import java.util.List;
 
+import javax.net.ssl.HttpsURLConnection;
+
 public class BlogFeedManager extends RecyclerView.Adapter<BlogFeedManager.ViewHolder>{
 
     private SwipeRefreshLayout swipeRefreshLayout;
@@ -39,6 +48,10 @@ public class BlogFeedManager extends RecyclerView.Adapter<BlogFeedManager.ViewHo
     private BlogFeedAsync blogHandler;
 
     private boolean isFetching = false;
+
+    private String crlf = "\r\n";
+    private String twoHyphens = "--";
+    private String boundary = "*****";
 
     private Activity activity;
 
@@ -52,7 +65,7 @@ public class BlogFeedManager extends RecyclerView.Adapter<BlogFeedManager.ViewHo
 
         blogHandler = new BlogFeedAsync(AuthenticationAddress.FETCH_BLOGS);
         isFetching = true;
-        blogHandler.execute("tile", "desc", feedList.size() + "", "6");
+        blogHandler.execute("tile", "desc", feedList.size() + "", "8");
 
     }
 
@@ -85,6 +98,7 @@ public class BlogFeedManager extends RecyclerView.Adapter<BlogFeedManager.ViewHo
 
             final BlogTile blogTile = feedList.get(position);
             holder.blogTileHeadingView.setText(blogTile.getHeading());
+            holder.blogTileImageView.setImageBitmap(blogTile.getImage());
 
             holder.container.setOnClickListener(new View.OnClickListener() {
                 @Override
@@ -114,10 +128,10 @@ public class BlogFeedManager extends RecyclerView.Adapter<BlogFeedManager.ViewHo
         for(int i = 0; i < dataList.length(); i++){
 
             JSONObject blogData = new JSONObject(dataList.getString(i));
-            BlogTile blogTile = new BlogTile(blogData);
+            BlogTile blogTile = BlogHelper.createBlogTileFromJSON(blogData, feedList.size());
+            BlogHelper.fetchImage(blogTile, this, activity);
             feedList.add(blogTile);
         }
-
         notifyItemRangeInserted(temp, dataList.length());
         swipeRefreshLayout.setRefreshing(false);
     }
@@ -196,12 +210,207 @@ public class BlogFeedManager extends RecyclerView.Adapter<BlogFeedManager.ViewHo
 
     public void addBlog(Intent data, Bundle userData){
 
+        Uri uri = data.getData();
+        Cursor cursor;
+        DataWrapper blogWrapper = null;
+
+        if(uri != null){
+
+            cursor = activity.getContentResolver().query(uri,
+                    null, null,
+                    null, null);
+
+            int nameIndex = cursor.getColumnIndex(OpenableColumns.DISPLAY_NAME);
+            cursor.moveToFirst();
+
+            String imageFile = cursor.getString(nameIndex);
+            Bitmap image = null;
+
+            try{
+                image = MediaStore.Images.Media.getBitmap(activity.getContentResolver(), uri);
+            }catch (IOException e){
+                e.printStackTrace();
+            }
+
+            blogWrapper = new DataWrapper(data.getStringExtra("ADD_BLOG_HEADING"), data.getStringExtra("ADD_BLOG_CONTENT"),
+                    imageFile, userData.getInt("USER_ID"), userData.getInt("USER_TYPE"), image);
+
+        }else{
+            blogWrapper = new DataWrapper(data.getStringExtra("ADD_BLOG_HEADING"), data.getStringExtra("ADD_BLOG_CONTENT"),
+                    null, userData.getInt("USER_ID"), userData.getInt("USER_TYPE"), null);
+        }
+
+        AddBlogAsync addBlogAsync = new AddBlogAsync(AuthenticationAddress.ADD_BLOG, activity);
+        addBlogAsync.execute(blogWrapper);
     }
 
     private class DataWrapper{
 
         private String heading;
         private String content;
+        private String imageFile;
+        private Bitmap image;
+        private int userType;
+        private int authorId;
 
+        public DataWrapper(String heading, String content, String imageFile, int authorId, int userType, Bitmap image){
+            this.content = content;
+            this.image = image;
+            this.authorId = authorId;
+            this.imageFile = imageFile;
+            this.userType = userType;
+            this.heading = heading;
+        }
+
+        public String getContent() {
+            return content;
+        }
+
+        public int getAuthorId() {
+            return authorId;
+        }
+
+        public Bitmap getImage() {
+            return image;
+        }
+
+        public String getImageFile() {
+            return imageFile;
+        }
+
+        public int getUserType() {
+            return userType;
+        }
+
+        public String getHeading() {
+            return heading;
+        }
+    }
+
+    private class AddBlogAsync extends RemoteDbConn<DataWrapper, Void, String>{
+
+        public AddBlogAsync(String urlAddress, Activity activity){
+            super(urlAddress, activity);
+        }
+
+        @Override
+        protected String doInBackground(DataWrapper... wrapper) {
+
+
+            try{
+
+                setUpConnection();
+                HttpURLConnection urlConnection = super.getUrlConnection();
+
+                if(wrapper[0].getImageFile() != null){
+
+                    urlConnection.setUseCaches(false);
+                    urlConnection.setRequestProperty("Connection", "Keep-Alive");
+                    urlConnection.setRequestProperty("Cache-Control", "no-cache");
+                    urlConnection.setRequestProperty(
+                            "Content-Type", "multipart/form-data;boundary=" + BlogFeedManager.this.boundary);
+
+                    OutputStream out = urlConnection.getOutputStream();
+                    DataOutputStream outputStream = new DataOutputStream(out);
+
+                    // start writing the iamge to buffer
+                    outputStream.writeBytes(BlogFeedManager.this.twoHyphens + BlogFeedManager.this.boundary + BlogFeedManager.this.crlf);
+                    outputStream.writeBytes("Content-Disposition: form-data; name=\"" +
+                            "image" + "\";filename=\"" +
+                            wrapper[0].getImageFile() + "\"" + BlogFeedManager.this.crlf);
+                    outputStream.writeBytes(BlogFeedManager.this.crlf);
+
+                    ByteArrayOutputStream stream = new ByteArrayOutputStream();
+                    wrapper[0].getImage().compress(Bitmap.CompressFormat.JPEG, 100, stream);
+                    byte[] byteArray = stream.toByteArray();
+
+                    outputStream.write(byteArray);
+
+                    outputStream.writeBytes(BlogFeedManager.this.crlf);
+                    outputStream.writeBytes(BlogFeedManager.this.twoHyphens + BlogFeedManager.this.boundary +
+                            BlogFeedManager.this.twoHyphens + BlogFeedManager.this.crlf);
+
+                    // end writing the image
+
+                    // authentication
+
+                    outputStream.writeBytes(twoHyphens+ boundary + crlf);
+                    outputStream.writeBytes("Content-Disposition: form-data; name=\""+AuthenticationKeys.IDENTIFICATION_KEY+"\";" + crlf);
+                    outputStream.writeBytes("Content-Type: text/plain; charset=UTF-8" + crlf);
+                    outputStream.writeBytes(crlf + AuthenticationKeys.IDENTIFICATION_VALUE + crlf);
+                    //outputStream.writeBytes(crlf);
+
+                    outputStream.writeBytes(twoHyphens+ boundary + crlf);
+                    outputStream.writeBytes("Content-Disposition: form-data; name=\""+AuthenticationKeys.USERNAME_KEY+"\";" + crlf);
+                    outputStream.writeBytes("Content-Type: text/plain; charset=UTF-8" + crlf);
+                    outputStream.writeBytes(crlf + AuthenticationKeys.USERNAME_VALUE+ crlf);
+
+
+                    outputStream.writeBytes(twoHyphens+ boundary + crlf);
+                    outputStream.writeBytes("Content-Disposition: form-data; name=\""+AuthenticationKeys.PASSWORD_KEY+"\";" + crlf);
+                    outputStream.writeBytes("Content-Type: text/plain; charset=UTF-8" + crlf);
+                    outputStream.writeBytes(crlf + AuthenticationKeys.PASSWORD_VALUE+ crlf);
+                    // end authentication
+
+                    // text data
+                    outputStream.writeBytes(twoHyphens+ boundary + crlf);
+                    outputStream.writeBytes("Content-Disposition: form-data; name=\"heading\";" + crlf);
+                    outputStream.writeBytes("Content-Type: text/plain; charset=UTF-8" + crlf);
+                    outputStream.writeBytes(crlf + wrapper[0].getHeading() + crlf);
+
+                    outputStream.writeBytes(twoHyphens+ boundary + crlf);
+                    outputStream.writeBytes("Content-Disposition: form-data; name=\"content\";" + crlf);
+                    outputStream.writeBytes("Content-Type: text/plain; charset=UTF-8" + crlf);
+                    outputStream.writeBytes(crlf + wrapper[0].getContent() + crlf);
+                    //outputStream.writeBytes(crlf);
+
+                    outputStream.writeBytes(twoHyphens+ boundary + crlf);
+                    outputStream.writeBytes("Content-Disposition: form-data; name=\"image_file\";" + crlf);
+                    outputStream.writeBytes("Content-Type: text/plain; charset=UTF-8" + crlf);
+                    outputStream.writeBytes(crlf + wrapper[0].getImageFile() + crlf);
+
+                    outputStream.writeBytes(twoHyphens+ boundary + crlf);
+                    outputStream.writeBytes("Content-Disposition: form-data; name=\"user_type\";" + crlf);
+                    outputStream.writeBytes("Content-Type: text/plain; charset=UTF-8" + crlf);
+                    outputStream.writeBytes(crlf + wrapper[0].getUserType()  + crlf);
+
+                    outputStream.writeBytes(twoHyphens+ boundary + crlf);
+                    outputStream.writeBytes("Content-Disposition: form-data; name=\"author\";" + crlf);
+                    outputStream.writeBytes("Content-Type: text/plain; charset=UTF-8" + crlf);
+                    outputStream.writeBytes(crlf + wrapper[0].getAuthorId() + crlf);
+
+                    outputStream.flush();
+                    outputStream.close();
+                    out.close();
+
+                }else{
+
+                    Uri.Builder queryBuilder = super.getQueryBuilder();
+                    queryBuilder.appendQueryParameter("content", wrapper[0].getContent())
+                            .appendQueryParameter("heading", wrapper[0].getHeading())
+                            .appendQueryParameter("image", wrapper[0].getImageFile())
+                            .appendQueryParameter("user_type", wrapper[0].getUserType() + "")
+                            .appendQueryParameter("author", wrapper[0].getAuthorId() + "");
+
+                    super.setRequest(getQueryBuilder().build().getEncodedQuery());
+                }
+
+                urlConnection.connect();
+               // String response = getRequest();
+                //return  response;
+
+                BufferedReader reader = new BufferedReader(new InputStreamReader(urlConnection.getInputStream()));
+                return reader.readLine() + " " + reader.readLine();
+
+            }catch (Exception e){
+                e.printStackTrace();
+            }
+            return null;
+        }
+
+        @Override
+        protected void onPostExecute(String s) {
+            Log.e("Response", s);
+        }
     }
 }
