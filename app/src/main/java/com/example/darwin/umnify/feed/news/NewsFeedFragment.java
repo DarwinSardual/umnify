@@ -19,10 +19,6 @@ public class NewsFeedFragment extends Fragment{
     private SwipeRefreshLayout swipeRefreshLayout;
     private NewsFeedManager manager;
 
-    private int USER_ID;
-    private int USER_TYPE;
-    private String USER_PASSWORD;
-
     @Override
     public void onCreate(Bundle savedInstanceState){
 
@@ -70,7 +66,7 @@ public class NewsFeedFragment extends Fragment{
 
     public void addNews(Intent data){
 
-        Bundle args = getArguments();
+        Bundle args = super.getArguments();
 
         manager.addNews(data, args);
     }

@@ -47,31 +47,12 @@ public class AddNewsActivity extends AppCompatActivity {
 
         submitButton.setOnClickListener(handler);
 
+        backButton.setOnClickListener(handler);
 
-
-        backButton.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View view) {
-
-            }
-        });
-
-        addImageButton.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View view) {
-                showFileChooser();
-            }
-        });
+        addImageButton.setOnClickListener(handler);
 
     }
 
-    private void showFileChooser() {
-        Intent intent = new Intent();
-        intent.setType("image/*");
-        intent.setAction(Intent.ACTION_GET_CONTENT);
-        startActivityForResult(Intent.createChooser(intent, "Select Image"), AddNewsActivity.SELECT_IMAGE);
-
-    }
 
     @Override
     protected void onActivityResult(int requestCode, int resultCode, Intent data) {
@@ -83,6 +64,16 @@ public class AddNewsActivity extends AppCompatActivity {
             }
         }
     }
+
+    private void showFileChooser() {
+        Intent intent = new Intent();
+        intent.setType("image/*");
+        intent.setAction(Intent.ACTION_GET_CONTENT);
+        startActivityForResult(Intent.createChooser(intent, "Select Image"), AddNewsActivity.SELECT_IMAGE);
+
+    }
+
+
 
     private class ClickHandler implements View.OnClickListener{
 
@@ -110,7 +101,10 @@ public class AddNewsActivity extends AppCompatActivity {
                 }
 
             }else if(view == backButton){
-
+                //check here if there's any data entered and prompt if the user wants to exit
+                finish();
+            }else if(view == addImageButton){
+                showFileChooser();
             }
         }
     }

@@ -3,11 +3,14 @@ package com.example.darwin.umnify.feed.news;
 import android.app.Activity;
 import android.content.Context;
 import android.content.Intent;
+import android.database.Cursor;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.net.Uri;
 import android.os.AsyncTask;
 import android.os.Bundle;
+import android.provider.MediaStore;
+import android.provider.OpenableColumns;
 import android.support.v4.widget.SwipeRefreshLayout;
 import android.support.v7.widget.CardView;
 import android.util.Log;
@@ -47,6 +50,10 @@ public class NewsFeedManager extends RecyclerView.Adapter<NewsFeedManager.ViewHo
     private Activity activity;
 
     private boolean isFetching = false;
+
+    private String crlf = "\r\n";
+    private String twoHyphens = "--";
+    private String boundary = "*****";
 
 
 
@@ -192,6 +199,7 @@ public class NewsFeedManager extends RecyclerView.Adapter<NewsFeedManager.ViewHo
 
             try {
                 JSONObject str = new JSONObject(response);
+
                 String data = str.getString("data");
 
                 addEntries(data);
@@ -206,12 +214,39 @@ public class NewsFeedManager extends RecyclerView.Adapter<NewsFeedManager.ViewHo
 
     public void addNews(Intent data, Bundle userData){
 
-        //int authorId =
+        Uri uri = data.getData();
+        Cursor returnCursor;
+        DataWrapper newsWrapper = null;
 
+        if(uri != null){
 
+            returnCursor =
+                    activity.getContentResolver()
+                            .query(uri,
+                                    null, null,
+                                    null, null);
+            int nameIndex = returnCursor.getColumnIndex(OpenableColumns.DISPLAY_NAME);
+            returnCursor.moveToFirst();
 
-        DataWrapper newsWrapper = new DataWrapper(data.getStringExtra("ADD_NEWS_CONTENT"),
-                null, userData.getInt("USER_ID"), null);
+            String imageFile = returnCursor.getString(nameIndex);
+            Bitmap image = null;
+
+            try{
+                image = MediaStore.Images.Media.getBitmap(activity.getContentResolver(), uri);
+            }catch (IOException e){
+                e.printStackTrace();
+            }
+
+             newsWrapper = new DataWrapper(data.getStringExtra("ADD_NEWS_CONTENT"),
+                    imageFile, userData.getInt("USER_ID"), userData.getInt("USER_TYPE"), image);
+
+        }else{
+            newsWrapper = new DataWrapper(data.getStringExtra("ADD_NEWS_CONTENT"),
+                    null, userData.getInt("USER_ID"), userData.getInt("USER_TYPE"), null);
+        }
+
+        AddNewsAsync addNewsAsync = new AddNewsAsync(AuthenticationAddress.ADD_NEWS, activity);
+        addNewsAsync.execute(newsWrapper);
 
     }
 
@@ -221,12 +256,14 @@ public class NewsFeedManager extends RecyclerView.Adapter<NewsFeedManager.ViewHo
         private Bitmap image;
         private int authorId;
         private String imageFile;
+        private int userType;
 
-        public DataWrapper(String content, String imageFile, int authorId, Bitmap image){
+        public DataWrapper(String content, String imageFile, int authorId, int userType, Bitmap image){
             this.content = content;
             this.image = image;
             this.authorId = authorId;
             this.imageFile = imageFile;
+            this.userType = userType;
         }
 
         public String getContent() {
@@ -244,6 +281,10 @@ public class NewsFeedManager extends RecyclerView.Adapter<NewsFeedManager.ViewHo
         public String getImageFile() {
             return imageFile;
         }
+
+        public int getUserType() {
+            return userType;
+        }
     }
 
     private class AddNewsAsync extends RemoteDbConn<DataWrapper, Void, String>{
@@ -258,14 +299,106 @@ public class NewsFeedManager extends RecyclerView.Adapter<NewsFeedManager.ViewHo
             try{
 
                 setUpConnection();
-                Uri.Builder queryBuilder = getQueryBuilder();
-                queryBuilder.appendQueryParameter("content", wrapper[0].getContent())
-                        .appendQueryParameter("image", wrapper[0].getImageFile())
-                        .appendQueryParameter("author", wrapper[0].getAuthorId() + "");
 
-                super.setRequest(getQueryBuilder().build().getEncodedQuery());
-                super.getUrlConnection().connect();
 
+                //
+
+                //edit this when switching to https
+                HttpURLConnection urlConnection = super.getUrlConnection();
+
+                if(wrapper[0].getImageFile() != null){
+
+                    urlConnection.setUseCaches(false);
+                    urlConnection.setRequestProperty("Connection", "Keep-Alive");
+                    urlConnection.setRequestProperty("Cache-Control", "no-cache");
+                    urlConnection.setRequestProperty(
+                            "Content-Type", "multipart/form-data;boundary=" + NewsFeedManager.this.boundary);
+
+                    OutputStream out = urlConnection.getOutputStream();
+                    DataOutputStream outputStream = new DataOutputStream(out);
+
+                    // start writing the iamge to buffer
+                    outputStream.writeBytes(NewsFeedManager.this.twoHyphens + NewsFeedManager.this.boundary + NewsFeedManager.this.crlf);
+                    outputStream.writeBytes("Content-Disposition: form-data; name=\"" +
+                            "image" + "\";filename=\"" +
+                            wrapper[0].getImageFile() + "\"" + NewsFeedManager.this.crlf);
+                    outputStream.writeBytes(NewsFeedManager.this.crlf);
+
+                    ByteArrayOutputStream stream = new ByteArrayOutputStream();
+                    wrapper[0].getImage().compress(Bitmap.CompressFormat.JPEG, 100, stream);
+                    byte[] byteArray = stream.toByteArray();
+
+                    outputStream.write(byteArray);
+
+                    outputStream.writeBytes(NewsFeedManager.this.crlf);
+                    outputStream.writeBytes(NewsFeedManager.this.twoHyphens + NewsFeedManager.this.boundary +
+                            NewsFeedManager.this.twoHyphens + NewsFeedManager.this.crlf);
+
+                    // end writing the image
+
+                    // authentication
+
+                    outputStream.writeBytes(twoHyphens+ boundary + crlf);
+                    outputStream.writeBytes("Content-Disposition: form-data; name=\""+AuthenticationKeys.IDENTIFICATION_KEY+"\";" + crlf);
+                    outputStream.writeBytes("Content-Type: text/plain; charset=UTF-8" + crlf);
+                    outputStream.writeBytes(crlf + AuthenticationKeys.IDENTIFICATION_VALUE + crlf);
+                    //outputStream.writeBytes(crlf);
+
+                    outputStream.writeBytes(twoHyphens+ boundary + crlf);
+                    outputStream.writeBytes("Content-Disposition: form-data; name=\""+AuthenticationKeys.USERNAME_KEY+"\";" + crlf);
+                    outputStream.writeBytes("Content-Type: text/plain; charset=UTF-8" + crlf);
+                    outputStream.writeBytes(crlf + AuthenticationKeys.USERNAME_VALUE+ crlf);
+
+
+                    outputStream.writeBytes(twoHyphens+ boundary + crlf);
+                    outputStream.writeBytes("Content-Disposition: form-data; name=\""+AuthenticationKeys.PASSWORD_KEY+"\";" + crlf);
+                    outputStream.writeBytes("Content-Type: text/plain; charset=UTF-8" + crlf);
+                    outputStream.writeBytes(crlf + AuthenticationKeys.PASSWORD_VALUE+ crlf);
+                    // end authentication
+
+                    // text data
+
+                    outputStream.writeBytes(twoHyphens+ boundary + crlf);
+                    outputStream.writeBytes("Content-Disposition: form-data; name=\"content\";" + crlf);
+                    outputStream.writeBytes("Content-Type: text/plain; charset=UTF-8" + crlf);
+                    outputStream.writeBytes(crlf + wrapper[0].getContent() + crlf);
+                    //outputStream.writeBytes(crlf);
+
+                    outputStream.writeBytes(twoHyphens+ boundary + crlf);
+                    outputStream.writeBytes("Content-Disposition: form-data; name=\"image_file\";" + crlf);
+                    outputStream.writeBytes("Content-Type: text/plain; charset=UTF-8" + crlf);
+                    outputStream.writeBytes(crlf + wrapper[0].getImageFile() + crlf);
+
+                    outputStream.writeBytes(twoHyphens+ boundary + crlf);
+                    outputStream.writeBytes("Content-Disposition: form-data; name=\"user_type\";" + crlf);
+                    outputStream.writeBytes("Content-Type: text/plain; charset=UTF-8" + crlf);
+                    outputStream.writeBytes(crlf + wrapper[0].getUserType()  + crlf);
+
+                    outputStream.writeBytes(twoHyphens+ boundary + crlf);
+                    outputStream.writeBytes("Content-Disposition: form-data; name=\"author\";" + crlf);
+                    outputStream.writeBytes("Content-Type: text/plain; charset=UTF-8" + crlf);
+                    outputStream.writeBytes(crlf + wrapper[0].getAuthorId() + crlf);
+
+                    outputStream.flush();
+                    outputStream.close();
+                    out.close();
+
+
+
+                }else{
+                    Uri.Builder queryBuilder = getQueryBuilder();
+                    queryBuilder.appendQueryParameter("content", wrapper[0].getContent())
+                            .appendQueryParameter("image", wrapper[0].getImageFile())
+                            .appendQueryParameter("user_type", wrapper[0].getUserType() + "")
+                            .appendQueryParameter("author", wrapper[0].getAuthorId() + "");
+
+                    super.setRequest(getQueryBuilder().build().getEncodedQuery());
+                }
+
+
+                urlConnection.connect();
+                String response = getRequest();
+                return  response;
 
             }catch (Exception e){
 
@@ -273,6 +406,12 @@ public class NewsFeedManager extends RecyclerView.Adapter<NewsFeedManager.ViewHo
 
 
             return null;
+        }
+
+        @Override
+        protected void onPostExecute(String s) {
+
+            Log.e("Request", s);
         }
     }
 

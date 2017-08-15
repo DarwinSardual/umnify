@@ -45,7 +45,7 @@
                         android:scaleType="fitXY"
                         android:layout_alignParentLeft="true"
                         android:adjustViewBounds="true"
-                        android:id="@+id/add_news_back_button"/>
+                        android:id="@+id/add_blog_back_button"/>
 
                 <ImageButton
                         android:layout_width="40dp"
@@ -55,7 +55,7 @@
                         android:scaleType="fitXY"
                         android:layout_alignParentRight="true"
                         android:adjustViewBounds="true"
-                        android:id="@+id/add_news_submit_button"/>
+                        android:id="@+id/add_blog_submit_button"/>
 
             </RelativeLayout>
         </android.support.v7.widget.Toolbar>
@@ -72,12 +72,14 @@
         <EditText android:layout_width="match_parent"
                   android:layout_height="40dp"
                   android:layout_weight="0.03"
+                  android:id="@+id/add_blog_heading"
                   android:background="@drawable/add_feed_border"
                   android:gravity="top"/>
 
         <EditText android:layout_width="match_parent"
                   android:layout_height="200dp"
-                  android:layout_weight="0.03" android:id="@+id/editText"
+                  android:layout_weight="0.03"
+                  android:id="@+id/add_blog_content"
                   android:background="@drawable/add_feed_border"
                   android:gravity="top"
                     android:layout_marginTop="10dp"/>
@@ -85,6 +87,7 @@
         <RelativeLayout android:layout_width="match_parent"
                         android:layout_height="50dp">
             <Button android:layout_width="wrap_content"
+                    android:id="@+id/add_blog_add_image"
                     android:layout_height="wrap_content"
                     android:text="Add an image"
             />

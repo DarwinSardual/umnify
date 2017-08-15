@@ -5,6 +5,7 @@ import android.content.Context;
 import android.content.Intent;
 import android.net.Uri;
 import android.os.AsyncTask;
+import android.os.Bundle;
 import android.support.v4.widget.SwipeRefreshLayout;
 import android.support.v7.widget.RecyclerView;
 import android.util.Log;
@@ -100,6 +101,11 @@ public class BlogFeedManager extends RecyclerView.Adapter<BlogFeedManager.ViewHo
         }
     }
 
+    @Override
+    public int getItemCount() {
+        return feedList.size();
+    }
+
     private void addEntries(String data) throws JSONException{
 
         JSONArray dataList = new JSONArray(data);
@@ -188,8 +194,14 @@ public class BlogFeedManager extends RecyclerView.Adapter<BlogFeedManager.ViewHo
         }
     }
 
-    @Override
-    public int getItemCount() {
-        return feedList.size();
+    public void addBlog(Intent data, Bundle userData){
+
+    }
+
+    private class DataWrapper{
+
+        private String heading;
+        private String content;
+
     }
 }

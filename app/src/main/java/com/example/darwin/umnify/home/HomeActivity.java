@@ -30,6 +30,7 @@ import com.example.darwin.umnify.feed.news.NewsFeedFragment;
 import com.example.darwin.umnify.feed.notifications.NotificationsFeedFragment;
 import com.example.darwin.umnify.groups.GroupsActivity;
 import com.example.darwin.umnify.preferences.PreferencesActivity;
+import org.json.JSONObject;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -151,7 +152,7 @@ public class HomeActivity extends AppCompatActivity {
             Bundle args = new Bundle();
             args.putInt("USER_ID", HomeActivity.this.USER_ID);
             args.putInt("USER_TYPE", HomeActivity.this.USER_TYPE);
-            args.putString("USER_ID", HomeActivity.this.USER_PASSWORD);
+            args.putString("USER_PASSWORD", HomeActivity.this.USER_PASSWORD);
 
             newsFragment = new NewsFeedFragment();
             newsFragment.setArguments(args);
@@ -277,7 +278,6 @@ public class HomeActivity extends AppCompatActivity {
                 intent.putExtras(extras);
 
             HomeActivity.this.startActivityForResult(intent, requestCode);
-
         }
     }
 
@@ -320,6 +320,8 @@ public class HomeActivity extends AppCompatActivity {
             }
 
         }else if(requestCode == HomeActivity.ADD_BLOG_CODE){
+
+            blogFragment.addBlog(data);
 
         }
     }

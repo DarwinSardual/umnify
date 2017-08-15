@@ -1,5 +1,6 @@
 package com.example.darwin.umnify.feed.blogs;
 
+import android.content.Intent;
 import android.os.Bundle;
 import android.support.v4.app.Fragment;
 import android.support.v4.widget.SwipeRefreshLayout;
@@ -51,5 +52,10 @@ public class BlogFeedFragment extends Fragment{
         return view;
     }
 
+    public void addBlog(Intent data){
+
+        Bundle args = super.getArguments();
+
+    }
 
 }
