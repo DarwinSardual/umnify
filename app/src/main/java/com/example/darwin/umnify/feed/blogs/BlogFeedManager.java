@@ -147,6 +147,12 @@ public class BlogFeedManager extends RecyclerView.Adapter<BlogFeedManager.ViewHo
             isFetching = true;
             blogHandler.execute("tile", "desc", feedList.size() + "", temp);
         }else if(direction == -1){
+            feedList.clear();
+            notifyDataSetChanged();
+
+            blogHandler = new BlogFeedAsync(AuthenticationAddress.FETCH_BLOGS);
+            isFetching = true;
+            blogHandler.execute("tile", "desc", feedList.size() + "", "8");
 
         }
 

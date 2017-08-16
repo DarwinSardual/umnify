@@ -161,6 +161,7 @@ class LoginActivityController {
                     intent.putExtra("USER_ID", user.getInt("id"));
                     intent.putExtra("USER_ID", user.getInt("type"));
                     intent.putExtra("USER_ID", user.getString("password"));
+                    intent.putExtra("USER_IMAGE_FILE", person.getString("image"));
                     LoginActivityController.this.activity.startActivity(intent);
                     LoginActivityController.this.activity.finish();
                 }else if(code == AuthenticationCodes.INVALID_USER_ID_PASSWORD){

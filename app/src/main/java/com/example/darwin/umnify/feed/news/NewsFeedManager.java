@@ -27,6 +27,7 @@ import android.support.v7.widget.RecyclerView;
 import com.example.darwin.umnify.R;
 import com.example.darwin.umnify.async.RemoteDbConn;
 import com.example.darwin.umnify.authentication.AuthenticationAddress;
+import com.example.darwin.umnify.authentication.AuthenticationCodes;
 import com.example.darwin.umnify.authentication.AuthenticationKeys;
 import org.json.JSONArray;
 import org.json.JSONException;
@@ -136,18 +137,20 @@ public class NewsFeedManager extends RecyclerView.Adapter<NewsFeedManager.ViewHo
         }
     }
 
-    private class UserNewsWrapper{
+    private class StarredNewsWrapper{
 
         private int userId;
         private News news;
         private Bundle extraData;
+        private View source;
 
 
-        public UserNewsWrapper(int userId, News news, Bundle extraData){
+        public StarredNewsWrapper(int userId, News news, View source, Bundle extraData){
 
             this.userId = userId;
             this.news = news;
             this.extraData = extraData;
+            this.source = source;
         }
 
         public void setExtraData(Bundle extraData){
@@ -157,20 +160,30 @@ public class NewsFeedManager extends RecyclerView.Adapter<NewsFeedManager.ViewHo
         public Bundle getExtraData() {
             return extraData;
         }
+
+        public void setSource(View source) {
+            this.source = source;
+        }
+
+        public View getSource() {
+            return source;
+        }
     }
 
     //handle when star button is clicked
     private class StarButtonAction implements View.OnClickListener{
 
-        private UserNewsWrapper wrapper;
+        private StarredNewsWrapper wrapper;
 
         public StarButtonAction(int userId, News news){
 
-            this.wrapper = new UserNewsWrapper(userId, news, null);
+            this.wrapper = new StarredNewsWrapper(userId, news, null, null);
         }
 
         @Override
         public void onClick(View view) {
+
+            wrapper.setSource(view);
             StarredNewsAsync starredNewsAsync = new StarredNewsAsync(AuthenticationAddress.STAR_NEWS, NewsFeedManager.this.activity);
             starredNewsAsync.execute(wrapper);
         }
@@ -476,14 +489,14 @@ public class NewsFeedManager extends RecyclerView.Adapter<NewsFeedManager.ViewHo
         }
     }
 
-    private class StarredNewsAsync extends RemoteDbConn<UserNewsWrapper, Void, UserNewsWrapper>{
+    private class StarredNewsAsync extends RemoteDbConn<StarredNewsWrapper, Void, StarredNewsWrapper>{
 
         public StarredNewsAsync(String urlAddress, Activity activity){
             super(urlAddress, activity);
         }
 
         @Override
-        protected UserNewsWrapper doInBackground(UserNewsWrapper... wrappers) {
+        protected StarredNewsWrapper doInBackground(StarredNewsWrapper... wrappers) {
 
             try{
 
@@ -506,6 +519,7 @@ public class NewsFeedManager extends RecyclerView.Adapter<NewsFeedManager.ViewHo
                 super.getUrlConnection().connect();
 
                 String response = super.getRequest();
+                Log.e("Response", response);
 
                 Bundle extraData = new Bundle();
                 extraData.putString("response", response);
@@ -517,10 +531,12 @@ public class NewsFeedManager extends RecyclerView.Adapter<NewsFeedManager.ViewHo
 
                 return null;
             }
+
         }
 
         @Override
-        protected void onPostExecute(UserNewsWrapper wrapper) {
+        protected void onPostExecute(StarredNewsWrapper wrapper) {
+
 
             if(wrapper == null){
                 Log.e("NewsFeedManager", "StarredNewsAsync - wrapper is null");
@@ -528,13 +544,31 @@ public class NewsFeedManager extends RecyclerView.Adapter<NewsFeedManager.ViewHo
             }
 
             String response = wrapper.getExtraData().getString("response");
-
             if(response != null){
 
                 try{
 
                     JSONObject json = new JSONObject(response);
+                    int code = json.getInt("code");
+                    int transaction = json.getInt("transaction");
 
+                    if(code == AuthenticationCodes.AUTHENTICATED && transaction == AuthenticationCodes.TRANSACTION_SUCCESS){
+                        JSONObject data = new JSONObject(json.getString("data"));
+
+                        Button source = (Button)wrapper.source;
+
+                        if(data.getString("action").equalsIgnoreCase("add")){
+                            wrapper.news.setIsStarred(true);
+                            source.setTextColor(Color.YELLOW);
+                            source.setText(data.getInt("count") + "");
+                        }else if(data.getString("action").equalsIgnoreCase("remove")){
+                            wrapper.news.setIsStarred(false);
+                            source.setTextColor(Color.BLACK);
+                            source.setText(data.getInt("count") + "");
+                        }
+
+
+                    }
 
                 }catch (JSONException e){
                     e.printStackTrace();

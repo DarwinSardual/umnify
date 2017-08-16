@@ -50,6 +50,13 @@ public class BlogFeedFragment extends Fragment{
             }
         });
 
+        swipeRefreshLayout.setOnRefreshListener(new SwipeRefreshLayout.OnRefreshListener() {
+            @Override
+            public void onRefresh() {
+                manager.updateFeed(-1);
+            }
+        });
+
         return view;
     }
 

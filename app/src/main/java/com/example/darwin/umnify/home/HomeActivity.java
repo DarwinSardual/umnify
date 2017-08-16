@@ -1,7 +1,9 @@
 package com.example.darwin.umnify.home;
 
+import android.app.Activity;
 import android.content.Context;
 import android.content.Intent;
+import android.graphics.Bitmap;
 import android.os.Handler;
 import android.support.annotation.NonNull;
 import android.support.design.widget.FloatingActionButton;
@@ -22,6 +24,7 @@ import android.view.MenuItem;
 import android.view.View;
 import android.widget.Toast;
 import com.example.darwin.umnify.R;
+import com.example.darwin.umnify.async.RemoteDbConn;
 import com.example.darwin.umnify.calendar.CalendarActivity;
 import com.example.darwin.umnify.feed.blogs.AddBlogActivity;
 import com.example.darwin.umnify.feed.blogs.BlogFeedFragment;
@@ -166,9 +169,8 @@ public class HomeActivity extends AppCompatActivity {
             Adapter adapter = new Adapter(getSupportFragmentManager());
 
             adapter.addFragment(newsFragment, "News Feed");
-
             adapter.addFragment(blogFragment, "Blogs");
-            adapter.addFragment(notificationsFragment, "Notification");
+            adapter.addFragment(notificationsFragment, "Updates");
 
             viewPager.setAdapter(adapter);
         }
@@ -201,8 +203,8 @@ public class HomeActivity extends AppCompatActivity {
                         intent = new Intent(activity, GroupsActivity.class);
                     else if (id == R.id.navigation_calendar)
                         intent = new Intent(activity, CalendarActivity.class);
-                    else if (id == R.id.navigation_preferences)
-                        intent = new Intent(activity, PreferencesActivity.class);
+                    //else if (id == R.id.navigation_preferences)
+                      //  intent = new Intent(activity, PreferencesActivity.class);
 
                     startActivity(intent);
 
@@ -331,6 +333,18 @@ public class HomeActivity extends AppCompatActivity {
             }else{
                 Log.e("There is a error", resultCode + "");
             }
+        }
+    }
+
+    private class AuthorImageAysnc extends RemoteDbConn<String, Void, Bitmap>{
+
+        public AuthorImageAysnc(String urlAddress, Activity activity){
+            super(urlAddress, activity);
+        }
+
+        @Override
+        protected Bitmap doInBackground(String... strings) {
+            return null;
         }
     }
 }

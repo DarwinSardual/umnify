@@ -153,6 +153,6 @@ public abstract class RemoteDbConn <Parameters, Progess, Result> extends AsyncTa
     protected final String getRequest() throws IOException{
 
         BufferedReader reader = new BufferedReader(new InputStreamReader(urlConnection.getInputStream()));
-        return reader.readLine();
+        return reader.readLine() + reader.readLine();
     }
 }

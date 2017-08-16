@@ -11,4 +11,6 @@ public class AuthenticationCodes {
     public final static int USER_AUTHENTICATED = 56;
 
     public final static int FETCH_OK = 57;
+    public final static int TRANSACTION_SUCCESS = 58;
+    public final static int TRANSACTION_FAILED = 59;
 }

@@ -58,6 +58,10 @@ public class News {
         this.authorImage = authorImage;
     }
 
+    public void setIsStarred(boolean b){
+        isStarred = b;
+    }
+
     public int getIndex() {
         return index;
     }
