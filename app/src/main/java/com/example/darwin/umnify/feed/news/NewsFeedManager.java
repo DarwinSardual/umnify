@@ -6,6 +6,7 @@ import android.content.Intent;
 import android.database.Cursor;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
+import android.graphics.Color;
 import android.net.Uri;
 import android.os.AsyncTask;
 import android.os.Bundle;
@@ -17,6 +18,7 @@ import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.Button;
 import android.widget.ImageView;
 import android.widget.TextView;
 
@@ -48,6 +50,7 @@ public class NewsFeedManager extends RecyclerView.Adapter<NewsFeedManager.ViewHo
     private NewsFeedAsync newsHandler;
 
     private Activity activity;
+    private Bundle userData;
 
     private boolean isFetching = false;
 
@@ -56,12 +59,13 @@ public class NewsFeedManager extends RecyclerView.Adapter<NewsFeedManager.ViewHo
     private String boundary = "*****";
 
 
-
-    public NewsFeedManager(Activity activity, SwipeRefreshLayout swipeRefreshLayout, RecyclerView recyclerView) {
+    public NewsFeedManager(Activity activity, SwipeRefreshLayout swipeRefreshLayout, RecyclerView recyclerView, Bundle userData) {
 
         this.activity = activity;
         this.swipeRefreshLayout = swipeRefreshLayout;
+        this.userData = userData;
         this.recyclerView = recyclerView;
+        this.userData = userData;
 
         feedList = new ArrayList<>();
 
@@ -77,6 +81,7 @@ public class NewsFeedManager extends RecyclerView.Adapter<NewsFeedManager.ViewHo
         private ImageView newsImageView;
         private TextView newsAuthorView;
         private ImageView newsAuthorImageView;
+        private Button newsStarButton;
         private CardView container;
 
         private ViewHolder(LayoutInflater inflater, ViewGroup parent) {
@@ -87,6 +92,7 @@ public class NewsFeedManager extends RecyclerView.Adapter<NewsFeedManager.ViewHo
             newsAuthorView = (TextView) itemView.findViewById(R.id.news_author);
             newsImageView = (ImageView) itemView.findViewById(R.id.news_image);
             newsAuthorImageView = (ImageView) itemView.findViewById(R.id.author_image);
+            newsStarButton = (Button) itemView.findViewById(R.id.news_stars);
         }
     }
 
@@ -107,14 +113,66 @@ public class NewsFeedManager extends RecyclerView.Adapter<NewsFeedManager.ViewHo
             holder.newsAuthorImageView.setImageBitmap(news.getAuthorImage());
             holder.newsImageView.setImageBitmap(news.getImage());
 
+            if(news.isStarred()){
+                holder.newsStarButton.setTextColor(Color.YELLOW);
+            }else{
+                holder.newsStarButton.setTextColor(Color.BLACK);
+            }
+            holder.newsStarButton.setText(news.getStars() + "");
+
+
+            // refactor this two code, this is heavy in memory
             holder.container.setOnClickListener(new View.OnClickListener() {
                 @Override
                 public void onClick(View view) {
+
 
                     Intent intent = new Intent(view.getContext(), NewsActivity.class);
                     view.getContext().startActivity(intent);
                 }
             });
+
+            holder.newsStarButton.setOnClickListener(new StarButtonAction(userData.getInt("USER_ID"), news));
+        }
+    }
+
+    private class UserNewsWrapper{
+
+        private int userId;
+        private News news;
+        private Bundle extraData;
+
+
+        public UserNewsWrapper(int userId, News news, Bundle extraData){
+
+            this.userId = userId;
+            this.news = news;
+            this.extraData = extraData;
+        }
+
+        public void setExtraData(Bundle extraData){
+            this.extraData = extraData;
+        }
+
+        public Bundle getExtraData() {
+            return extraData;
+        }
+    }
+
+    //handle when star button is clicked
+    private class StarButtonAction implements View.OnClickListener{
+
+        private UserNewsWrapper wrapper;
+
+        public StarButtonAction(int userId, News news){
+
+            this.wrapper = new UserNewsWrapper(userId, news, null);
+        }
+
+        @Override
+        public void onClick(View view) {
+            StarredNewsAsync starredNewsAsync = new StarredNewsAsync(AuthenticationAddress.STAR_NEWS, NewsFeedManager.this.activity);
+            starredNewsAsync.execute(wrapper);
         }
     }
 
@@ -124,6 +182,8 @@ public class NewsFeedManager extends RecyclerView.Adapter<NewsFeedManager.ViewHo
     }
 
     private void addEntries(String data) throws JSONException{
+
+        Log.e("News data", data);
 
         JSONArray dataList = new JSONArray(data);
         int temp = feedList.size();
@@ -187,6 +247,7 @@ public class NewsFeedManager extends RecyclerView.Adapter<NewsFeedManager.ViewHo
                 super.getUrlConnection().connect();
 
                 String response = super.getRequest();
+
                 return  response;
 
             }catch (IOException e){
@@ -412,6 +473,77 @@ public class NewsFeedManager extends RecyclerView.Adapter<NewsFeedManager.ViewHo
         protected void onPostExecute(String s) {
 
             Log.e("Request", s);
+        }
+    }
+
+    private class StarredNewsAsync extends RemoteDbConn<UserNewsWrapper, Void, UserNewsWrapper>{
+
+        public StarredNewsAsync(String urlAddress, Activity activity){
+            super(urlAddress, activity);
+        }
+
+        @Override
+        protected UserNewsWrapper doInBackground(UserNewsWrapper... wrappers) {
+
+            try{
+
+                super.setUpConnection();
+                Uri.Builder queryBuilder = super.getQueryBuilder();
+
+                if(wrappers[0].news.isStarred()){
+                    queryBuilder.appendQueryParameter("action", "remove")
+                            .appendQueryParameter("news", wrappers[0].news.getId() + "")
+                            .appendQueryParameter("user", wrappers[0].userId + "");
+                }else{
+                    queryBuilder.appendQueryParameter("action", "add")
+                            .appendQueryParameter("news", wrappers[0].news.getId() + "")
+                            .appendQueryParameter("user", wrappers[0].userId + "");
+                }
+
+                String query = queryBuilder.build().getEncodedQuery();
+
+                super.setRequest(query);
+                super.getUrlConnection().connect();
+
+                String response = super.getRequest();
+
+                Bundle extraData = new Bundle();
+                extraData.putString("response", response);
+                wrappers[0].setExtraData(extraData);
+
+                return wrappers[0];
+            }catch(IOException e){
+                e.printStackTrace();
+
+                return null;
+            }
+        }
+
+        @Override
+        protected void onPostExecute(UserNewsWrapper wrapper) {
+
+            if(wrapper == null){
+                Log.e("NewsFeedManager", "StarredNewsAsync - wrapper is null");
+                return;
+            }
+
+            String response = wrapper.getExtraData().getString("response");
+
+            if(response != null){
+
+                try{
+
+                    JSONObject json = new JSONObject(response);
+
+
+                }catch (JSONException e){
+                    e.printStackTrace();
+                }
+            }
+
+
+
+
         }
     }
 

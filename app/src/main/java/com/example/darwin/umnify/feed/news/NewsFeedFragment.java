@@ -19,10 +19,14 @@ public class NewsFeedFragment extends Fragment{
     private SwipeRefreshLayout swipeRefreshLayout;
     private NewsFeedManager manager;
 
+    private Bundle userData;
+
     @Override
     public void onCreate(Bundle savedInstanceState){
 
         super.onCreate(savedInstanceState);
+        userData = super.getArguments();
+
     }
 
     @Override
@@ -33,7 +37,7 @@ public class NewsFeedFragment extends Fragment{
         swipeRefreshLayout = (SwipeRefreshLayout) view.findViewById(R.id.swipe_refresher_layout);
         recyclerView = (RecyclerView) view.findViewById(R.id.recycler_view);
 
-        manager = new NewsFeedManager(getActivity(), swipeRefreshLayout, recyclerView);
+        manager = new NewsFeedManager(this.getActivity(), swipeRefreshLayout, recyclerView, userData);
 
         recyclerView.setAdapter(manager);
         recyclerView.setHasFixedSize(true);

@@ -20,8 +20,10 @@ public class NewsHelper {
         String authorFirstname = data.getString("firstname");
         String authorLastname = data.getString("lastname");
         String authorImageFile = data.getString("author_image");
+        int stars = data.getInt("stars");
+        boolean isStarred = data.getBoolean("starred");
 
-        News news = new News(id, content, imageFile, authorId, publishedDate, signature,
+        News news = new News(id, content, imageFile, authorId, publishedDate, signature, stars, isStarred,
                 index, authorFirstname, authorLastname, authorImageFile);
 
         return news;

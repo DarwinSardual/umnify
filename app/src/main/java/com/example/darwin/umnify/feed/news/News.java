@@ -15,14 +15,15 @@ public class News {
     private String authorFirstname;
     private String authorLastname;
     private String authorImageFile;
+    private int stars;
+    private boolean isStarred;
 
     private Bitmap authorImage;
 
     private int index;
 
 
-
-    public News(int id, String content, String imageFile, int authorId, String publishedDate, int signature,
+    public News(int id, String content, String imageFile, int authorId, String publishedDate, int signature, int stars, boolean isStarred,
                 int index, String authorFirstname, String authorLastname,  String authorImageFile){
 
         this.id = id;
@@ -31,12 +32,22 @@ public class News {
         this.authorId = authorId;
         this.publishedDate = publishedDate;
         this.signature = signature;
+        this.stars = stars;
+        this.isStarred = isStarred;
 
         this.index = index;
         this.authorFirstname = authorFirstname;
         this.authorLastname = authorLastname;
         this.authorImageFile = authorImageFile;
 
+    }
+
+    public int getStars() {
+        return stars;
+    }
+
+    public boolean isStarred() {
+        return isStarred;
     }
 
     public void setImage(Bitmap image) {

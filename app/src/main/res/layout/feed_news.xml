@@ -79,6 +79,24 @@
 
     </RelativeLayout>
 
+    <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="horizontal">
+
+        <Button android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:id="@+id/news_stars"
+                android:layout_weight="0.5"
+        android:text="Starred"/>
+
+        <Button android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:id="@+id/news_comment"
+                android:layout_weight="0.5"
+        android:text="Comment"/>
+    </LinearLayout>
+
 </LinearLayout>
 
 

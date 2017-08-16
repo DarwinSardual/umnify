@@ -6,6 +6,7 @@ import android.database.sqlite.SQLiteDatabase;
 import android.net.Uri;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
+import android.util.Log;
 import com.example.darwin.umnify.R;
 import com.example.darwin.umnify.async.RemoteDbConn;
 import com.example.darwin.umnify.authentication.AuthenticationAddress;
