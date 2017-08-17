@@ -26,7 +26,7 @@ import javax.net.ssl.SSLContext;
 import javax.net.ssl.SSLSession;
 import javax.net.ssl.TrustManagerFactory;
 
-public abstract class RemoteDbConn <Parameters, Progess, Result> extends AsyncTask <Parameters, Progess, Result>{
+public class WebServiceConnection{
 
     private String urlAddress;
     private final int READ_TIMEOUT = 10000;
@@ -48,7 +48,7 @@ public abstract class RemoteDbConn <Parameters, Progess, Result> extends AsyncTa
 
     SSLContext context;
 
-    public RemoteDbConn(String urlAddress, Activity activity){
+    public WebServiceConnection(String urlAddress, Activity activity){
 
         this.activity = activity;
         this.urlAddress = urlAddress;
