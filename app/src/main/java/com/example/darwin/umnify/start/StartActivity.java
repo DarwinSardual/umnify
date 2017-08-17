@@ -34,11 +34,11 @@ public class StartActivity extends AppCompatActivity {
         setContentView(R.layout.activity_start);
 
         //initialize needed directory
-
         File directory = this.getDir("umnify", Context.MODE_PRIVATE);
         if(!directory.exists())
             directory.mkdirs();
 
+        //handle start
         databaseConnection = UMnifyDbHelper.getInstance(this);
         handleUserCheck();
 
@@ -58,16 +58,12 @@ public class StartActivity extends AppCompatActivity {
 
         Cursor cursor = databaseConnectionRead.query(
                 UMnifyContract.UMnifyColumns.User.TABLE_NAME.toString(),
-                projection,
-                null,
-                null,
-                null,
-                null,
-                null);
+                projection, null, null, null, null, null);
 
         if(cursor.getCount() == 1){
             //check if the stored credentials is valid
             //get user credentials
+
             int id = 0;
             int type = 0;
             String password = null;
@@ -112,6 +108,7 @@ public class StartActivity extends AppCompatActivity {
 
                 // response, id, type, password
                 HashMap<String, String> response = new HashMap<>();
+
                 response.put("request", super.getRequest());
                 response.put("id", strings[0]);
                 response.put("type", strings[1]);
@@ -127,7 +124,6 @@ public class StartActivity extends AppCompatActivity {
 
         @Override
         protected void onPostExecute(HashMap<String, String> response) {
-            //super.onPostExecute(s);
             Intent intent;
 
             try{

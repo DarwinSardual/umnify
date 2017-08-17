@@ -24,7 +24,7 @@ class NewsImageAsync extends RemoteDbConn<NewsWrapper, Void, NewsWrapper> {
     protected NewsWrapper doInBackground(NewsWrapper... wrapper) {
 
         try{
-            super.setUpConnection();
+            super.setUpConnection(true, true, false);
             super.getUrlConnection().connect();
             InputStream imageStream;
             Bitmap image;
@@ -38,7 +38,7 @@ class NewsImageAsync extends RemoteDbConn<NewsWrapper, Void, NewsWrapper> {
             if(wrapper[0].news.getImageFile() != null){
 
                 super.resetUrl(AuthenticationAddress.NEWS_IMAGE_FOLDER + "/" + wrapper[0].news.getImageFile());
-                super.setUpConnection();
+                super.setUpConnection(true, true, false);
                 super.getUrlConnection().connect();
 
                 imageStream = getUrlConnection().getInputStream();

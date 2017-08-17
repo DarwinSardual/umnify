@@ -117,15 +117,12 @@ class LoginActivityController {
 
                 if(code == AuthenticationCodes.USER_AUTHENTICATED){
 
-
                     JSONObject user = new JSONObject(json.getString("user"));
                     JSONObject person = new JSONObject(json.getString("person"));
 
                     //store database credentials here
-
                     UMnifyDbHelper databaseConnection = UMnifyDbHelper.getInstance(LoginActivityController.this.activity);
                     SQLiteDatabase databaseConnectionWrite = databaseConnection.getWritableDatabase();
-
 
                     // insert person data here
                     ContentValues values = new ContentValues();

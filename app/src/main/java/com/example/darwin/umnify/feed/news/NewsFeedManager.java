@@ -32,6 +32,8 @@ import com.example.darwin.umnify.async.RemoteDbConn;
 import com.example.darwin.umnify.authentication.AuthenticationAddress;
 import com.example.darwin.umnify.authentication.AuthenticationCodes;
 import com.example.darwin.umnify.authentication.AuthenticationKeys;
+import com.example.darwin.umnify.feed.DataActionWrapper;
+
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -83,6 +85,14 @@ public class NewsFeedManager extends RecyclerView.Adapter<NewsFeedManager.ViewHo
         newsHandler = new NewsFeedAsync(AuthenticationAddress.FETCH_NEWS);
         isFetching = true;
         newsHandler.execute("desc", feedList.size() + "", "5", "-1");
+
+        HashMap<String, String> fetchNewsDataStartup = new HashMap<>();
+        fetchNewsDataStartup.put("order", "desc");
+        fetchNewsDataStartup.put("offset", "0");
+        fetchNewsDataStartup.put("limit", "5");
+        fetchNewsDataStartup.put("id", "-1");
+
+        
 
     }
 
@@ -140,8 +150,6 @@ public class NewsFeedManager extends RecyclerView.Adapter<NewsFeedManager.ViewHo
             holder.container.setOnClickListener(new View.OnClickListener() {
                 @Override
                 public void onClick(View view) {
-
-
                     Intent intent = new Intent(view.getContext(), NewsActivity.class);
                     view.getContext().startActivity(intent);
                 }
@@ -151,62 +159,12 @@ public class NewsFeedManager extends RecyclerView.Adapter<NewsFeedManager.ViewHo
         }
     }
 
-    private class StarredNewsWrapper{
-
-        private int userId;
-        private News news;
-        private Bundle extraData;
-        private View source;
-
-
-        public StarredNewsWrapper(int userId, News news, View source, Bundle extraData){
-
-            this.userId = userId;
-            this.news = news;
-            this.extraData = extraData;
-            this.source = source;
-        }
-
-        public void setExtraData(Bundle extraData){
-            this.extraData = extraData;
-        }
-
-        public Bundle getExtraData() {
-            return extraData;
-        }
-
-        public void setSource(View source) {
-            this.source = source;
-        }
-
-        public View getSource() {
-            return source;
-        }
-    }
-
-    //handle when star button is clicked
-    private class StarButtonAction implements View.OnClickListener{
-
-        private StarredNewsWrapper wrapper;
-
-        public StarButtonAction(int userId, News news){
-
-            this.wrapper = new StarredNewsWrapper(userId, news, null, null);
-        }
-
-        @Override
-        public void onClick(View view) {
-
-            wrapper.setSource(view);
-            StarredNewsAsync starredNewsAsync = new StarredNewsAsync(AuthenticationAddress.STAR_NEWS, NewsFeedManager.this.activity);
-            starredNewsAsync.execute(wrapper);
-        }
-    }
-
     @Override
     public int getItemCount() {
         return feedList.size();
     }
+
+    /* handle fetching of news here */
 
     private void addEntries(String data) throws JSONException{
 
@@ -236,6 +194,8 @@ public class NewsFeedManager extends RecyclerView.Adapter<NewsFeedManager.ViewHo
             isFetching = true;
             newsHandler.execute("desc", feedList.size() + "", "3", "-1");
 
+
+
         }else if(direction == -1){
 
             feedList.clear();
@@ -244,6 +204,23 @@ public class NewsFeedManager extends RecyclerView.Adapter<NewsFeedManager.ViewHo
             newsHandler = new NewsFeedAsync(AuthenticationAddress.FETCH_NEWS);
             isFetching = true;
             newsHandler.execute("desc", 0 + "", "5", "-1");
+
+        }
+    }
+
+    private class FetchNewsDataActionWrapper extends DataActionWrapper{
+
+        public FetchNewsDataActionWrapper(HashMap<String, String> textData,
+                                          HashMap<String, byte[]> fileData,
+                                          boolean doInput, boolean doOuput,
+                                          boolean isUseCaches){
+
+            super(textData, fileData, doInput, doOuput, isUseCaches);
+        }
+
+        @Override
+        public void onResultAction() {
+
         }
     }
 
@@ -263,7 +240,7 @@ public class NewsFeedManager extends RecyclerView.Adapter<NewsFeedManager.ViewHo
 
             try{
 
-                super.setUpConnection();
+                super.setUpConnection(true, true, false);
                 Uri.Builder queryBuilder = super.getQueryBuilder();
                 queryBuilder.appendQueryParameter("order", strings[0])
                         .appendQueryParameter("offset", strings[1])
@@ -298,6 +275,8 @@ public class NewsFeedManager extends RecyclerView.Adapter<NewsFeedManager.ViewHo
             }
         }
     }
+
+    /* end handling fetching of news */
 
     /* Handle adding of news here */
 
@@ -387,17 +366,15 @@ public class NewsFeedManager extends RecyclerView.Adapter<NewsFeedManager.ViewHo
 
             try{
 
-                setUpConnection();
+                setUpConnection(true, true, false);
                 //edit this when switching to https
                 HttpURLConnection urlConnection = super.getUrlConnection();
 
                 if(wrapper[0].getImageFile() != null){
 
-                    urlConnection.setUseCaches(false);
                     urlConnection.setRequestProperty("Connection", "Keep-Alive");
                     urlConnection.setRequestProperty("Cache-Control", "no-cache");
-                    urlConnection.setRequestProperty(
-                            "Content-Type", "multipart/form-data;boundary=" + NewsFeedManager.this.boundary);
+                    urlConnection.setRequestProperty("Content-Type", "multipart/form-data;boundary=" + NewsFeedManager.this.boundary);
 
                     OutputStream out = urlConnection.getOutputStream();
                     DataOutputStream outputStream = new DataOutputStream(out);
@@ -503,6 +480,62 @@ public class NewsFeedManager extends RecyclerView.Adapter<NewsFeedManager.ViewHo
         }
     }
 
+    /* End handling adding of news */
+
+    /*Start handling star button actions */
+
+    private class StarredNewsWrapper{
+
+        private int userId;
+        private News news;
+        private Bundle extraData;
+        private View source;
+
+
+        public StarredNewsWrapper(int userId, News news, View source, Bundle extraData){
+
+            this.userId = userId;
+            this.news = news;
+            this.extraData = extraData;
+            this.source = source;
+        }
+
+        public void setExtraData(Bundle extraData){
+            this.extraData = extraData;
+        }
+
+        public Bundle getExtraData() {
+            return extraData;
+        }
+
+        public void setSource(View source) {
+            this.source = source;
+        }
+
+        public View getSource() {
+            return source;
+        }
+    }
+
+    //handle when star button is clicked
+    private class StarButtonAction implements View.OnClickListener{
+
+        private StarredNewsWrapper wrapper;
+
+        public StarButtonAction(int userId, News news){
+
+            this.wrapper = new StarredNewsWrapper(userId, news, null, null);
+        }
+
+        @Override
+        public void onClick(View view) {
+
+            wrapper.setSource(view);
+            StarredNewsAsync starredNewsAsync = new StarredNewsAsync(AuthenticationAddress.STAR_NEWS, NewsFeedManager.this.activity);
+            starredNewsAsync.execute(wrapper);
+        }
+    }
+
     private class StarredNewsAsync extends RemoteDbConn<StarredNewsWrapper, Void, StarredNewsWrapper>{
 
         public StarredNewsAsync(String urlAddress, Activity activity){
@@ -514,7 +547,7 @@ public class NewsFeedManager extends RecyclerView.Adapter<NewsFeedManager.ViewHo
 
             try{
 
-                super.setUpConnection();
+                super.setUpConnection(true, true, false);
                 Uri.Builder queryBuilder = super.getQueryBuilder();
 
                 if(wrappers[0].news.isStarred()){
@@ -545,12 +578,10 @@ public class NewsFeedManager extends RecyclerView.Adapter<NewsFeedManager.ViewHo
 
                 return null;
             }
-
         }
 
         @Override
         protected void onPostExecute(StarredNewsWrapper wrapper) {
-
 
             if(wrapper == null){
                 Log.e("NewsFeedManager", "StarredNewsAsync - wrapper is null");
@@ -589,19 +620,14 @@ public class NewsFeedManager extends RecyclerView.Adapter<NewsFeedManager.ViewHo
                                 view.setText(wrapper.news.getStars() + " have starred this");
                             }
                         }
-
-
                     }
 
                 }catch (JSONException e){
                     e.printStackTrace();
                 }
             }
-
-
-
-
         }
     }
 
+    /* End handling of star button */
 }

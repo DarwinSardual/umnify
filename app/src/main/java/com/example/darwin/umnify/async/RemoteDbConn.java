@@ -37,7 +37,14 @@ public abstract class RemoteDbConn <Parameters, Progess, Result> extends AsyncTa
     private HttpURLConnection urlConnection;
     private Uri.Builder builder;
 
+    private String crlf = "\r\n";
+    private String twoHyphens = "--";
+    private String boundary = "*****";
+
     private Activity activity;
+    private OutputStream outputStream;
+    private InputStream inputStream;
+    DataOutputStream dataOutputStream;
 
     SSLContext context;
 
@@ -96,7 +103,7 @@ public abstract class RemoteDbConn <Parameters, Progess, Result> extends AsyncTa
         }
     }
 
-    protected final void setUpConnection() throws IOException{
+    protected final void setUpConnection(boolean doInput, boolean doOuput, boolean useCaches) throws IOException{
 
         url = new URL(urlAddress);
         //urlConnection = (HttpsURLConnection) url.openConnection();
@@ -114,21 +121,81 @@ public abstract class RemoteDbConn <Parameters, Progess, Result> extends AsyncTa
         urlConnection.setConnectTimeout(CONNECT_TIMEOUT);
         urlConnection.setRequestMethod(REQUEST_METHOD);
 
-        urlConnection.setDoInput(true);
-        urlConnection.setDoOutput(true);
+        if(doInput){
+            inputStream = urlConnection.getInputStream();
+        }
 
+        if(doOuput){
+            outputStream = urlConnection.getOutputStream();
+            dataOutputStream = new DataOutputStream(outputStream);
+        }
+
+
+        urlConnection.setDoInput(doInput);
+        urlConnection.setDoOutput(doOuput);
+        urlConnection.setUseCaches(useCaches);
     }
 
     protected final void setRequest(String query) throws IOException{
 
-        OutputStream stream = urlConnection.getOutputStream();
+        outputStream = urlConnection.getOutputStream();
         BufferedWriter writer = new BufferedWriter(
-                new OutputStreamWriter(stream, "UTF-8"));
+                new OutputStreamWriter(outputStream, "UTF-8"));
 
         writer.write(query);
         writer.flush();
         writer.close();
-        stream.close();
+        outputStream.close();
+    }
+
+    public void addFileUpload(String name, String filename, byte[] byteArray) throws IOException{
+
+        if(outputStream == null){
+            Log.e("addFileUpload", "output stream is null");
+            return;
+        }
+
+        urlConnection.setRequestProperty("Connection", "Keep-Alive");
+        urlConnection.setRequestProperty("Cache-Control", "no-cache");
+        urlConnection.setRequestProperty("Content-Type", "multipart/form-data;boundary=" + boundary);
+
+        outputStream = urlConnection.getOutputStream();
+       dataOutputStream = new DataOutputStream(outputStream);
+
+        dataOutputStream.writeBytes(twoHyphens +boundary + crlf);
+        dataOutputStream.writeBytes("Content-Disposition: form-data; name=\"" + name + "\";filename=\"" + filename + "\"" + crlf);
+        dataOutputStream.writeBytes(crlf);
+
+        dataOutputStream.write(byteArray);
+
+        dataOutputStream.writeBytes(crlf);
+        dataOutputStream.writeBytes(twoHyphens + boundary + twoHyphens + crlf);
+    }
+
+    public void addTextUpload(String name, String value) throws IOException{
+
+        if(outputStream == null){
+            Log.e("addTextUpload", "output stream is null");
+            return;
+        }
+
+        dataOutputStream.writeBytes(twoHyphens+ boundary + crlf);
+        dataOutputStream.writeBytes("Content-Disposition: form-data; name=\""+name+"\";" + crlf);
+        dataOutputStream.writeBytes("Content-Type: text/plain; charset=UTF-8" + crlf);
+        dataOutputStream.writeBytes(crlf + value + crlf);
+    }
+
+    public void flushOutputStream() throws IOException{
+
+        if(dataOutputStream == null){
+            Log.e("flushOuputStream", "output stream is null");
+            return;
+        }
+
+        dataOutputStream.flush();
+        dataOutputStream.close();
+        outputStream.close();
+
     }
 
     protected final void resetUrl(String urlAddress){
