@@ -2,8 +2,8 @@ package com.example.darwin.umnify.authentication;
 
 public final class AuthenticationAddress {
 
-    public static final String DOMAIN_NAME = "http://192.168.137.1";
-    //public static final String DOMAIN_NAME = "http://192.168.0.105/~darwin";
+    //public static final String DOMAIN_NAME = "http://192.168.137.1";
+    public static final String DOMAIN_NAME = "http://192.168.0.105/~darwin";
     public static final String ROOT_FOLDER = "/UMnifyMobileScripts";
 
     public static final String ROOT_LOGIN = "/login";
@@ -20,4 +20,6 @@ public final class AuthenticationAddress {
     public static final String ADD_BLOG = DOMAIN_NAME + ROOT_FOLDER +  ROOT_FEED + "/blog/add_blog.php";
     public static final String FETCH_BLOGS = DOMAIN_NAME + ROOT_FOLDER + ROOT_FEED + "/blog/fetch_blogs.php";
     public static final String BLOG_IMAGE_FOLDER = DOMAIN_NAME + ROOT_FOLDER + "/uploads/images/feed/blog";
+
+    public static final String AVATAR_IMAGE_FOLDER = DOMAIN_NAME + ROOT_FOLDER + "/uploads/images/avatar";
 }

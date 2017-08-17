@@ -62,6 +62,10 @@ public class News {
         isStarred = b;
     }
 
+    public void setStars(int stars) {
+        this.stars = stars;
+    }
+
     public int getIndex() {
         return index;
     }

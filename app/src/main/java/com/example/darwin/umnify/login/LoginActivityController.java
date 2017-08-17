@@ -132,12 +132,14 @@ class LoginActivityController {
                     values.put(UMnifyContract.UMnifyColumns.Person.ID.toString(), user.getInt("id"));
                     values.put(UMnifyContract.UMnifyColumns.Person.FIRSTNAME.toString(), person.getString("firstname"));
                     values.put(UMnifyContract.UMnifyColumns.Person.MIDDLENAME.toString(), person.getString("middlename"));
+                    values.put(UMnifyContract.UMnifyColumns.Person.LASTNAME.toString(), person.getString("lastname"));
                     values.put(UMnifyContract.UMnifyColumns.Person.NAME_EXT.toString(), person.getString("name_ext"));
                     values.put(UMnifyContract.UMnifyColumns.Person.BIRTHDATE.toString(), person.getString("birthdate"));
                     values.put(UMnifyContract.UMnifyColumns.Person.GENDER.toString(), person.getString("gender"));
                     values.put(UMnifyContract.UMnifyColumns.Person.ADDRESS.toString(), person.getString("address"));
                     values.put(UMnifyContract.UMnifyColumns.Person.CONTACT.toString(), person.getString("contact"));
                     values.put(UMnifyContract.UMnifyColumns.Person.IMAGE.toString(), person.getString("image"));
+                    values.put(UMnifyContract.UMnifyColumns.Person.EMAIL.toString(), person.getString("email"));
 
                     long person_id  = databaseConnectionWrite.insert(
                             UMnifyContract.UMnifyColumns.Person.TABLE_NAME.toString(),
@@ -159,11 +161,16 @@ class LoginActivityController {
 
                     Intent intent = new Intent(LoginActivityController.this.activity, HomeActivity.class);
                     intent.putExtra("USER_ID", user.getInt("id"));
-                    intent.putExtra("USER_ID", user.getInt("type"));
-                    intent.putExtra("USER_ID", user.getString("password"));
+                    intent.putExtra("USER_TYPE", user.getInt("type"));
+                    intent.putExtra("USER_PASSWORD", user.getString("password"));
+                    intent.putExtra("USER_FIRSTNAME", person.getString("firstname"));
+                    intent.putExtra("USER_LASTNAME", person.getString("lastname"));
+                    intent.putExtra("USER_EMAIL", person.getString("email"));
                     intent.putExtra("USER_IMAGE_FILE", person.getString("image"));
+
                     LoginActivityController.this.activity.startActivity(intent);
                     LoginActivityController.this.activity.finish();
+
                 }else if(code == AuthenticationCodes.INVALID_USER_ID_PASSWORD){
 
                     Snackbar.make(source, "User not authenticated!",

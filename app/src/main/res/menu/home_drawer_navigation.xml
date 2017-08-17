@@ -25,6 +25,7 @@
         <item
                 android:icon="@drawable/logout_icon"
                 android:tint="@color/button_grey"
+                android:id="@+id/navigation_logout"
                 android:title="Log out" />
     </group>
 

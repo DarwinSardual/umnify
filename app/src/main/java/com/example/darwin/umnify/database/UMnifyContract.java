@@ -20,7 +20,8 @@ public final class UMnifyContract {
             GENDER("gender"),
             ADDRESS("address"),
             CONTACT("contact"),
-            IMAGE("image");
+            IMAGE("image"),
+            EMAIL("email");
 
             private String str;
 

@@ -1,5 +1,6 @@
 package com.example.darwin.umnify.start;
 
+import android.content.Context;
 import android.content.Intent;
 import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
@@ -19,6 +20,7 @@ import com.example.darwin.umnify.login.LoginActivity;
 import org.json.JSONException;
 import org.json.JSONObject;
 
+import java.io.File;
 import java.io.IOException;
 import java.util.HashMap;
 
@@ -30,6 +32,12 @@ public class StartActivity extends AppCompatActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_start);
+
+        //initialize needed directory
+
+        File directory = this.getDir("umnify", Context.MODE_PRIVATE);
+        if(!directory.exists())
+            directory.mkdirs();
 
         databaseConnection = UMnifyDbHelper.getInstance(this);
         handleUserCheck();
@@ -94,7 +102,6 @@ public class StartActivity extends AppCompatActivity {
         protected HashMap<String, String> doInBackground(String... strings) {
 
             try{
-
                 setUpConnection();
                 Uri.Builder queryBuilder = super.getQueryBuilder();
                 queryBuilder.appendQueryParameter(AuthenticationKeys.USER_ID_KEY, strings[0])
@@ -113,10 +120,9 @@ public class StartActivity extends AppCompatActivity {
                 return response;
 
             }catch (IOException e){
-
+                e.printStackTrace();
+                return null;
             }
-
-            return null;
         }
 
         @Override
@@ -130,10 +136,16 @@ public class StartActivity extends AppCompatActivity {
 
                 if(code == AuthenticationCodes.USER_AUTHENTICATED){
 
+                    JSONObject data = new JSONObject(json.getString("user"));
+
                     intent = new Intent(StartActivity.this, HomeActivity.class);
                     intent.putExtra("USER_ID", Integer.parseInt(response.get("id")));
                     intent.putExtra("USER_TYPE", Integer.parseInt(response.get("type")));
                     intent.putExtra("USER_PASSWORD", response.get("password"));
+                    intent.putExtra("USER_FIRSTNAME", data.getString("firstname"));
+                    intent.putExtra("USER_LASTNAME", data.getString("lastname"));
+                    intent.putExtra("USER_IMAGE_FILE", data.getString("image"));
+                    intent.putExtra("USER_EMAIL", data.getString("email"));
                     startActivity(intent);
 
                 }else if(code == AuthenticationCodes.INVALID_USER_ID_PASSWORD){

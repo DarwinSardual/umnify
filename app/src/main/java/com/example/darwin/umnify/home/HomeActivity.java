@@ -4,6 +4,8 @@ import android.app.Activity;
 import android.content.Context;
 import android.content.Intent;
 import android.graphics.Bitmap;
+import android.graphics.BitmapFactory;
+import android.net.Uri;
 import android.os.Handler;
 import android.support.annotation.NonNull;
 import android.support.design.widget.FloatingActionButton;
@@ -22,10 +24,15 @@ import android.support.v7.widget.Toolbar;
 import android.util.Log;
 import android.view.MenuItem;
 import android.view.View;
+import android.widget.ImageView;
+import android.widget.TextView;
 import android.widget.Toast;
 import com.example.darwin.umnify.R;
 import com.example.darwin.umnify.async.RemoteDbConn;
+import com.example.darwin.umnify.authentication.AuthenticationAddress;
 import com.example.darwin.umnify.calendar.CalendarActivity;
+import com.example.darwin.umnify.database.UMnifyContract;
+import com.example.darwin.umnify.database.UMnifyDbHelper;
 import com.example.darwin.umnify.feed.blogs.AddBlogActivity;
 import com.example.darwin.umnify.feed.blogs.BlogFeedFragment;
 import com.example.darwin.umnify.feed.news.AddNewsActivity;
@@ -33,8 +40,13 @@ import com.example.darwin.umnify.feed.news.NewsFeedFragment;
 import com.example.darwin.umnify.feed.notifications.NotificationsFeedFragment;
 import com.example.darwin.umnify.groups.GroupsActivity;
 import com.example.darwin.umnify.preferences.PreferencesActivity;
+import com.example.darwin.umnify.start.StartActivity;
 import org.json.JSONObject;
+import org.w3c.dom.Text;
 
+import java.io.File;
+import java.io.IOException;
+import java.io.InputStream;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -52,6 +64,10 @@ public class HomeActivity extends AppCompatActivity {
     private int USER_ID;
     private int USER_TYPE;
     private String USER_PASSWORD;
+    private String USER_FIRSTNAME;
+    private String USER_LASTNAME;
+    private String USER_EMAIL;
+    private String USER_IMAGE_FILE;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -64,9 +80,19 @@ public class HomeActivity extends AppCompatActivity {
         USER_ID = extra.getInt("USER_ID");
         USER_TYPE = extra.getInt("USER_TYPE");
         USER_PASSWORD = extra.getString("USER_PASSWORD");
+        USER_FIRSTNAME = extra.getString("USER_FIRSTNAME");
+        USER_LASTNAME = extra.getString("USER_LASTNAME");
+        USER_EMAIL = extra.getString("USER_EMAIL");
+        USER_IMAGE_FILE = extra.getString("USER_IMAGE_FILE");
 
         HomeActivityLayout homeActivityLayout = new HomeActivityLayout(HomeActivity.this);
         drawerLayout = homeActivityLayout.getDrawerLayout();
+
+        UserNavigationWrapper wrapper = new UserNavigationWrapper(USER_FIRSTNAME, USER_LASTNAME, USER_EMAIL,
+                homeActivityLayout.getUserIconView(), homeActivityLayout.getUserNameView(), homeActivityLayout.getUserEmailView());
+
+        AuthorImageAysnc authorImageAysnc = new AuthorImageAysnc(AuthenticationAddress.AVATAR_IMAGE_FOLDER + "/" + USER_IMAGE_FILE, this);
+        authorImageAysnc.execute(wrapper);
     }
 
     @Override
@@ -91,6 +117,11 @@ public class HomeActivity extends AppCompatActivity {
         private AppCompatActivity activity;
         private DrawerLayout drawerLayout;
         private NavigationView navigationView;
+
+        private ImageView userIconView;
+        private TextView userNameView;
+        private TextView userEmailView;
+        private View headerLayout;
 
         public HomeActivityLayout(AppCompatActivity activity){
             this.activity = activity;
@@ -191,6 +222,11 @@ public class HomeActivity extends AppCompatActivity {
         private void setUpNavigationView(){
 
             navigationView = (NavigationView) activity.findViewById(R.id.home_navigation_view);
+            headerLayout = navigationView.getHeaderView(0);
+
+            userIconView = (ImageView) headerLayout.findViewById(R.id.drawer_navigation_user_image);
+            userNameView = (TextView) headerLayout.findViewById(R.id.drawer_navigation_name);
+            userEmailView = (TextView) headerLayout.findViewById(R.id.drawer_navigation_email);
 
             navigationView.setNavigationItemSelectedListener(new NavigationView.OnNavigationItemSelectedListener() {
                 @Override
@@ -199,14 +235,24 @@ public class HomeActivity extends AppCompatActivity {
                     int id = item.getItemId();
                     Intent intent = null;
 
-                    if(id == R.id.navigation_groups)
+                    if(id == R.id.navigation_groups){
                         intent = new Intent(activity, GroupsActivity.class);
-                    else if (id == R.id.navigation_calendar)
+                        startActivity(intent);
+                    }else if (id == R.id.navigation_calendar) {
                         intent = new Intent(activity, CalendarActivity.class);
-                    //else if (id == R.id.navigation_preferences)
-                      //  intent = new Intent(activity, PreferencesActivity.class);
+                        startActivity(intent);
+                    }else if(id == R.id.navigation_logout){
+                        //erase all the folders
+                        File directory = activity.getDir("umnify", Context.MODE_PRIVATE);
+                        HomeActivity.this.deleteDirectoryRecursive(directory);
+                        //delete the database
+                        UMnifyDbHelper.getInstance(HomeActivity.this).close();
+                        HomeActivity.this.deleteDatabase(UMnifyDbHelper.DATABASE_NAME);
 
-                    startActivity(intent);
+                        HomeActivity.this.finish();
+                        intent = new Intent(HomeActivity.this, StartActivity.class);
+                        startActivity(intent);
+                    }
 
                     drawerLayout.closeDrawers();
 
@@ -223,6 +269,26 @@ public class HomeActivity extends AppCompatActivity {
             return drawerLayout;
         }
 
+        public ImageView getUserIconView() {
+            return userIconView;
+        }
+
+        public TextView getUserNameView() {
+            return userNameView;
+        }
+
+        public TextView getUserEmailView() {
+            return userEmailView;
+        }
+    }
+
+    private void deleteDirectoryRecursive(File directory){
+        if (directory.isDirectory()) {
+            for (File child : directory.listFiles()) {
+                deleteDirectoryRecursive(child);
+            }
+        }
+        directory.delete();
     }
 
     private class Adapter extends FragmentPagerAdapter {
@@ -336,15 +402,70 @@ public class HomeActivity extends AppCompatActivity {
         }
     }
 
-    private class AuthorImageAysnc extends RemoteDbConn<String, Void, Bitmap>{
+    private class UserNavigationWrapper{
+
+        private Bitmap image;
+        private String firstname;
+        private String lastname;
+        private String email;
+
+        private ImageView userImageView;
+        private TextView userNameView;
+        private TextView userEmailView;
+
+        public UserNavigationWrapper(String firstname, String lastname, String email,
+                ImageView userImageView, TextView userNameView, TextView userEmailView){
+
+            this.firstname = firstname;
+            this.lastname = lastname;
+            this.email = email;
+            this.userImageView = userImageView;
+            this.userNameView = userNameView;
+            this.userEmailView = userEmailView;
+        }
+
+
+    }
+
+    private class AuthorImageAysnc extends RemoteDbConn<UserNavigationWrapper, Void, UserNavigationWrapper>{
 
         public AuthorImageAysnc(String urlAddress, Activity activity){
             super(urlAddress, activity);
         }
 
         @Override
-        protected Bitmap doInBackground(String... strings) {
-            return null;
+        protected UserNavigationWrapper doInBackground(UserNavigationWrapper... wrappers) {
+
+            try{
+
+                super.setUpConnection();
+
+                super.getUrlConnection().connect();
+                InputStream imageStream;
+                Bitmap image;
+
+                imageStream = super.getUrlConnection().getInputStream();
+                image = BitmapFactory.decodeStream(imageStream);
+
+                wrappers[0].image = image;
+
+                return wrappers[0];
+            }catch (IOException e){
+
+                e.printStackTrace();
+                return null;
+            }
+        }
+
+        @Override
+        protected void onPostExecute(UserNavigationWrapper wrapper) {
+
+            if(wrapper.image != null){
+                wrapper.userImageView.setImageBitmap(wrapper.image);
+            }
+
+            wrapper.userNameView.setText(wrapper.firstname + " " + wrapper.lastname);
+            wrapper.userEmailView.setText(wrapper.email);
         }
     }
 }

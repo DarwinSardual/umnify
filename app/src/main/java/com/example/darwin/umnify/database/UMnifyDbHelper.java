@@ -21,7 +21,8 @@ public class UMnifyDbHelper extends SQLiteOpenHelper{
                 UMnifyContract.UMnifyColumns.Person.GENDER.toString() + " TEXT," +
                 UMnifyContract.UMnifyColumns.Person.ADDRESS.toString() + " TEXT," +
                 UMnifyContract.UMnifyColumns.Person.CONTACT.toString() + " TEXT," +
-                UMnifyContract.UMnifyColumns.Person.IMAGE.toString() + " TEXT);";
+                UMnifyContract.UMnifyColumns.Person.IMAGE.toString() + " TEXT," +
+                UMnifyContract.UMnifyColumns.Person.EMAIL.toString() + " TEXT);";
 
     private static final String CREATE_TABLE_USER =
             "CREATE TABLE " + UMnifyContract.UMnifyColumns.User.TABLE_NAME.toString() + "(" +

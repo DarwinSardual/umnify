@@ -7,11 +7,13 @@ import android.database.Cursor;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.graphics.Color;
+import android.graphics.drawable.Drawable;
 import android.net.Uri;
 import android.os.AsyncTask;
 import android.os.Bundle;
 import android.provider.MediaStore;
 import android.provider.OpenableColumns;
+import android.support.v4.content.ContextCompat;
 import android.support.v4.widget.SwipeRefreshLayout;
 import android.support.v7.widget.CardView;
 import android.util.Log;
@@ -19,6 +21,7 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.Button;
+import android.widget.ImageButton;
 import android.widget.ImageView;
 import android.widget.TextView;
 
@@ -32,6 +35,7 @@ import com.example.darwin.umnify.authentication.AuthenticationKeys;
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
+import org.w3c.dom.Text;
 
 import java.io.*;
 import java.net.HttpURLConnection;
@@ -59,6 +63,9 @@ public class NewsFeedManager extends RecyclerView.Adapter<NewsFeedManager.ViewHo
     private String twoHyphens = "--";
     private String boundary = "*****";
 
+    private Drawable emptyStar;
+    private Drawable filledStar;
+
 
     public NewsFeedManager(Activity activity, SwipeRefreshLayout swipeRefreshLayout, RecyclerView recyclerView, Bundle userData) {
 
@@ -67,6 +74,9 @@ public class NewsFeedManager extends RecyclerView.Adapter<NewsFeedManager.ViewHo
         this.userData = userData;
         this.recyclerView = recyclerView;
         this.userData = userData;
+
+        filledStar = ContextCompat.getDrawable(NewsFeedManager.this.activity, R.drawable.filled_star);
+        emptyStar = ContextCompat.getDrawable(NewsFeedManager.this.activity, R.drawable.empty_star);
 
         feedList = new ArrayList<>();
 
@@ -82,18 +92,21 @@ public class NewsFeedManager extends RecyclerView.Adapter<NewsFeedManager.ViewHo
         private ImageView newsImageView;
         private TextView newsAuthorView;
         private ImageView newsAuthorImageView;
-        private Button newsStarButton;
+        private ImageButton newsStarButton;
         private CardView container;
+        private TextView newsStarsCountView;
 
         private ViewHolder(LayoutInflater inflater, ViewGroup parent) {
             super(inflater.inflate(R.layout.feed_news, parent, false));
 
             container = (CardView) itemView.findViewById(R.id.news_card_container);
             newsContentView = (TextView) itemView.findViewById(R.id.news_content);
+            newsStarsCountView = (TextView) itemView.findViewById(R.id.news_stars_count);
             newsAuthorView = (TextView) itemView.findViewById(R.id.news_author);
             newsImageView = (ImageView) itemView.findViewById(R.id.news_image);
             newsAuthorImageView = (ImageView) itemView.findViewById(R.id.author_image);
-            newsStarButton = (Button) itemView.findViewById(R.id.news_stars);
+            newsStarButton = (ImageButton) itemView.findViewById(R.id.news_stars);
+            newsStarButton.setTag(newsStarsCountView);
         }
     }
 
@@ -115,11 +128,12 @@ public class NewsFeedManager extends RecyclerView.Adapter<NewsFeedManager.ViewHo
             holder.newsImageView.setImageBitmap(news.getImage());
 
             if(news.isStarred()){
-                holder.newsStarButton.setTextColor(Color.YELLOW);
+                //holder.newsStarButton.setTextColor(Color.YELLOW);
+                holder.newsStarButton.setImageDrawable(filledStar);
             }else{
-                holder.newsStarButton.setTextColor(Color.BLACK);
+                holder.newsStarButton.setImageDrawable(emptyStar);
             }
-            holder.newsStarButton.setText(news.getStars() + "");
+            holder.newsStarsCountView.setText(news.getStars() + " have starred this");
 
 
             // refactor this two code, this is heavy in memory
@@ -555,16 +569,25 @@ public class NewsFeedManager extends RecyclerView.Adapter<NewsFeedManager.ViewHo
                     if(code == AuthenticationCodes.AUTHENTICATED && transaction == AuthenticationCodes.TRANSACTION_SUCCESS){
                         JSONObject data = new JSONObject(json.getString("data"));
 
-                        Button source = (Button)wrapper.source;
+                        ImageButton source = (ImageButton)wrapper.source;
 
                         if(data.getString("action").equalsIgnoreCase("add")){
                             wrapper.news.setIsStarred(true);
-                            source.setTextColor(Color.YELLOW);
-                            source.setText(data.getInt("count") + "");
+                            wrapper.news.setStars(data.getInt("count"));
+                            source.setImageDrawable(filledStar);
+                            if(wrapper.news.isStarred()){
+                                TextView view = (TextView) source.getTag();
+                                view.setText("You and " + wrapper.news.getStars() + " have starred this");
+                            }
+
                         }else if(data.getString("action").equalsIgnoreCase("remove")){
                             wrapper.news.setIsStarred(false);
-                            source.setTextColor(Color.BLACK);
-                            source.setText(data.getInt("count") + "");
+                            source.setImageDrawable(emptyStar);
+
+                            if(!wrapper.news.isStarred()){
+                                TextView view = (TextView) source.getTag();
+                                view.setText(wrapper.news.getStars() + " have starred this");
+                            }
                         }
 
 

@@ -8,16 +8,16 @@
                                     android:layout_gravity="center"
                                     android:layout_marginTop="12dp"
                                     android:layout_marginBottom="12dp"
-                                    android:layout_marginLeft="10dp"
-                                    android:layout_marginRight="10dp"
-
                                     android:foreground="?attr/selectableItemBackground"
                                     android:elevation="4dp">
 <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:orientation="vertical"
-        android:padding="12dp">
+        android:paddingTop="12dp"
+        android:paddingLeft="12dp"
+        android:paddingRight="12dp"
+android:paddingBottom="5dp">
 
     <!-- Place the author here-->
 
@@ -37,8 +37,8 @@
         <de.hdodenhof.circleimageview.CircleImageView
                 xmlns:app="http://schemas.android.com/apk/res-auto"
                 android:id="@+id/author_image"
-                android:layout_width="50dp"
-                android:layout_height="50dp"
+                android:layout_width="40dp"
+                android:layout_height="40dp"
                 app:civ_border_width="1dp"
                 app:civ_border_color="#8E8989"/>
 
@@ -56,9 +56,11 @@
 
 
     <!-- Place the content here-->
-    <RelativeLayout
+    <LinearLayout
             android:layout_width="match_parent"
-            android:layout_height="wrap_content">
+            android:layout_height="wrap_content"
+            android:orientation="vertical"
+            android:padding="3dp">
 
         <TextView
                 android:id="@+id/news_content"
@@ -76,26 +78,40 @@
                 android:layout_height="wrap_content"
             android:layout_marginTop="5dp"
                 android:scaleType="centerCrop"
-                android:layout_below="@+id/news_content"/>
+                />
 
-    </RelativeLayout>
+        <TextView android:layout_width="wrap_content"
+                  android:layout_height="wrap_content"
+                  android:id="@+id/news_stars_count"
+        />
+
+    </LinearLayout>
 
     <LinearLayout
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:orientation="horizontal">
+            android:orientation="horizontal"
+            android:gravity="center_vertical"
+            android:background="@drawable/top_border_newsfeed"
+            android:padding="2dp">
 
-        <Button android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:id="@+id/news_stars"
-                android:layout_weight="0.5"
-        android:text="Starred"/>
+        <ImageButton android:layout_width="match_parent"
+                     android:layout_height="30dp"
+                     android:id="@+id/news_stars"
+                     android:scaleType="fitCenter"
+                     android:layout_weight="0.5"
+                     android:background="@drawable/button_newsfeed_click"
 
-        <Button android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:id="@+id/news_comment"
-                android:layout_weight="0.5"
-        android:text="Comment"/>
+        />
+
+        <ImageButton android:layout_width="match_parent"
+                     android:layout_height="30dp"
+                     android:scaleType="fitCenter"
+                     android:id="@+id/news_comment"
+                     android:layout_weight="0.5"
+                     android:src="@drawable/comment"
+                     android:background="@drawable/button_newsfeed_click"
+                />
     </LinearLayout>
 
 </LinearLayout>
