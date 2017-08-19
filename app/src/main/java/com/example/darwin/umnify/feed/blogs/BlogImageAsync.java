@@ -5,11 +5,15 @@ import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.util.Log;
 
-import com.example.darwin.umnify.async.RemoteDbConn;
+//import com.example.darwin.umnify.connection.RemoteDbConn;
 import java.io.IOException;
 import java.io.InputStream;
 
-public class BlogImageAsync extends RemoteDbConn <BlogTileWrapper, Void, BlogTileWrapper>{
+public class BlogImageAsync{
+
+}
+
+/*public class BlogImageAsync extends RemoteDbConn <BlogTileWrapper, Void, BlogTileWrapper>{
 
     public BlogImageAsync(String urlAddress, Activity activity){
         super(urlAddress, activity);
@@ -43,4 +47,4 @@ public class BlogImageAsync extends RemoteDbConn <BlogTileWrapper, Void, BlogTil
     protected void onPostExecute(BlogTileWrapper wrapper) {
         wrapper.manager.notifyItemChanged(wrapper.tile.getIndex());
     }
-}
+}*/

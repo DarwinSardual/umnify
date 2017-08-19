@@ -25,8 +25,8 @@ public class BlogHelper {
 
 
 
-        BlogTileWrapper wrapper = new BlogTileWrapper(tile, manager);
-        BlogImageAsync blogImageAsync = new BlogImageAsync(AuthenticationAddress.BLOG_IMAGE_FOLDER + "/" + wrapper.tile.getImageFile(), activity);
-        blogImageAsync.execute(wrapper);
+       // BlogTileWrapper wrapper = new BlogTileWrapper(tile, manager);
+        //BlogImageAsync blogImageAsync = new BlogImageAsync(AuthenticationAddress.BLOG_IMAGE_FOLDER + "/" + wrapper.tile.getImageFile(), activity);
+        //blogImageAsync.execute(wrapper);
     }
 }

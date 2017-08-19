@@ -3,13 +3,17 @@ package com.example.darwin.umnify.feed.news;
 import android.app.Activity;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
-import com.example.darwin.umnify.async.RemoteDbConn;
+//import com.example.darwin.umnify.connection.RemoteDbConn;
 import com.example.darwin.umnify.authentication.AuthenticationAddress;
 
 import java.io.IOException;
 import java.io.InputStream;
 
-class NewsImageAsync extends RemoteDbConn<NewsWrapper, Void, NewsWrapper> {
+public class NewsImageAsync{
+
+}
+
+/*class NewsImageAsync extends RemoteDbConn<NewsWrapper, Void, NewsWrapper> {
 
     public NewsImageAsync(String urlAddress, Activity activity){
         super(urlAddress, activity);
@@ -57,4 +61,4 @@ class NewsImageAsync extends RemoteDbConn<NewsWrapper, Void, NewsWrapper> {
 
         wrapper.manager.notifyItemChanged(wrapper.news.getIndex());
     }
-}
+}*/

@@ -1,15 +1,12 @@
 package com.example.darwin.umnify.feed.news;
 
 import android.app.Activity;
-import android.content.Context;
 import android.content.Intent;
 import android.database.Cursor;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
-import android.graphics.Color;
 import android.graphics.drawable.Drawable;
 import android.net.Uri;
-import android.os.AsyncTask;
 import android.os.Bundle;
 import android.provider.MediaStore;
 import android.provider.OpenableColumns;
@@ -20,28 +17,19 @@ import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
-import android.widget.Button;
 import android.widget.ImageButton;
 import android.widget.ImageView;
 import android.widget.TextView;
 
 import android.support.v7.widget.RecyclerView;
-
-import com.example.darwin.umnify.R;
-import com.example.darwin.umnify.async.RemoteDbConn;
-import com.example.darwin.umnify.authentication.AuthenticationAddress;
-import com.example.darwin.umnify.authentication.AuthenticationCodes;
-import com.example.darwin.umnify.authentication.AuthenticationKeys;
-import com.example.darwin.umnify.feed.DataActionWrapper;
-
+import com.example.darwin.umnify.R;;
+import com.example.darwin.umnify.async.WebServiceAsync;
+import com.example.darwin.umnify.feed.news.data_action_wrapper.*;
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
-import org.w3c.dom.Text;
 
 import java.io.*;
-import java.net.HttpURLConnection;
-import java.net.URL;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -49,59 +37,48 @@ import java.util.List;
 public class NewsFeedManager extends RecyclerView.Adapter<NewsFeedManager.ViewHolder> {
 
     private SwipeRefreshLayout swipeRefreshLayout;
-    private RecyclerView recyclerView;
 
-    private final int MAX_FEED_SIZE = 50;
-
-    private List<News> feedList;
-    private NewsFeedAsync newsHandler;
+    private List<News> feedList;;
+    public HashMap<News, ViewHolder> newsViewHolderMap;
 
     private Activity activity;
     private Bundle userData;
 
-    private boolean isFetching = false;
+    public boolean isFetching = false;
 
-    private String crlf = "\r\n";
-    private String twoHyphens = "--";
-    private String boundary = "*****";
-
-    private Drawable emptyStar;
-    private Drawable filledStar;
-
+    public Drawable emptyStar;
+    public Drawable filledStar;
 
     public NewsFeedManager(Activity activity, SwipeRefreshLayout swipeRefreshLayout, RecyclerView recyclerView, Bundle userData) {
 
         this.activity = activity;
         this.swipeRefreshLayout = swipeRefreshLayout;
         this.userData = userData;
-        this.recyclerView = recyclerView;
         this.userData = userData;
+        newsViewHolderMap = new HashMap<>();
 
         filledStar = ContextCompat.getDrawable(NewsFeedManager.this.activity, R.drawable.filled_star);
         emptyStar = ContextCompat.getDrawable(NewsFeedManager.this.activity, R.drawable.empty_star);
 
         feedList = new ArrayList<>();
 
-        newsHandler = new NewsFeedAsync(AuthenticationAddress.FETCH_NEWS);
-        isFetching = true;
-        newsHandler.execute("desc", feedList.size() + "", "5", "-1");
+        HashMap<String, String> fetchNewsDataParams = new HashMap<>();
+        fetchNewsDataParams.put("order", "desc");
+        fetchNewsDataParams.put("offset", feedList.size() + "");
+        fetchNewsDataParams.put("limit", "5");
+        fetchNewsDataParams.put("id", "-1");
 
-        HashMap<String, String> fetchNewsDataStartup = new HashMap<>();
-        fetchNewsDataStartup.put("order", "desc");
-        fetchNewsDataStartup.put("offset", "0");
-        fetchNewsDataStartup.put("limit", "5");
-        fetchNewsDataStartup.put("id", "-1");
-
-        
-
+        WebServiceAsync asyncFetchNews = new WebServiceAsync();
+        FetchNewsDataActionWrapper fetchNewsWrapper = new FetchNewsDataActionWrapper(fetchNewsDataParams, activity, this);
+        asyncFetchNews.execute(fetchNewsWrapper);
     }
 
     public final class ViewHolder extends RecyclerView.ViewHolder {
 
         private TextView newsContentView;
-        private ImageView newsImageView;
+        public ImageView newsImageView;
         private TextView newsAuthorView;
-        private ImageView newsAuthorImageView;
+        public ImageView newsAuthorImageView;
         private ImageButton newsStarButton;
         private CardView container;
         private TextView newsStarsCountView;
@@ -116,6 +93,7 @@ public class NewsFeedManager extends RecyclerView.Adapter<NewsFeedManager.ViewHo
             newsImageView = (ImageView) itemView.findViewById(R.id.news_image);
             newsAuthorImageView = (ImageView) itemView.findViewById(R.id.author_image);
             newsStarButton = (ImageButton) itemView.findViewById(R.id.news_stars);
+
             newsStarButton.setTag(newsStarsCountView);
         }
     }
@@ -155,7 +133,14 @@ public class NewsFeedManager extends RecyclerView.Adapter<NewsFeedManager.ViewHo
                 }
             });
 
-            holder.newsStarButton.setOnClickListener(new StarButtonAction(userData.getInt("USER_ID"), news));
+            HashMap<String, String> textData = new HashMap<>();
+            textData.put("user", userData.getInt("USER_ID") + "");
+            holder.newsStarButton.setOnClickListener(new StarButtonAction(textData, news));
+
+            HashMap<String, String> starTextData = new HashMap<>();
+            starTextData.put("id", userData.getInt("USER_ID") + "");
+
+            newsViewHolderMap.put(news, holder);
         }
     }
 
@@ -164,11 +149,10 @@ public class NewsFeedManager extends RecyclerView.Adapter<NewsFeedManager.ViewHo
         return feedList.size();
     }
 
-    /* handle fetching of news here */
+    public void addEntries(String data) throws JSONException{
 
-    private void addEntries(String data) throws JSONException{
-
-        Log.e("News data", data);
+        FetchAuthorImageDataActionWrapper fetchAuthorImageDataActionWrapper;
+        FetchNewsImageDataActionWrapper fetchNewsImageDataActionWrapper;
 
         JSONArray dataList = new JSONArray(data);
         int temp = feedList.size();
@@ -177,10 +161,17 @@ public class NewsFeedManager extends RecyclerView.Adapter<NewsFeedManager.ViewHo
 
             JSONObject newsData = new JSONObject(dataList.getString(i));
             News news = NewsHelper.createNewsFromJSON(newsData, feedList.size());
-            NewsHelper.fetchImage(news, this, activity);
+            fetchAuthorImageDataActionWrapper = new FetchAuthorImageDataActionWrapper( news, activity, this);
+            fetchNewsImageDataActionWrapper = new FetchNewsImageDataActionWrapper(news, activity, this);
             feedList.add(news);
+            notifyItemInserted(news.getIndex());
+
+            WebServiceAsync asyncFetchAuthorImage = new WebServiceAsync();
+            asyncFetchAuthorImage.execute(fetchAuthorImageDataActionWrapper);
+            WebServiceAsync asyncFetchNewsImage = new WebServiceAsync();
+            asyncFetchNewsImage.execute(fetchNewsImageDataActionWrapper);
         }
-        notifyItemRangeInserted(temp, dataList.length());
+
         swipeRefreshLayout.setRefreshing(false);
     }
 
@@ -188,103 +179,41 @@ public class NewsFeedManager extends RecyclerView.Adapter<NewsFeedManager.ViewHo
 
         if(isFetching) return;
 
+        WebServiceAsync asyncFetchNews = new WebServiceAsync();
+
         if(direction == 1){
 
-            newsHandler = new NewsFeedAsync(AuthenticationAddress.FETCH_NEWS);
-            isFetching = true;
-            newsHandler.execute("desc", feedList.size() + "", "3", "-1");
+            HashMap<String, String> fetchNewsDataParamsUpdate = new HashMap<>();
+            fetchNewsDataParamsUpdate.put("order", "desc");
+            fetchNewsDataParamsUpdate.put("offset", feedList.size() + "");
+            fetchNewsDataParamsUpdate.put("limit", "3");
+            fetchNewsDataParamsUpdate.put("id", "-1");
 
-
+            FetchNewsDataActionWrapper fetchNewsWrapper = new FetchNewsDataActionWrapper(fetchNewsDataParamsUpdate, activity, this);
+            asyncFetchNews.execute(fetchNewsWrapper);
 
         }else if(direction == -1){
-
             feedList.clear();
             notifyDataSetChanged();
 
-            newsHandler = new NewsFeedAsync(AuthenticationAddress.FETCH_NEWS);
-            isFetching = true;
-            newsHandler.execute("desc", 0 + "", "5", "-1");
+            HashMap<String, String> fetchNewsDataParams = new HashMap<>();
+            fetchNewsDataParams.put("order", "desc");
+            fetchNewsDataParams.put("offset", feedList.size() + "");
+            fetchNewsDataParams.put("limit", "5");
+            fetchNewsDataParams.put("id", "-1");
 
+            FetchNewsDataActionWrapper fetchNewsWrapper = new FetchNewsDataActionWrapper(fetchNewsDataParams, activity, this);
+            asyncFetchNews.execute(fetchNewsWrapper);
         }
     }
-
-    private class FetchNewsDataActionWrapper extends DataActionWrapper{
-
-        public FetchNewsDataActionWrapper(HashMap<String, String> textData,
-                                          HashMap<String, byte[]> fileData,
-                                          boolean doInput, boolean doOuput,
-                                          boolean isUseCaches){
-
-            super(textData, fileData, doInput, doOuput, isUseCaches);
-        }
-
-        @Override
-        public void onResultAction() {
-
-        }
-    }
-
-    private class NewsFeedAsync extends RemoteDbConn<String, Void, String>{
-
-        public NewsFeedAsync(String urlAddress){
-            super(urlAddress, NewsFeedManager.this.activity);
-        }
-
-        @Override
-        protected void onPreExecute() {
-            super.onPreExecute();
-        }
-
-        @Override
-        protected String doInBackground(String... strings) {
-
-            try{
-
-                super.setUpConnection(true, true, false);
-                Uri.Builder queryBuilder = super.getQueryBuilder();
-                queryBuilder.appendQueryParameter("order", strings[0])
-                        .appendQueryParameter("offset", strings[1])
-                        .appendQueryParameter("limit", strings[2])
-                        .appendQueryParameter("id", strings[3]);
-
-                super.setRequest(queryBuilder.build().getEncodedQuery());
-                super.getUrlConnection().connect();
-
-                String response = super.getRequest();
-
-                return  response;
-
-            }catch (IOException e){
-                e.printStackTrace();
-            }
-            return null;
-        }
-
-        @Override
-        protected void onPostExecute(String response) {
-
-            try {
-                JSONObject str = new JSONObject(response);
-
-                String data = str.getString("data");
-
-                addEntries(data);
-                isFetching = false;
-            }catch (Exception e){
-                e.printStackTrace();
-            }
-        }
-    }
-
-    /* end handling fetching of news */
-
-    /* Handle adding of news here */
-
     public void addNews(Intent data, Bundle userData){
 
         Uri uri = data.getData();
         Cursor returnCursor;
-        DataWrapper newsWrapper = null;
+
+        HashMap<String, String> textData = new HashMap<>();
+        HashMap<String, byte[]> fileData = new HashMap<>();
+
 
         if(uri != null){
 
@@ -298,336 +227,58 @@ public class NewsFeedManager extends RecyclerView.Adapter<NewsFeedManager.ViewHo
 
             String imageFile = returnCursor.getString(nameIndex);
             Bitmap image = null;
+            byte[] byteArray = null;
 
             try{
                 image = MediaStore.Images.Media.getBitmap(activity.getContentResolver(), uri);
+                ByteArrayOutputStream stream = new ByteArrayOutputStream();
+                image.compress(Bitmap.CompressFormat.JPEG, 100, stream);
+                byteArray = stream.toByteArray();
             }catch (IOException e){
                 e.printStackTrace();
             }
 
-             newsWrapper = new DataWrapper(data.getStringExtra("ADD_NEWS_CONTENT"),
-                    imageFile, userData.getInt("USER_ID"), userData.getInt("USER_TYPE"), image);
+            textData.put("content", data.getStringExtra("ADD_NEWS_CONTENT"));
+            textData.put("author", userData.getInt("USER_ID") +"");
+            textData.put("user_type", userData.getInt("USER_TYPE") +"");
+
+            fileData.put(imageFile, byteArray);
 
         }else{
-            newsWrapper = new DataWrapper(data.getStringExtra("ADD_NEWS_CONTENT"),
-                    null, userData.getInt("USER_ID"), userData.getInt("USER_TYPE"), null);
+            textData.put("content", data.getStringExtra("ADD_NEWS_CONTENT"));
+            textData.put("author", userData.getInt("USER_ID") +"");
+            textData.put("user_type", userData.getInt("USER_TYPE") +"");
         }
 
-        AddNewsAsync addNewsAsync = new AddNewsAsync(AuthenticationAddress.ADD_NEWS, activity);
-        addNewsAsync.execute(newsWrapper);
+        AddNewsDataActionWrapper addNewsDataActionWrapper = new AddNewsDataActionWrapper(textData,
+                fileData, activity);
+
+        WebServiceAsync asyncAddNews = new WebServiceAsync();
+        asyncAddNews.execute(addNewsDataActionWrapper);
 
     }
 
-    private class DataWrapper{
-
-        private String content;
-        private Bitmap image;
-        private int authorId;
-        private String imageFile;
-        private int userType;
-
-        public DataWrapper(String content, String imageFile, int authorId, int userType, Bitmap image){
-            this.content = content;
-            this.image = image;
-            this.authorId = authorId;
-            this.imageFile = imageFile;
-            this.userType = userType;
-        }
-
-        public String getContent() {
-            return content;
-        }
-
-        public int getAuthorId() {
-            return authorId;
-        }
-
-        public Bitmap getImage() {
-            return image;
-        }
-
-        public String getImageFile() {
-            return imageFile;
-        }
-
-        public int getUserType() {
-            return userType;
-        }
-    }
-
-    private class AddNewsAsync extends RemoteDbConn<DataWrapper, Void, String>{
-
-        public AddNewsAsync(String urlAddress, Activity activity){
-            super(urlAddress, activity);
-        }
-
-        @Override
-        protected String doInBackground(DataWrapper... wrapper) {
-
-            try{
-
-                setUpConnection(true, true, false);
-                //edit this when switching to https
-                HttpURLConnection urlConnection = super.getUrlConnection();
-
-                if(wrapper[0].getImageFile() != null){
-
-                    urlConnection.setRequestProperty("Connection", "Keep-Alive");
-                    urlConnection.setRequestProperty("Cache-Control", "no-cache");
-                    urlConnection.setRequestProperty("Content-Type", "multipart/form-data;boundary=" + NewsFeedManager.this.boundary);
-
-                    OutputStream out = urlConnection.getOutputStream();
-                    DataOutputStream outputStream = new DataOutputStream(out);
-
-                    // start writing the iamge to buffer
-                    outputStream.writeBytes(NewsFeedManager.this.twoHyphens + NewsFeedManager.this.boundary + NewsFeedManager.this.crlf);
-                    outputStream.writeBytes("Content-Disposition: form-data; name=\"" +
-                            "image" + "\";filename=\"" +
-                            wrapper[0].getImageFile() + "\"" + NewsFeedManager.this.crlf);
-                    outputStream.writeBytes(NewsFeedManager.this.crlf);
-
-                    ByteArrayOutputStream stream = new ByteArrayOutputStream();
-                    wrapper[0].getImage().compress(Bitmap.CompressFormat.JPEG, 100, stream);
-                    byte[] byteArray = stream.toByteArray();
-
-                    outputStream.write(byteArray);
-
-                    outputStream.writeBytes(NewsFeedManager.this.crlf);
-                    outputStream.writeBytes(NewsFeedManager.this.twoHyphens + NewsFeedManager.this.boundary +
-                            NewsFeedManager.this.twoHyphens + NewsFeedManager.this.crlf);
-
-                    // end writing the image
-
-                    // authentication
-
-                    outputStream.writeBytes(twoHyphens+ boundary + crlf);
-                    outputStream.writeBytes("Content-Disposition: form-data; name=\""+AuthenticationKeys.IDENTIFICATION_KEY+"\";" + crlf);
-                    outputStream.writeBytes("Content-Type: text/plain; charset=UTF-8" + crlf);
-                    outputStream.writeBytes(crlf + AuthenticationKeys.IDENTIFICATION_VALUE + crlf);
-                    //outputStream.writeBytes(crlf);
-
-                    outputStream.writeBytes(twoHyphens+ boundary + crlf);
-                    outputStream.writeBytes("Content-Disposition: form-data; name=\""+AuthenticationKeys.USERNAME_KEY+"\";" + crlf);
-                    outputStream.writeBytes("Content-Type: text/plain; charset=UTF-8" + crlf);
-                    outputStream.writeBytes(crlf + AuthenticationKeys.USERNAME_VALUE+ crlf);
-
-
-                    outputStream.writeBytes(twoHyphens+ boundary + crlf);
-                    outputStream.writeBytes("Content-Disposition: form-data; name=\""+AuthenticationKeys.PASSWORD_KEY+"\";" + crlf);
-                    outputStream.writeBytes("Content-Type: text/plain; charset=UTF-8" + crlf);
-                    outputStream.writeBytes(crlf + AuthenticationKeys.PASSWORD_VALUE+ crlf);
-                    // end authentication
-
-                    // text data
-
-                    outputStream.writeBytes(twoHyphens+ boundary + crlf);
-                    outputStream.writeBytes("Content-Disposition: form-data; name=\"content\";" + crlf);
-                    outputStream.writeBytes("Content-Type: text/plain; charset=UTF-8" + crlf);
-                    outputStream.writeBytes(crlf + wrapper[0].getContent() + crlf);
-                    //outputStream.writeBytes(crlf);
-
-                    outputStream.writeBytes(twoHyphens+ boundary + crlf);
-                    outputStream.writeBytes("Content-Disposition: form-data; name=\"image_file\";" + crlf);
-                    outputStream.writeBytes("Content-Type: text/plain; charset=UTF-8" + crlf);
-                    outputStream.writeBytes(crlf + wrapper[0].getImageFile() + crlf);
-
-                    outputStream.writeBytes(twoHyphens+ boundary + crlf);
-                    outputStream.writeBytes("Content-Disposition: form-data; name=\"user_type\";" + crlf);
-                    outputStream.writeBytes("Content-Type: text/plain; charset=UTF-8" + crlf);
-                    outputStream.writeBytes(crlf + wrapper[0].getUserType()  + crlf);
-
-                    outputStream.writeBytes(twoHyphens+ boundary + crlf);
-                    outputStream.writeBytes("Content-Disposition: form-data; name=\"author\";" + crlf);
-                    outputStream.writeBytes("Content-Type: text/plain; charset=UTF-8" + crlf);
-                    outputStream.writeBytes(crlf + wrapper[0].getAuthorId() + crlf);
-
-                    outputStream.flush();
-                    outputStream.close();
-                    out.close();
-
-
-
-                }else{
-                    Uri.Builder queryBuilder = getQueryBuilder();
-                    queryBuilder.appendQueryParameter("content", wrapper[0].getContent())
-                            .appendQueryParameter("image", wrapper[0].getImageFile())
-                            .appendQueryParameter("user_type", wrapper[0].getUserType() + "")
-                            .appendQueryParameter("author", wrapper[0].getAuthorId() + "");
-
-                    super.setRequest(getQueryBuilder().build().getEncodedQuery());
-                }
-
-
-                urlConnection.connect();
-                String response = getRequest();
-
-                //BufferedReader reader = new BufferedReader(new InputStreamReader(urlConnection.getInputStream()));
-                //return reader.readLine() + " " + reader.readLine();
-                return  response;
-
-            }catch (Exception e){
-                e.printStackTrace();
-            }
-
-
-            return null;
-        }
-
-        @Override
-        protected void onPostExecute(String s) {
-
-            Log.e("Request", s);
-        }
-    }
-
-    /* End handling adding of news */
-
-    /*Start handling star button actions */
-
-    private class StarredNewsWrapper{
-
-        private int userId;
-        private News news;
-        private Bundle extraData;
-        private View source;
-
-
-        public StarredNewsWrapper(int userId, News news, View source, Bundle extraData){
-
-            this.userId = userId;
-            this.news = news;
-            this.extraData = extraData;
-            this.source = source;
-        }
-
-        public void setExtraData(Bundle extraData){
-            this.extraData = extraData;
-        }
-
-        public Bundle getExtraData() {
-            return extraData;
-        }
-
-        public void setSource(View source) {
-            this.source = source;
-        }
-
-        public View getSource() {
-            return source;
-        }
-    }
-
-    //handle when star button is clicked
     private class StarButtonAction implements View.OnClickListener{
 
-        private StarredNewsWrapper wrapper;
+        private HashMap<String, String> textDataOutput;
+        private News news;
 
-        public StarButtonAction(int userId, News news){
 
-            this.wrapper = new StarredNewsWrapper(userId, news, null, null);
+        public StarButtonAction(HashMap<String, String> textDataOutput, News news){
+
+            this.textDataOutput = textDataOutput;
+            this.news = news;
         }
 
         @Override
         public void onClick(View view) {
 
-            wrapper.setSource(view);
-            StarredNewsAsync starredNewsAsync = new StarredNewsAsync(AuthenticationAddress.STAR_NEWS, NewsFeedManager.this.activity);
-            starredNewsAsync.execute(wrapper);
+            StarredNewsDataActionWrapper starredNewsDataActionWrapper  = new StarredNewsDataActionWrapper(textDataOutput, news,
+                    view, NewsFeedManager.this.activity, NewsFeedManager.this);
+
+            WebServiceAsync asyncStarredNews = new WebServiceAsync();
+            asyncStarredNews.execute(starredNewsDataActionWrapper);
+
         }
     }
-
-    private class StarredNewsAsync extends RemoteDbConn<StarredNewsWrapper, Void, StarredNewsWrapper>{
-
-        public StarredNewsAsync(String urlAddress, Activity activity){
-            super(urlAddress, activity);
-        }
-
-        @Override
-        protected StarredNewsWrapper doInBackground(StarredNewsWrapper... wrappers) {
-
-            try{
-
-                super.setUpConnection(true, true, false);
-                Uri.Builder queryBuilder = super.getQueryBuilder();
-
-                if(wrappers[0].news.isStarred()){
-                    queryBuilder.appendQueryParameter("action", "remove")
-                            .appendQueryParameter("news", wrappers[0].news.getId() + "")
-                            .appendQueryParameter("user", wrappers[0].userId + "");
-                }else{
-                    queryBuilder.appendQueryParameter("action", "add")
-                            .appendQueryParameter("news", wrappers[0].news.getId() + "")
-                            .appendQueryParameter("user", wrappers[0].userId + "");
-                }
-
-                String query = queryBuilder.build().getEncodedQuery();
-
-                super.setRequest(query);
-                super.getUrlConnection().connect();
-
-                String response = super.getRequest();
-                Log.e("Response", response);
-
-                Bundle extraData = new Bundle();
-                extraData.putString("response", response);
-                wrappers[0].setExtraData(extraData);
-
-                return wrappers[0];
-            }catch(IOException e){
-                e.printStackTrace();
-
-                return null;
-            }
-        }
-
-        @Override
-        protected void onPostExecute(StarredNewsWrapper wrapper) {
-
-            if(wrapper == null){
-                Log.e("NewsFeedManager", "StarredNewsAsync - wrapper is null");
-                return;
-            }
-
-            String response = wrapper.getExtraData().getString("response");
-            if(response != null){
-
-                try{
-
-                    JSONObject json = new JSONObject(response);
-                    int code = json.getInt("code");
-                    int transaction = json.getInt("transaction");
-
-                    if(code == AuthenticationCodes.AUTHENTICATED && transaction == AuthenticationCodes.TRANSACTION_SUCCESS){
-                        JSONObject data = new JSONObject(json.getString("data"));
-
-                        ImageButton source = (ImageButton)wrapper.source;
-
-                        if(data.getString("action").equalsIgnoreCase("add")){
-                            wrapper.news.setIsStarred(true);
-                            wrapper.news.setStars(data.getInt("count"));
-                            source.setImageDrawable(filledStar);
-                            if(wrapper.news.isStarred()){
-                                TextView view = (TextView) source.getTag();
-                                view.setText("You and " + wrapper.news.getStars() + " have starred this");
-                            }
-
-                        }else if(data.getString("action").equalsIgnoreCase("remove")){
-                            wrapper.news.setIsStarred(false);
-                            source.setImageDrawable(emptyStar);
-
-                            if(!wrapper.news.isStarred()){
-                                TextView view = (TextView) source.getTag();
-                                view.setText(wrapper.news.getStars() + " have starred this");
-                            }
-                        }
-                    }
-
-                }catch (JSONException e){
-                    e.printStackTrace();
-                }
-            }
-        }
-    }
-
-    /* End handling of star button */
 }

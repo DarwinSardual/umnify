@@ -13,7 +13,7 @@ import android.view.ViewGroup;
 
 import com.example.darwin.umnify.R;
 
-public class BlogFeedFragment extends Fragment{
+/*public class BlogFeedFragment extends Fragment{
 
     private RecyclerView recyclerView;
     private SwipeRefreshLayout swipeRefreshLayout;
@@ -68,4 +68,4 @@ public class BlogFeedFragment extends Fragment{
 
     }
 
-}
+}*/

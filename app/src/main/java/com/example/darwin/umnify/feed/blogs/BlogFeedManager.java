@@ -1,16 +1,13 @@
 package com.example.darwin.umnify.feed.blogs;
 
 import android.app.Activity;
-import android.content.Context;
 import android.content.Intent;
 import android.database.Cursor;
 import android.graphics.Bitmap;
 import android.net.Uri;
-import android.os.AsyncTask;
 import android.os.Bundle;
 import android.provider.MediaStore;
 import android.provider.OpenableColumns;
-import android.support.v4.widget.CursorAdapter;
 import android.support.v4.widget.SwipeRefreshLayout;
 import android.support.v7.widget.RecyclerView;
 import android.util.Log;
@@ -22,10 +19,9 @@ import android.widget.RelativeLayout;
 import android.widget.TextView;
 
 import com.example.darwin.umnify.R;
-import com.example.darwin.umnify.async.RemoteDbConn;
+//import com.example.darwin.umnify.connection.RemoteDbConn;
 import com.example.darwin.umnify.authentication.AuthenticationAddress;
 import com.example.darwin.umnify.authentication.AuthenticationKeys;
-import com.example.darwin.umnify.feed.news.NewsFeedManager;
 
 import org.json.JSONArray;
 import org.json.JSONException;
@@ -33,13 +29,14 @@ import org.json.JSONObject;
 
 import java.io.*;
 import java.net.HttpURLConnection;
-import java.net.URL;
 import java.util.ArrayList;
 import java.util.List;
 
-import javax.net.ssl.HttpsURLConnection;
+public class BlogFeedManager{
 
-public class BlogFeedManager extends RecyclerView.Adapter<BlogFeedManager.ViewHolder>{
+}
+
+/*public class BlogFeedManager extends RecyclerView.Adapter<BlogFeedManager.ViewHolder>{
 
     private SwipeRefreshLayout swipeRefreshLayout;
     private RecyclerView recyclerView;
@@ -419,4 +416,4 @@ public class BlogFeedManager extends RecyclerView.Adapter<BlogFeedManager.ViewHo
             Log.e("Response", s);
         }
     }
-}
+}*/

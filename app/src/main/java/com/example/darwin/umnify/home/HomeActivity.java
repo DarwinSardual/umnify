@@ -5,7 +5,6 @@ import android.content.Context;
 import android.content.Intent;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
-import android.net.Uri;
 import android.os.Handler;
 import android.support.annotation.NonNull;
 import android.support.design.widget.FloatingActionButton;
@@ -28,26 +27,25 @@ import android.widget.ImageView;
 import android.widget.TextView;
 import android.widget.Toast;
 import com.example.darwin.umnify.R;
-import com.example.darwin.umnify.async.RemoteDbConn;
+import com.example.darwin.umnify.async.WebServiceAsync;
 import com.example.darwin.umnify.authentication.AuthenticationAddress;
 import com.example.darwin.umnify.calendar.CalendarActivity;
-import com.example.darwin.umnify.database.UMnifyContract;
+import com.example.darwin.umnify.connection.WebServiceConnection;
 import com.example.darwin.umnify.database.UMnifyDbHelper;
 import com.example.darwin.umnify.feed.blogs.AddBlogActivity;
-import com.example.darwin.umnify.feed.blogs.BlogFeedFragment;
+//import com.example.darwin.umnify.feed.blogs.BlogFeedFragment;
 import com.example.darwin.umnify.feed.news.AddNewsActivity;
 import com.example.darwin.umnify.feed.news.NewsFeedFragment;
 import com.example.darwin.umnify.feed.notifications.NotificationsFeedFragment;
 import com.example.darwin.umnify.groups.GroupsActivity;
-import com.example.darwin.umnify.preferences.PreferencesActivity;
 import com.example.darwin.umnify.start.StartActivity;
-import org.json.JSONObject;
-import org.w3c.dom.Text;
+import com.example.darwin.umnify.wrapper.WebServiceAction;
 
 import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
 
 public class HomeActivity extends AppCompatActivity {
@@ -58,7 +56,7 @@ public class HomeActivity extends AppCompatActivity {
     private static final int ADD_BLOG_CODE = 2;
 
     private NewsFeedFragment newsFragment;
-    private BlogFeedFragment blogFragment;
+    //private BlogFeedFragment blogFragment;
     private NotificationsFeedFragment notificationsFragment;
 
     private int USER_ID;
@@ -68,6 +66,8 @@ public class HomeActivity extends AppCompatActivity {
     private String USER_LASTNAME;
     private String USER_EMAIL;
     private String USER_IMAGE_FILE;
+
+    private WebServiceAsync async;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -88,11 +88,18 @@ public class HomeActivity extends AppCompatActivity {
         HomeActivityLayout homeActivityLayout = new HomeActivityLayout(HomeActivity.this);
         drawerLayout = homeActivityLayout.getDrawerLayout();
 
-        UserNavigationWrapper wrapper = new UserNavigationWrapper(USER_FIRSTNAME, USER_LASTNAME, USER_EMAIL,
-                homeActivityLayout.getUserIconView(), homeActivityLayout.getUserNameView(), homeActivityLayout.getUserEmailView());
+        HashMap<String, String> textData = new HashMap<>();
+        textData.put("email", USER_EMAIL);
+        textData.put("name", USER_FIRSTNAME +" " + USER_LASTNAME);
 
-        AuthorImageAysnc authorImageAysnc = new AuthorImageAysnc(AuthenticationAddress.AVATAR_IMAGE_FOLDER + "/" + USER_IMAGE_FILE, this);
-        authorImageAysnc.execute(wrapper);
+
+
+        FetchUserImageDataActionWrapper fetchUserImageDataActionWrapper = new FetchUserImageDataActionWrapper(
+            textData, null, homeActivityLayout.getUserNameView(), homeActivityLayout.getUserEmailView(),
+                homeActivityLayout.getUserIconView());
+
+        async = new WebServiceAsync();
+        async.execute(fetchUserImageDataActionWrapper);
     }
 
     @Override
@@ -191,8 +198,8 @@ public class HomeActivity extends AppCompatActivity {
             newsFragment = new NewsFeedFragment();
             newsFragment.setArguments(args);
 
-            blogFragment = new BlogFeedFragment();
-            blogFragment.setArguments(args);
+            //blogFragment = new BlogFeedFragment();
+            //blogFragment.setArguments(args);
 
             notificationsFragment = new NotificationsFeedFragment();
             notificationsFragment.setArguments(args);
@@ -200,7 +207,7 @@ public class HomeActivity extends AppCompatActivity {
             Adapter adapter = new Adapter(getSupportFragmentManager());
 
             adapter.addFragment(newsFragment, "News Feed");
-            adapter.addFragment(blogFragment, "Blogs");
+            //adapter.addFragment(blogFragment, "Blogs");
             adapter.addFragment(notificationsFragment, "Updates");
 
             viewPager.setAdapter(adapter);
@@ -214,8 +221,8 @@ public class HomeActivity extends AppCompatActivity {
 
 
             tabLayout.getTabAt(0).setIcon(R.drawable.newsfeed_icon);
-            tabLayout.getTabAt(1).setIcon(R.drawable.blogfeed_icon);
-            tabLayout.getTabAt(2).setIcon(R.drawable.notificationsfeed_icon);
+            //tabLayout.getTabAt(1).setIcon(R.drawable.blogfeed_icon);
+            tabLayout.getTabAt(1).setIcon(R.drawable.notificationsfeed_icon);
             tabLayout.getTabAt(0).select();
         }
 
@@ -293,7 +300,8 @@ public class HomeActivity extends AppCompatActivity {
 
     private class Adapter extends FragmentPagerAdapter {
 
-        private final int size = 3;
+        private final int size = 2;
+        //private final int size = 3;
         private final List<Fragment> tabFragments = new ArrayList<Fragment>();
         private final List<String> tabFragmentTitles = new ArrayList<String>();
 
@@ -395,77 +403,61 @@ public class HomeActivity extends AppCompatActivity {
                 // add user data
                 // news fragment and trigger news manager to perform adding news
 
-                blogFragment.addBlog(data);
+                //blogFragment.addBlog(data);
             }else{
                 Log.e("There is a error", resultCode + "");
             }
         }
     }
 
-    private class UserNavigationWrapper{
+    private class FetchUserImageDataActionWrapper implements WebServiceAction{
 
-        private Bitmap image;
-        private String firstname;
-        private String lastname;
-        private String email;
+        private HashMap<String, String> textDataOutput;
+        private WebServiceConnection connection;
+
+        private InputStream inputStream;
 
         private ImageView userImageView;
         private TextView userNameView;
         private TextView userEmailView;
+        private Activity activity;
+        Bitmap image;
 
-        public UserNavigationWrapper(String firstname, String lastname, String email,
-                ImageView userImageView, TextView userNameView, TextView userEmailView){
+        public FetchUserImageDataActionWrapper(HashMap<String, String> textDataOutput,
+                                               Activity activity,
+                                               TextView userNameView, TextView userEmailView,
+                                               ImageView userImageView){
 
-            this.firstname = firstname;
-            this.lastname = lastname;
-            this.email = email;
-            this.userImageView = userImageView;
+            this.textDataOutput = textDataOutput;
+            this.connection = connection;
+            this.activity = activity;
             this.userNameView = userNameView;
             this.userEmailView = userEmailView;
-        }
-
-
-    }
-
-    private class AuthorImageAysnc extends RemoteDbConn<UserNavigationWrapper, Void, UserNavigationWrapper>{
-
-        public AuthorImageAysnc(String urlAddress, Activity activity){
-            super(urlAddress, activity);
+            this.userImageView = userImageView;
         }
 
         @Override
-        protected UserNavigationWrapper doInBackground(UserNavigationWrapper... wrappers) {
+        public void processRequest() {
 
-            try{
+            connection = new WebServiceConnection(AuthenticationAddress.AVATAR_IMAGE_FOLDER + "/" + USER_IMAGE_FILE,
+                    activity, true, true, false);
 
-                super.setUpConnection();
-
-                super.getUrlConnection().connect();
-                InputStream imageStream;
-                Bitmap image;
-
-                imageStream = super.getUrlConnection().getInputStream();
-                image = BitmapFactory.decodeStream(imageStream);
-
-                wrappers[0].image = image;
-
-                return wrappers[0];
-            }catch (IOException e){
-
-                e.printStackTrace();
-                return null;
-            }
+            inputStream = connection.getInputStream();
+            image = BitmapFactory.decodeStream(inputStream);
         }
 
         @Override
-        protected void onPostExecute(UserNavigationWrapper wrapper) {
+        public void processResult() {
 
-            if(wrapper.image != null){
-                wrapper.userImageView.setImageBitmap(wrapper.image);
+
+            if(image != null){
+                userImageView.setImageBitmap(image);
             }
 
-            wrapper.userNameView.setText(wrapper.firstname + " " + wrapper.lastname);
-            wrapper.userEmailView.setText(wrapper.email);
+            userNameView.setText(textDataOutput.get("name"));
+            userEmailView.setText(textDataOutput.get("email"));
+
+
         }
     }
 }

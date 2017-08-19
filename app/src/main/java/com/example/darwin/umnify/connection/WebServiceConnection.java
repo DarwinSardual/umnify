@@ -1,10 +1,8 @@
-package com.example.darwin.umnify.async;
+package com.example.darwin.umnify.connection;
 
 import android.app.Activity;
-import android.content.pm.ActivityInfo;
 import android.content.res.AssetManager;
 import android.net.Uri;
-import android.os.AsyncTask;
 import android.util.Log;
 import com.example.darwin.umnify.authentication.AuthenticationKeys;
 
@@ -18,12 +16,8 @@ import java.security.NoSuchAlgorithmException;
 import java.security.cert.Certificate;
 import java.security.cert.CertificateException;
 import java.security.cert.CertificateFactory;
-import java.security.cert.X509Certificate;
 
-import javax.net.ssl.HostnameVerifier;
-import javax.net.ssl.HttpsURLConnection;
 import javax.net.ssl.SSLContext;
-import javax.net.ssl.SSLSession;
 import javax.net.ssl.TrustManagerFactory;
 
 public class WebServiceConnection{
@@ -44,19 +38,42 @@ public class WebServiceConnection{
     private Activity activity;
     private OutputStream outputStream;
     private InputStream inputStream;
-    DataOutputStream dataOutputStream;
+    private DataOutputStream dataOutputStream;
 
     SSLContext context;
 
-    public WebServiceConnection(String urlAddress, Activity activity){
+    public WebServiceConnection(String urlAddress, Activity activity,
+                                boolean doInput, boolean doOuput, boolean useCaches){
 
         this.activity = activity;
         this.urlAddress = urlAddress;
+
         builder  = new Uri.Builder()
                 .appendQueryParameter(AuthenticationKeys.IDENTIFICATION_KEY, AuthenticationKeys.IDENTIFICATION_VALUE)
                 .appendQueryParameter(AuthenticationKeys.USERNAME_KEY, AuthenticationKeys.USERNAME_VALUE)
                 .appendQueryParameter(AuthenticationKeys.PASSWORD_KEY, AuthenticationKeys.PASSWORD_VALUE);
 
+        try{
+
+            url = new URL(urlAddress);
+            urlConnection = (HttpURLConnection) url.openConnection();
+            urlConnection.setRequestProperty("Connection", "Keep-Alive");
+            urlConnection.setRequestProperty("Cache-Control", "no-cache");
+            urlConnection.setRequestProperty("Content-Type", "multipart/form-data;boundary=" + boundary);
+            urlConnection.setReadTimeout(READ_TIMEOUT);
+            urlConnection.setConnectTimeout(CONNECT_TIMEOUT);
+            urlConnection.setRequestMethod(REQUEST_METHOD);
+
+            urlConnection.setDoInput(doInput);
+            urlConnection.setDoOutput(doOuput);
+            urlConnection.setUseCaches(useCaches);
+
+            outputStream = urlConnection.getOutputStream();
+            dataOutputStream = null;
+
+        }catch (IOException e){
+            e.printStackTrace();
+        }
         //trustCertificate();
     }
 
@@ -103,11 +120,11 @@ public class WebServiceConnection{
         }
     }
 
-    protected final void setUpConnection(boolean doInput, boolean doOuput, boolean useCaches) throws IOException{
+    private void setUpConnection(boolean doInput, boolean doOuput, boolean useCaches) throws IOException{
 
-        url = new URL(urlAddress);
+
         //urlConnection = (HttpsURLConnection) url.openConnection();
-        urlConnection = (HttpURLConnection) url.openConnection();
+
         //urlConnection.setSSLSocketFactory(context.getSocketFactory());
         /*urlConnection.setHostnameVerifier(new HostnameVerifier()
         {
@@ -117,89 +134,109 @@ public class WebServiceConnection{
             }
         });*/
 
-        urlConnection.setReadTimeout(READ_TIMEOUT);
-        urlConnection.setConnectTimeout(CONNECT_TIMEOUT);
-        urlConnection.setRequestMethod(REQUEST_METHOD);
+    }
 
-        if(doInput){
-            inputStream = urlConnection.getInputStream();
-        }
+    protected final void setRequest(String query){
 
-        if(doOuput){
+        try{
+
             outputStream = urlConnection.getOutputStream();
-            dataOutputStream = new DataOutputStream(outputStream);
+            BufferedWriter writer = new BufferedWriter(
+                    new OutputStreamWriter(outputStream, "UTF-8"));
+
+            writer.write(query);
+            writer.flush();
+            writer.close();
+            outputStream.close();
+
+        }catch (IOException e){
+            e.printStackTrace();
         }
-
-
-        urlConnection.setDoInput(doInput);
-        urlConnection.setDoOutput(doOuput);
-        urlConnection.setUseCaches(useCaches);
     }
 
-    protected final void setRequest(String query) throws IOException{
+    public void addFileUpload(String name, String filename, byte[] byteArray){
 
-        outputStream = urlConnection.getOutputStream();
-        BufferedWriter writer = new BufferedWriter(
-                new OutputStreamWriter(outputStream, "UTF-8"));
+        try{
 
-        writer.write(query);
-        writer.flush();
-        writer.close();
-        outputStream.close();
-    }
+            if(outputStream == null){
+                Log.e("addFileUpload", "output stream is null");
+                return;
+            }
 
-    public void addFileUpload(String name, String filename, byte[] byteArray) throws IOException{
+
+
+            if(dataOutputStream == null)
+                dataOutputStream = new DataOutputStream(outputStream);
+
+            dataOutputStream.writeBytes(twoHyphens +boundary + crlf);
+            dataOutputStream.writeBytes("Content-Disposition: form-data; name=\"" + name + "\";filename=\"" + filename + "\"" + crlf);
+            dataOutputStream.writeBytes(crlf);
+
+            dataOutputStream.write(byteArray);
+
+            dataOutputStream.writeBytes(crlf);
+            dataOutputStream.writeBytes(twoHyphens + boundary + twoHyphens + crlf);
+
+        }catch (IOException e){
+            e.printStackTrace();
+        }
 
         if(outputStream == null){
             Log.e("addFileUpload", "output stream is null");
             return;
         }
-
-        urlConnection.setRequestProperty("Connection", "Keep-Alive");
-        urlConnection.setRequestProperty("Cache-Control", "no-cache");
-        urlConnection.setRequestProperty("Content-Type", "multipart/form-data;boundary=" + boundary);
-
-        outputStream = urlConnection.getOutputStream();
-       dataOutputStream = new DataOutputStream(outputStream);
-
-        dataOutputStream.writeBytes(twoHyphens +boundary + crlf);
-        dataOutputStream.writeBytes("Content-Disposition: form-data; name=\"" + name + "\";filename=\"" + filename + "\"" + crlf);
-        dataOutputStream.writeBytes(crlf);
-
-        dataOutputStream.write(byteArray);
-
-        dataOutputStream.writeBytes(crlf);
-        dataOutputStream.writeBytes(twoHyphens + boundary + twoHyphens + crlf);
     }
 
-    public void addTextUpload(String name, String value) throws IOException{
+    public void addTextUpload(String name, String value){
 
-        if(outputStream == null){
-            Log.e("addTextUpload", "output stream is null");
-            return;
+        try{
+
+            if(outputStream == null){
+                Log.e("addTextUpload", "output stream is null");
+                return;
+            }
+
+            if(dataOutputStream == null)
+                 dataOutputStream = new DataOutputStream(outputStream);
+
+            dataOutputStream.writeBytes(twoHyphens+ boundary + crlf);
+            dataOutputStream.writeBytes("Content-Disposition: form-data; name=\"" + name + "\";" + crlf);
+            dataOutputStream.writeBytes("Content-Type: text/plain; charset=UTF-8" + crlf);
+            dataOutputStream.writeBytes(crlf + value + crlf);
+
+        }catch (IOException e){
+            e.printStackTrace();
         }
 
-        dataOutputStream.writeBytes(twoHyphens+ boundary + crlf);
-        dataOutputStream.writeBytes("Content-Disposition: form-data; name=\""+name+"\";" + crlf);
-        dataOutputStream.writeBytes("Content-Type: text/plain; charset=UTF-8" + crlf);
-        dataOutputStream.writeBytes(crlf + value + crlf);
+
     }
 
-    public void flushOutputStream() throws IOException{
+    public void addAuthentication(){
+
+
+
+        addTextUpload(AuthenticationKeys.IDENTIFICATION_KEY, AuthenticationKeys.IDENTIFICATION_VALUE);
+        addTextUpload(AuthenticationKeys.USERNAME_KEY, AuthenticationKeys.USERNAME_VALUE);
+        addTextUpload(AuthenticationKeys.PASSWORD_KEY, AuthenticationKeys.PASSWORD_VALUE);
+
+    }
+
+    public void flushOutputStream(){
 
         if(dataOutputStream == null){
             Log.e("flushOuputStream", "output stream is null");
             return;
         }
 
-        dataOutputStream.flush();
-        dataOutputStream.close();
-        outputStream.close();
+        try{
 
-    }
+            dataOutputStream.flush();
+            dataOutputStream.close();
+            outputStream.close();
 
-    protected final void resetUrl(String urlAddress){
-        this.urlAddress = urlAddress;
+        }catch (IOException e){
+            e.printStackTrace();
+        }
     }
 
     protected final String getUrlAddress() {
@@ -215,6 +252,16 @@ public class WebServiceConnection{
     }*/
     protected final HttpURLConnection getUrlConnection(){
         return urlConnection;
+    }
+
+    public InputStream getInputStream(){
+
+        try{
+            return urlConnection.getInputStream();
+        }catch (IOException e){
+            e.printStackTrace();
+            return null;
+        }
     }
 
     protected final String getRequest() throws IOException{
