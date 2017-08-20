@@ -9,6 +9,8 @@ import com.example.darwin.umnify.feed.news.News;
 import com.example.darwin.umnify.feed.news.NewsFeedManager;
 import com.example.darwin.umnify.wrapper.WebServiceAction;
 
+import java.io.ByteArrayInputStream;
+import java.io.ByteArrayOutputStream;
 import java.io.InputStream;
 
 public class FetchAuthorImageDataActionWrapper implements WebServiceAction {
@@ -40,9 +42,14 @@ public class FetchAuthorImageDataActionWrapper implements WebServiceAction {
     @Override
     public void processResult(){
 
+        //ByteArrayOutputStream out = new ByteArrayOutputStream();
+        //image.compress(Bitmap.CompressFormat.JPEG, 100, out);
 
+        //Bitmap decoded = BitmapFactory.decodeStream(new ByteArrayInputStream(out.toByteArray()));
 
-        news.setAuthorImage(image);
+        news.setAuthorImage(Bitmap.createScaledBitmap(image, 100, 100, false));
         manager.notifyItemChanged(news.getIndex());
+
+        image = null;
     }
 }

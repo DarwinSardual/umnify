@@ -71,6 +71,10 @@ public class NewsFeedManager extends RecyclerView.Adapter<NewsFeedManager.ViewHo
         WebServiceAsync asyncFetchNews = new WebServiceAsync();
         FetchNewsDataActionWrapper fetchNewsWrapper = new FetchNewsDataActionWrapper(fetchNewsDataParams, activity, this);
         asyncFetchNews.execute(fetchNewsWrapper);
+
+        fetchNewsWrapper = null;
+        asyncFetchNews = null;
+        fetchNewsDataParams = null;
     }
 
     public final class ViewHolder extends RecyclerView.ViewHolder {
@@ -153,25 +157,34 @@ public class NewsFeedManager extends RecyclerView.Adapter<NewsFeedManager.ViewHo
 
         FetchAuthorImageDataActionWrapper fetchAuthorImageDataActionWrapper;
         FetchNewsImageDataActionWrapper fetchNewsImageDataActionWrapper;
+        WebServiceAsync asyncFetchAuthorImage;
+        WebServiceAsync asyncFetchNewsImage;
+        News news;
 
         JSONArray dataList = new JSONArray(data);
-        int temp = feedList.size();
 
         for(int i = 0; i < dataList.length(); i++){
 
             JSONObject newsData = new JSONObject(dataList.getString(i));
-            News news = NewsHelper.createNewsFromJSON(newsData, feedList.size());
+            news = NewsHelper.createNewsFromJSON(newsData, feedList.size());
             fetchAuthorImageDataActionWrapper = new FetchAuthorImageDataActionWrapper( news, activity, this);
             fetchNewsImageDataActionWrapper = new FetchNewsImageDataActionWrapper(news, activity, this);
             feedList.add(news);
             notifyItemInserted(news.getIndex());
 
-            WebServiceAsync asyncFetchAuthorImage = new WebServiceAsync();
+            asyncFetchAuthorImage = new WebServiceAsync();
             asyncFetchAuthorImage.execute(fetchAuthorImageDataActionWrapper);
-            WebServiceAsync asyncFetchNewsImage = new WebServiceAsync();
-            asyncFetchNewsImage.execute(fetchNewsImageDataActionWrapper);
+            //asyncFetchNewsImage = new WebServiceAsync();
+            //asyncFetchNewsImage.execute(fetchNewsImageDataActionWrapper);
         }
 
+
+        news = null;
+        fetchAuthorImageDataActionWrapper = null;
+        fetchNewsImageDataActionWrapper = null;
+        asyncFetchAuthorImage = null;
+        asyncFetchNewsImage = null;
+        dataList = null;
         swipeRefreshLayout.setRefreshing(false);
     }
 
@@ -180,6 +193,7 @@ public class NewsFeedManager extends RecyclerView.Adapter<NewsFeedManager.ViewHo
         if(isFetching) return;
 
         WebServiceAsync asyncFetchNews = new WebServiceAsync();
+        FetchNewsDataActionWrapper fetchNewsWrapper;
 
         if(direction == 1){
 
@@ -189,8 +203,10 @@ public class NewsFeedManager extends RecyclerView.Adapter<NewsFeedManager.ViewHo
             fetchNewsDataParamsUpdate.put("limit", "3");
             fetchNewsDataParamsUpdate.put("id", "-1");
 
-            FetchNewsDataActionWrapper fetchNewsWrapper = new FetchNewsDataActionWrapper(fetchNewsDataParamsUpdate, activity, this);
+            fetchNewsWrapper = new FetchNewsDataActionWrapper(fetchNewsDataParamsUpdate, activity, this);
             asyncFetchNews.execute(fetchNewsWrapper);
+
+            fetchNewsDataParamsUpdate = null;
 
         }else if(direction == -1){
             feedList.clear();
@@ -202,9 +218,14 @@ public class NewsFeedManager extends RecyclerView.Adapter<NewsFeedManager.ViewHo
             fetchNewsDataParams.put("limit", "5");
             fetchNewsDataParams.put("id", "-1");
 
-            FetchNewsDataActionWrapper fetchNewsWrapper = new FetchNewsDataActionWrapper(fetchNewsDataParams, activity, this);
+            fetchNewsWrapper = new FetchNewsDataActionWrapper(fetchNewsDataParams, activity, this);
             asyncFetchNews.execute(fetchNewsWrapper);
+
+            fetchNewsDataParams = null;
         }
+
+        fetchNewsWrapper = null;
+        asyncFetchNews = null;
     }
     public void addNews(Intent data, Bundle userData){
 
@@ -278,6 +299,8 @@ public class NewsFeedManager extends RecyclerView.Adapter<NewsFeedManager.ViewHo
 
             WebServiceAsync asyncStarredNews = new WebServiceAsync();
             asyncStarredNews.execute(starredNewsDataActionWrapper);
+
+            asyncStarredNews = null;
 
         }
     }

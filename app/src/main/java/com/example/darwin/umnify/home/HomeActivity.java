@@ -67,8 +67,6 @@ public class HomeActivity extends AppCompatActivity {
     private String USER_EMAIL;
     private String USER_IMAGE_FILE;
 
-    private WebServiceAsync async;
-
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -85,6 +83,8 @@ public class HomeActivity extends AppCompatActivity {
         USER_EMAIL = extra.getString("USER_EMAIL");
         USER_IMAGE_FILE = extra.getString("USER_IMAGE_FILE");
 
+        extra = null;
+
         HomeActivityLayout homeActivityLayout = new HomeActivityLayout(HomeActivity.this);
         drawerLayout = homeActivityLayout.getDrawerLayout();
 
@@ -98,8 +98,12 @@ public class HomeActivity extends AppCompatActivity {
             textData, null, homeActivityLayout.getUserNameView(), homeActivityLayout.getUserEmailView(),
                 homeActivityLayout.getUserIconView());
 
-        async = new WebServiceAsync();
+        WebServiceAsync async = new WebServiceAsync();
         async.execute(fetchUserImageDataActionWrapper);
+
+        textData = null;
+        fetchUserImageDataActionWrapper = null;
+        async = null;
     }
 
     @Override
