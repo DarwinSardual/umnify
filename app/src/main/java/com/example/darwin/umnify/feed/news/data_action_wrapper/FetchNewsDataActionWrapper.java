@@ -49,7 +49,6 @@ public class FetchNewsDataActionWrapper implements WebServiceAction {
 
         try {
             String response = DataHelper.parseStringFromStream(inputStream);
-            Log.e("Fetch news", response);
             JSONObject str = new JSONObject(response);
             String data = str.getString("data");
 

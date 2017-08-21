@@ -32,11 +32,7 @@ import java.net.HttpURLConnection;
 import java.util.ArrayList;
 import java.util.List;
 
-public class BlogFeedManager{
-
-}
-
-/*public class BlogFeedManager extends RecyclerView.Adapter<BlogFeedManager.ViewHolder>{
+public class BlogFeedManager extends RecyclerView.Adapter<BlogFeedManager.ViewHolder>{
 
     private SwipeRefreshLayout swipeRefreshLayout;
     private RecyclerView recyclerView;
@@ -117,7 +113,7 @@ public class BlogFeedManager{
         return feedList.size();
     }
 
-    private void addEntries(String data) throws JSONException{
+    public void addEntries(String data) throws JSONException{
 
         JSONArray dataList = new JSONArray(data);
         int temp = feedList.size();
@@ -416,4 +412,4 @@ public class BlogFeedManager{
             Log.e("Response", s);
         }
     }
-}*/
+}

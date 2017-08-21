@@ -38,7 +38,7 @@ public class NewsFeedManager extends RecyclerView.Adapter<NewsFeedManager.ViewHo
 
     private SwipeRefreshLayout swipeRefreshLayout;
 
-    private List<News> feedList;;
+    private List<News> feedList;
     public HashMap<News, ViewHolder> newsViewHolderMap;
 
     private Activity activity;
