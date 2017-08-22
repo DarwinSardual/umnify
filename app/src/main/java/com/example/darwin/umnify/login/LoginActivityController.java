@@ -9,6 +9,7 @@ import android.support.design.widget.Snackbar;
 import android.util.Log;
 import android.view.View;
 import android.widget.Button;
+import com.example.darwin.umnify.async.WebServiceAsync;
 import com.example.darwin.umnify.authentication.AuthenticationAddress;
 import com.example.darwin.umnify.authentication.AuthenticationCodes;
 import com.example.darwin.umnify.connection.WebServiceConnection;
@@ -62,12 +63,20 @@ class LoginActivityController {
         String urlAddress = AuthenticationAddress.AUTHENTICATE_LOGIN;
 
         HashMap<String, String> textData = new HashMap<>();
-        textData.put("id", id);
-        textData.put("password", password);
+        textData.put(AuthenticationKeys.USER_ID_KEY, id);
+        textData.put(AuthenticationKeys.USER_PASSWORD_KEY, password);
 
 
         //loginHandler = new LoginAsync(urlAddress, source);
         //loginHandler.execute(id, password);
+
+        Log.e("Login", "pressed");
+
+        LoginDataWrapper loginDataWrapper = new LoginDataWrapper(textData,
+                activity, source);
+
+        WebServiceAsync async = new WebServiceAsync();
+        async.execute(loginDataWrapper);
 
     }
 
@@ -75,21 +84,23 @@ class LoginActivityController {
 
         private HashMap<String, String> textDataOutput;
         private WebServiceConnection connection;
+        private Activity activity;
 
         private InputStream inputStream;
         private View source;
 
-        public LoginDataWrapper(HashMap<String, String> textDataOutput, WebServiceConnection connection, View source) {
+        public LoginDataWrapper(HashMap<String, String> textDataOutput, Activity activity, View source) {
 
             this.textDataOutput = textDataOutput;
-            this.connection = connection;
-
             this.source = source;
+            this.activity = activity;
         }
 
         @Override
         public void processRequest() {
 
+                connection = new WebServiceConnection(AuthenticationAddress.AUTHENTICATE_LOGIN,
+                        activity, true, true, true);
 
                 connection.addAuthentication();
                 DataHelper.writeTextUpload(textDataOutput, connection);
@@ -106,6 +117,7 @@ class LoginActivityController {
             try{
 
                 String response = DataHelper.parseStringFromStream(inputStream);
+
 
                 JSONObject json = new JSONObject(response);
                 int code = json.getInt("code");

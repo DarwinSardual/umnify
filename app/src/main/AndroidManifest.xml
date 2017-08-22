@@ -51,6 +51,11 @@
         </activity>
         <activity android:name=".feed.blogs.AddBlogActivity">
         </activity>
+        <activity android:name=".scratch.CollapsingToolbar">
+        </activity>
+        <activity android:name=".feed.news.NewsCommentActivity"
+            android:theme="@style/NewsCommentThemeWithCorners">
+        </activity>
     </application>
 
 </manifest>

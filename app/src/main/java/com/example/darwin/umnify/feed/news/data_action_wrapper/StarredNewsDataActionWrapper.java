@@ -88,12 +88,13 @@ public class StarredNewsDataActionWrapper implements WebServiceAction {
                         button.setImageDrawable(manager.filledStar);
                         if(news.isStarred()){
                             TextView view = (TextView) source.getTag();
-                            view.setText("You and " + news.getStars() + " have starred this");
+                            view.setText(news.getStars() + " have starred this");
                         }
 
                     }else if(data.getString("action").equalsIgnoreCase("remove")){
                         news.setIsStarred(false);
                         button.setImageDrawable(manager.emptyStar);
+                        news.setStars(data.getInt("count"));
 
                         if(!news.isStarred()){
                             TextView view = (TextView) source.getTag();

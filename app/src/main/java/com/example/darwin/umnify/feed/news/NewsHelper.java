@@ -29,13 +29,4 @@ public class NewsHelper {
         return news;
 
     }
-
-    public static void fetchImage(News news, NewsFeedManager manager, Activity activity){
-
-        //NewsWrapper wrapper = new NewsWrapper(news, manager);
-        //NewsImageAsync async = new NewsImageAsync(AuthenticationAddress.DOMAIN_NAME + AuthenticationAddress.ROOT_FOLDER + "/images/avatar/" + news.getAuthorImageFile(), activity);
-        //async.execute(wrapper);
-    }
-
-
 }

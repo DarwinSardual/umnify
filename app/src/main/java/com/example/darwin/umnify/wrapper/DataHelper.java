@@ -31,6 +31,16 @@ public class DataHelper {
             return null;
 
         BufferedReader reader = new BufferedReader(new InputStreamReader(inputStream));
-        return reader.readLine() + reader.readLine();
+        String buffer = "";
+
+        while(true){
+
+            String temp = reader.readLine();
+            if(temp != null)
+                buffer += temp;
+            else break;
+        }
+
+        return buffer;
     }
 }

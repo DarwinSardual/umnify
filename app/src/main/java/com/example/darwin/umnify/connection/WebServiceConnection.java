@@ -163,8 +163,6 @@ public class WebServiceConnection{
                 return;
             }
 
-
-
             if(dataOutputStream == null)
                 dataOutputStream = new DataOutputStream(outputStream);
 
@@ -179,11 +177,6 @@ public class WebServiceConnection{
 
         }catch (IOException e){
             e.printStackTrace();
-        }
-
-        if(outputStream == null){
-            Log.e("addFileUpload", "output stream is null");
-            return;
         }
     }
 

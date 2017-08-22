@@ -6,7 +6,7 @@
         android:layout_width="match_parent"
         android:layout_height="match_parent"
         android:fitsSystemWindows="true"
-        tools:context="com.example.darwin.umnify.feed.blogs.BlogActivity">
+        tools:context="com.example.darwin.umnify.scratch.CollapsingToolbar">
 
     <android.support.design.widget.AppBarLayout
             android:id="@+id/appBar"
@@ -16,7 +16,7 @@
             android:fitsSystemWindows="true">
 
         <android.support.design.widget.CollapsingToolbarLayout
-                android:id="@+id/blog_collapsing_toolbar"
+                android:id="@+id/collapsingToolbar"
                 android:layout_width="match_parent"
                 android:layout_height="match_parent"
                 app:layout_scrollFlags="scroll|exitUntilCollapsed"
@@ -24,10 +24,10 @@
                 app:contentScrim="?attr/colorPrimary"
                 app:expandedTitleMarginStart="48dp"
                 app:expandedTitleMarginEnd="64dp"
-                >
+                app:title="Collapsing Toolbar">
 
             <ImageView
-                    android:id="@+id/blog_featured_image"
+                    android:id="@+id/toolbarImage"
                     android:layout_width="match_parent"
                     android:layout_height="match_parent"
                     android:scaleType="centerCrop"
@@ -54,7 +54,7 @@
                 android:layout_height="wrap_content"
                 android:textSize="16sp"
                 android:lineSpacingExtra="8dp"
-                android:id="@+id/blog_content"
+                android:text="@string/long_text"
                 android:padding="@dimen/activity_horizontal_margin" />
     </android.support.v4.widget.NestedScrollView>
 

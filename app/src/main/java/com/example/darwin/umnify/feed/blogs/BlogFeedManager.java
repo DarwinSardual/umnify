@@ -20,9 +20,14 @@ import android.widget.TextView;
 
 import com.example.darwin.umnify.R;
 //import com.example.darwin.umnify.connection.RemoteDbConn;
+import com.example.darwin.umnify.async.WebServiceAsync;
 import com.example.darwin.umnify.authentication.AuthenticationAddress;
 import com.example.darwin.umnify.authentication.AuthenticationKeys;
 
+import com.example.darwin.umnify.connection.WebServiceConnection;
+import com.example.darwin.umnify.feed.blogs.data_action_wrapper.AddBlogDataActionWrapper;
+import com.example.darwin.umnify.feed.blogs.data_action_wrapper.FetchBlogImageDataActionWrapper;
+import com.example.darwin.umnify.feed.blogs.data_action_wrapper.FetchBlogTileDataActionWrapper;
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -30,6 +35,7 @@ import org.json.JSONObject;
 import java.io.*;
 import java.net.HttpURLConnection;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
 
 public class BlogFeedManager extends RecyclerView.Adapter<BlogFeedManager.ViewHolder>{
@@ -38,7 +44,7 @@ public class BlogFeedManager extends RecyclerView.Adapter<BlogFeedManager.ViewHo
     private RecyclerView recyclerView;
 
     private List<BlogTile> feedList;
-    private BlogFeedAsync blogHandler;
+    //private BlogFeedAsync blogHandler;
 
     private boolean isFetching = false;
 
@@ -56,10 +62,17 @@ public class BlogFeedManager extends RecyclerView.Adapter<BlogFeedManager.ViewHo
 
         feedList = new ArrayList<>();
 
-        blogHandler = new BlogFeedAsync(AuthenticationAddress.FETCH_BLOGS);
-        isFetching = true;
-        blogHandler.execute("tile", "desc", feedList.size() + "", "8");
+        HashMap<String, String> fetchBlogTextData = new HashMap<>();
+        fetchBlogTextData.put("type", "tile");
+        fetchBlogTextData.put("order", "desc");
+        fetchBlogTextData.put("offset", feedList.size() +"");
+        fetchBlogTextData.put("limit", "8");
 
+        WebServiceAsync asyncFetchBlog = new WebServiceAsync();
+        FetchBlogTileDataActionWrapper fetchBlogTileDataActionWrapper = new FetchBlogTileDataActionWrapper(fetchBlogTextData,
+                activity, this);
+
+        asyncFetchBlog.execute(fetchBlogTileDataActionWrapper);
     }
 
     public final class ViewHolder extends RecyclerView.ViewHolder{
@@ -99,7 +112,8 @@ public class BlogFeedManager extends RecyclerView.Adapter<BlogFeedManager.ViewHo
                     Intent intent = new Intent(view.getContext(), BlogActivity.class);
                     intent.putExtra("BLOG_TILE_ID", blogTile.getId());
                     intent.putExtra("BLOG_TILE_HEADING", blogTile.getHeading());
-                    intent.putExtra("BLOG_TILE_IMAGE","");
+                    intent.putExtra("BLOG_TILE_IMAGE_FILE",blogTile.getImageFile());
+                    intent.putExtra("BLOG_TILE_INDEX",blogTile.getIndex());
 
                     view.getContext().startActivity(intent);
                 }
@@ -115,103 +129,89 @@ public class BlogFeedManager extends RecyclerView.Adapter<BlogFeedManager.ViewHo
 
     public void addEntries(String data) throws JSONException{
 
+        /* Everytime we add an entry we save it to the database
+         * Save the image in the internal folder for caching */
+
         JSONArray dataList = new JSONArray(data);
+        WebServiceAsync asyncFetchBlogImage;
+        FetchBlogImageDataActionWrapper fetchBlogImageDataActionWrapper;
         int temp = feedList.size();
 
         for(int i = 0; i < dataList.length(); i++){
 
             JSONObject blogData = new JSONObject(dataList.getString(i));
             BlogTile blogTile = BlogHelper.createBlogTileFromJSON(blogData, feedList.size());
-            BlogHelper.fetchImage(blogTile, this, activity);
+            fetchBlogImageDataActionWrapper = new FetchBlogImageDataActionWrapper(blogTile,
+                    activity, this);
+
             feedList.add(blogTile);
+            notifyItemInserted(blogTile.getIndex());
+
+            /* We fetch image here
+            *  before doing any rescaling ie. thumbnails, save the original image first */
+
+            asyncFetchBlogImage = new WebServiceAsync();
+            asyncFetchBlogImage.execute(fetchBlogImageDataActionWrapper);
         }
-        notifyItemRangeInserted(temp, dataList.length());
+
+        isFetching = false;
         swipeRefreshLayout.setRefreshing(false);
+        dataList = null;
     }
 
     public void updateFeed(int direction){
 
         if(isFetching) return;
 
+        WebServiceAsync asyncFetchBlog = new WebServiceAsync();
+        FetchBlogTileDataActionWrapper fetchBlogTileDataActionWrapper;
+        HashMap<String, String> fetchBlogTextData = new HashMap<>();
+
+        fetchBlogTextData.put("type", "tile");
+        fetchBlogTextData.put("order", "desc");
+
+
         if(direction == 1){
 
-            blogHandler = new BlogFeedAsync(AuthenticationAddress.FETCH_BLOGS);
-            String temp = feedList.size()/2 ==0? "2":"3";
             isFetching = true;
-            blogHandler.execute("tile", "desc", feedList.size() + "", temp);
+
+            fetchBlogTextData.put("offset", feedList.size() + "");
+            String oddEven = feedList.size()/2 ==0? "2":"3";
+            fetchBlogTextData.put("limit", oddEven);
+            fetchBlogTileDataActionWrapper = new FetchBlogTileDataActionWrapper(fetchBlogTextData,
+                    activity, this);
+
+            asyncFetchBlog.execute(fetchBlogTileDataActionWrapper);
+
         }else if(direction == -1){
+
+            isFetching = true;
             feedList.clear();
             notifyDataSetChanged();
 
-            blogHandler = new BlogFeedAsync(AuthenticationAddress.FETCH_BLOGS);
-            isFetching = true;
-            blogHandler.execute("tile", "desc", feedList.size() + "", "8");
+            fetchBlogTextData.put("offset", feedList.size() + "");
+            fetchBlogTextData.put("limit", "8");
+
+            fetchBlogTileDataActionWrapper = new FetchBlogTileDataActionWrapper(fetchBlogTextData,
+                    activity, this);
+
+            asyncFetchBlog.execute(fetchBlogTileDataActionWrapper);
 
         }
 
-    }
+        fetchBlogTextData = null;
+        fetchBlogTileDataActionWrapper = null;
+        asyncFetchBlog = null;
 
-    private class BlogFeedAsync extends RemoteDbConn<String, Void, String>{
-
-        public BlogFeedAsync(String urlAdress){
-            super(urlAdress, BlogFeedManager.this.activity);
-
-        }
-
-        @Override
-        protected void onPreExecute() {
-            super.onPreExecute();
-        }
-
-        @Override
-        protected String doInBackground(String... strings) {
-
-            try{
-
-                setUpConnection();
-                Uri.Builder queryBuilder = super.getQueryBuilder();
-                queryBuilder.appendQueryParameter("type", strings[0])
-                        .appendQueryParameter("order", strings[1])
-                        .appendQueryParameter("offset", strings[2])
-                        .appendQueryParameter("limit", strings[3]);
-
-                super.setRequest(queryBuilder.build().getEncodedQuery());
-                super.getUrlConnection().connect();
-
-                String response = super.getRequest();
-
-                return response;
-            }catch (IOException e){
-                e.printStackTrace();
-            }
-
-            return null;
-        }
-
-        @Override
-        protected void onPostExecute(String response) {
-            //super.onPostExecute(s);
-
-            try {
-                JSONObject str = new JSONObject(response);
-                String data = str.getString("data");
-
-               // if(DIRECTION == 1)
-                    addEntries(data);
-                //else if(DIRECTION == -1);
-
-                isFetching = false;
-            }catch (JSONException e){
-                e.printStackTrace();
-            }
-        }
     }
 
     public void addBlog(Intent data, Bundle userData){
 
         Uri uri = data.getData();
         Cursor cursor;
-        DataWrapper blogWrapper = null;
+
+        HashMap<String, String> textData = new HashMap<>();
+        HashMap<String, byte[]> fileData = new HashMap<>();
 
         if(uri != null){
 
@@ -224,192 +224,37 @@ public class BlogFeedManager extends RecyclerView.Adapter<BlogFeedManager.ViewHo
 
             String imageFile = cursor.getString(nameIndex);
             Bitmap image = null;
+            byte[] byteArray = null;
 
             try{
                 image = MediaStore.Images.Media.getBitmap(activity.getContentResolver(), uri);
+                ByteArrayOutputStream stream = new ByteArrayOutputStream();
+                image.compress(Bitmap.CompressFormat.JPEG, 100, stream);
+                byteArray = stream.toByteArray();
+
             }catch (IOException e){
                 e.printStackTrace();
             }
 
-            blogWrapper = new DataWrapper(data.getStringExtra("ADD_BLOG_HEADING"), data.getStringExtra("ADD_BLOG_CONTENT"),
-                    imageFile, userData.getInt("USER_ID"), userData.getInt("USER_TYPE"), image);
+            textData.put("heading", data.getStringExtra("ADD_BLOG_HEADING"));
+            textData.put("content", data.getStringExtra("ADD_BLOG_CONTENT"));
+            textData.put("image_file", imageFile);
+            textData.put("user_type", userData.getInt("USER_TYPE") + "");
+            textData.put("author", userData.getInt("USER_ID") + "");
+
+            fileData.put(imageFile, byteArray);
 
         }else{
-            blogWrapper = new DataWrapper(data.getStringExtra("ADD_BLOG_HEADING"), data.getStringExtra("ADD_BLOG_CONTENT"),
-                    null, userData.getInt("USER_ID"), userData.getInt("USER_TYPE"), null);
+            textData.put("heading", data.getStringExtra("ADD_BLOG_HEADING"));
+            textData.put("content", data.getStringExtra("ADD_BLOG_CONTENT"));
+            textData.put("user_type", userData.getInt("USER_TYPE") + "");
+            textData.put("author", userData.getInt("USER_ID") + "");
         }
 
-        AddBlogAsync addBlogAsync = new AddBlogAsync(AuthenticationAddress.ADD_BLOG, activity);
-        addBlogAsync.execute(blogWrapper);
-    }
+        AddBlogDataActionWrapper addBlogDataActionWrapper = new AddBlogDataActionWrapper(textData,
+                fileData, activity);
 
-    private class DataWrapper{
-
-        private String heading;
-        private String content;
-        private String imageFile;
-        private Bitmap image;
-        private int userType;
-        private int authorId;
-
-        public DataWrapper(String heading, String content, String imageFile, int authorId, int userType, Bitmap image){
-            this.content = content;
-            this.image = image;
-            this.authorId = authorId;
-            this.imageFile = imageFile;
-            this.userType = userType;
-            this.heading = heading;
-        }
-
-        public String getContent() {
-            return content;
-        }
-
-        public int getAuthorId() {
-            return authorId;
-        }
-
-        public Bitmap getImage() {
-            return image;
-        }
-
-        public String getImageFile() {
-            return imageFile;
-        }
-
-        public int getUserType() {
-            return userType;
-        }
-
-        public String getHeading() {
-            return heading;
-        }
-    }
-
-    private class AddBlogAsync extends RemoteDbConn<DataWrapper, Void, String>{
-
-        public AddBlogAsync(String urlAddress, Activity activity){
-            super(urlAddress, activity);
-        }
-
-        @Override
-        protected String doInBackground(DataWrapper... wrapper) {
-
-
-            try{
-
-                setUpConnection();
-                HttpURLConnection urlConnection = super.getUrlConnection();
-
-                if(wrapper[0].getImageFile() != null){
-
-                    urlConnection.setUseCaches(false);
-                    urlConnection.setRequestProperty("Connection", "Keep-Alive");
-                    urlConnection.setRequestProperty("Cache-Control", "no-cache");
-                    urlConnection.setRequestProperty(
-                            "Content-Type", "multipart/form-data;boundary=" + BlogFeedManager.this.boundary);
-
-                    OutputStream out = urlConnection.getOutputStream();
-                    DataOutputStream outputStream = new DataOutputStream(out);
-
-                    // start writing the iamge to buffer
-                    outputStream.writeBytes(BlogFeedManager.this.twoHyphens + BlogFeedManager.this.boundary + BlogFeedManager.this.crlf);
-                    outputStream.writeBytes("Content-Disposition: form-data; name=\"" +
-                            "image" + "\";filename=\"" +
-                            wrapper[0].getImageFile() + "\"" + BlogFeedManager.this.crlf);
-                    outputStream.writeBytes(BlogFeedManager.this.crlf);
-
-                    ByteArrayOutputStream stream = new ByteArrayOutputStream();
-                    wrapper[0].getImage().compress(Bitmap.CompressFormat.JPEG, 100, stream);
-                    byte[] byteArray = stream.toByteArray();
-
-                    outputStream.write(byteArray);
-
-                    outputStream.writeBytes(BlogFeedManager.this.crlf);
-                    outputStream.writeBytes(BlogFeedManager.this.twoHyphens + BlogFeedManager.this.boundary +
-                            BlogFeedManager.this.twoHyphens + BlogFeedManager.this.crlf);
-
-                    // end writing the image
-
-                    // authentication
-
-                    outputStream.writeBytes(twoHyphens+ boundary + crlf);
-                    outputStream.writeBytes("Content-Disposition: form-data; name=\""+AuthenticationKeys.IDENTIFICATION_KEY+"\";" + crlf);
-                    outputStream.writeBytes("Content-Type: text/plain; charset=UTF-8" + crlf);
-                    outputStream.writeBytes(crlf + AuthenticationKeys.IDENTIFICATION_VALUE + crlf);
-                    //outputStream.writeBytes(crlf);
-
-                    outputStream.writeBytes(twoHyphens+ boundary + crlf);
-                    outputStream.writeBytes("Content-Disposition: form-data; name=\""+AuthenticationKeys.USERNAME_KEY+"\";" + crlf);
-                    outputStream.writeBytes("Content-Type: text/plain; charset=UTF-8" + crlf);
-                    outputStream.writeBytes(crlf + AuthenticationKeys.USERNAME_VALUE+ crlf);
-
-
-                    outputStream.writeBytes(twoHyphens+ boundary + crlf);
-                    outputStream.writeBytes("Content-Disposition: form-data; name=\""+AuthenticationKeys.PASSWORD_KEY+"\";" + crlf);
-                    outputStream.writeBytes("Content-Type: text/plain; charset=UTF-8" + crlf);
-                    outputStream.writeBytes(crlf + AuthenticationKeys.PASSWORD_VALUE+ crlf);
-                    // end authentication
-
-                    // text data
-                    outputStream.writeBytes(twoHyphens+ boundary + crlf);
-                    outputStream.writeBytes("Content-Disposition: form-data; name=\"heading\";" + crlf);
-                    outputStream.writeBytes("Content-Type: text/plain; charset=UTF-8" + crlf);
-                    outputStream.writeBytes(crlf + wrapper[0].getHeading() + crlf);
-
-                    outputStream.writeBytes(twoHyphens+ boundary + crlf);
-                    outputStream.writeBytes("Content-Disposition: form-data; name=\"content\";" + crlf);
-                    outputStream.writeBytes("Content-Type: text/plain; charset=UTF-8" + crlf);
-                    outputStream.writeBytes(crlf + wrapper[0].getContent() + crlf);
-                    //outputStream.writeBytes(crlf);
-
-                    outputStream.writeBytes(twoHyphens+ boundary + crlf);
-                    outputStream.writeBytes("Content-Disposition: form-data; name=\"image_file\";" + crlf);
-                    outputStream.writeBytes("Content-Type: text/plain; charset=UTF-8" + crlf);
-                    outputStream.writeBytes(crlf + wrapper[0].getImageFile() + crlf);
-
-                    outputStream.writeBytes(twoHyphens+ boundary + crlf);
-                    outputStream.writeBytes("Content-Disposition: form-data; name=\"user_type\";" + crlf);
-                    outputStream.writeBytes("Content-Type: text/plain; charset=UTF-8" + crlf);
-                    outputStream.writeBytes(crlf + wrapper[0].getUserType()  + crlf);
-
-                    outputStream.writeBytes(twoHyphens+ boundary + crlf);
-                    outputStream.writeBytes("Content-Disposition: form-data; name=\"author\";" + crlf);
-                    outputStream.writeBytes("Content-Type: text/plain; charset=UTF-8" + crlf);
-                    outputStream.writeBytes(crlf + wrapper[0].getAuthorId() + crlf);
-
-                    outputStream.flush();
-                    outputStream.close();
-                    out.close();
-
-                }else{
-
-                    Uri.Builder queryBuilder = super.getQueryBuilder();
-                    queryBuilder.appendQueryParameter("content", wrapper[0].getContent())
-                            .appendQueryParameter("heading", wrapper[0].getHeading())
-                            .appendQueryParameter("image", wrapper[0].getImageFile())
-                            .appendQueryParameter("user_type", wrapper[0].getUserType() + "")
-                            .appendQueryParameter("author", wrapper[0].getAuthorId() + "");
-
-                    super.setRequest(getQueryBuilder().build().getEncodedQuery());
-                }
-
-                urlConnection.connect();
-               // String response = getRequest();
-                //return  response;
-
-                BufferedReader reader = new BufferedReader(new InputStreamReader(urlConnection.getInputStream()));
-                return reader.readLine() + " " + reader.readLine();
-
-            }catch (Exception e){
-                e.printStackTrace();
-            }
-            return null;
-        }
-
-        @Override
-        protected void onPostExecute(String s) {
-            Log.e("Response", s);
-        }
+        WebServiceAsync asyncAddBlog = new WebServiceAsync();
+        asyncAddBlog.execute(addBlogDataActionWrapper);
     }
 }

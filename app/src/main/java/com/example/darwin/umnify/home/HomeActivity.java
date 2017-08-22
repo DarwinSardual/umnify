@@ -34,10 +34,12 @@ import com.example.darwin.umnify.connection.WebServiceConnection;
 import com.example.darwin.umnify.database.UMnifyDbHelper;
 import com.example.darwin.umnify.feed.blogs.AddBlogActivity;
 //import com.example.darwin.umnify.feed.blogs.BlogFeedFragment;
+import com.example.darwin.umnify.feed.blogs.BlogFeedFragment;
 import com.example.darwin.umnify.feed.news.AddNewsActivity;
 import com.example.darwin.umnify.feed.news.NewsFeedFragment;
 import com.example.darwin.umnify.feed.notifications.NotificationsFeedFragment;
 import com.example.darwin.umnify.groups.GroupsActivity;
+import com.example.darwin.umnify.scratch.CollapsingToolbar;
 import com.example.darwin.umnify.start.StartActivity;
 import com.example.darwin.umnify.wrapper.WebServiceAction;
 
@@ -56,7 +58,7 @@ public class HomeActivity extends AppCompatActivity {
     private static final int ADD_BLOG_CODE = 2;
 
     private NewsFeedFragment newsFragment;
-    //private BlogFeedFragment blogFragment;
+    private BlogFeedFragment blogFragment;
     private NotificationsFeedFragment notificationsFragment;
 
     private int USER_ID;
@@ -163,7 +165,8 @@ public class HomeActivity extends AppCompatActivity {
             viewPager.setOffscreenPageLimit(3);
 
             final FabAction addNewsAction = new FabAction(activity, AddNewsActivity.class, null, HomeActivity.ADD_NEWS_CODE);
-            final FabAction addBlogAction = new FabAction(activity, AddBlogActivity.class, null, HomeActivity.ADD_BLOG_CODE);
+            //final FabAction addBlogAction = new FabAction(activity, AddBlogActivity.class, null, HomeActivity.ADD_BLOG_CODE);
+            final FabAction addBlogAction = new FabAction(activity, CollapsingToolbar.class, null, HomeActivity.ADD_BLOG_CODE);
 
             // default position is 0
             fab.setOnClickListener(addNewsAction);
@@ -202,8 +205,8 @@ public class HomeActivity extends AppCompatActivity {
             newsFragment = new NewsFeedFragment();
             newsFragment.setArguments(args);
 
-            //blogFragment = new BlogFeedFragment();
-            //blogFragment.setArguments(args);
+            blogFragment = new BlogFeedFragment();
+            blogFragment.setArguments(args);
 
             notificationsFragment = new NotificationsFeedFragment();
             notificationsFragment.setArguments(args);
@@ -211,7 +214,7 @@ public class HomeActivity extends AppCompatActivity {
             Adapter adapter = new Adapter(getSupportFragmentManager());
 
             adapter.addFragment(newsFragment, "News Feed");
-            //adapter.addFragment(blogFragment, "Blogs");
+            adapter.addFragment(blogFragment, "Blogs");
             adapter.addFragment(notificationsFragment, "Updates");
 
             viewPager.setAdapter(adapter);
@@ -225,8 +228,8 @@ public class HomeActivity extends AppCompatActivity {
 
 
             tabLayout.getTabAt(0).setIcon(R.drawable.newsfeed_icon);
-            //tabLayout.getTabAt(1).setIcon(R.drawable.blogfeed_icon);
-            tabLayout.getTabAt(1).setIcon(R.drawable.notificationsfeed_icon);
+            tabLayout.getTabAt(1).setIcon(R.drawable.blogfeed_icon);
+            tabLayout.getTabAt(2).setIcon(R.drawable.notificationsfeed_icon);
             tabLayout.getTabAt(0).select();
         }
 
@@ -304,8 +307,8 @@ public class HomeActivity extends AppCompatActivity {
 
     private class Adapter extends FragmentPagerAdapter {
 
-        private final int size = 2;
-        //private final int size = 3;
+        //private final int size = 2;
+        private final int size = 3;
         private final List<Fragment> tabFragments = new ArrayList<Fragment>();
         private final List<String> tabFragmentTitles = new ArrayList<String>();
 
@@ -407,7 +410,7 @@ public class HomeActivity extends AppCompatActivity {
                 // add user data
                 // news fragment and trigger news manager to perform adding news
 
-                //blogFragment.addBlog(data);
+                blogFragment.addBlog(data);
             }else{
                 Log.e("There is a error", resultCode + "");
             }

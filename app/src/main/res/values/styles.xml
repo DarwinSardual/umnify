@@ -6,6 +6,8 @@
         <item name="colorPrimary">@color/colorPrimary</item>
         <item name="colorPrimaryDark">@color/colorPrimaryDark</item>
         <item name="colorAccent">@color/colorAccent</item>
+
+
     </style>
 
     <style name="CustomTabLayout" parent="Widget.Design.TabLayout">
@@ -17,4 +19,7 @@
         <item name="textAllCaps">false</item>
     </style>
 
+        <style name="NewsCommentThemeWithCorners" parent="Theme.AppCompat.Light.Dialog">
+            <item name="android:windowBackground">@drawable/news_comment_rounded_corner</item>
+        </style>
 </resources>

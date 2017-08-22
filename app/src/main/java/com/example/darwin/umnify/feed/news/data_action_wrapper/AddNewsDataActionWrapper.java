@@ -1,6 +1,7 @@
 package com.example.darwin.umnify.feed.news.data_action_wrapper;
 
 import android.app.Activity;
+import android.util.Log;
 import com.example.darwin.umnify.authentication.AuthenticationAddress;
 import com.example.darwin.umnify.connection.WebServiceConnection;
 import com.example.darwin.umnify.wrapper.DataHelper;
@@ -33,8 +34,8 @@ public class AddNewsDataActionWrapper implements WebServiceAction {
                 true, true, true);
 
         connection.addAuthentication();
-        DataHelper.writeTextUpload(textDataOutput, connection);
         DataHelper.writeFileUpload("image", fileDataOutput, connection);
+        DataHelper.writeTextUpload(textDataOutput, connection);
         connection.flushOutputStream();
 
         inputStream = connection.getInputStream();
@@ -46,6 +47,7 @@ public class AddNewsDataActionWrapper implements WebServiceAction {
         try{
 
             String response = DataHelper.parseStringFromStream(inputStream);
+            Log.e("AddNewsData", response);
         }catch (IOException e){
             e.printStackTrace();
         }

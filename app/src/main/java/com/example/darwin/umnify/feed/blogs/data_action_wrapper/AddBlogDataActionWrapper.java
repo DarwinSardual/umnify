@@ -1,6 +1,7 @@
 package com.example.darwin.umnify.feed.blogs.data_action_wrapper;
 
 import android.app.Activity;
+import android.util.Log;
 import com.example.darwin.umnify.authentication.AuthenticationAddress;
 import com.example.darwin.umnify.connection.WebServiceConnection;
 import com.example.darwin.umnify.wrapper.DataHelper;
@@ -24,6 +25,7 @@ public class AddBlogDataActionWrapper implements WebServiceAction{
 
         this.textDataOutput = textDataOutput;
         this.fileDataOutput = fileDataOutput;
+        this.activity = activity;
 
     }
 
@@ -36,8 +38,8 @@ public class AddBlogDataActionWrapper implements WebServiceAction{
         if(connection != null){
 
             connection.addAuthentication();
-            DataHelper.writeTextUpload(textDataOutput, connection);
             DataHelper.writeFileUpload("image", fileDataOutput, connection);
+            DataHelper.writeTextUpload(textDataOutput, connection);
 
             connection.flushOutputStream();
 
@@ -50,7 +52,8 @@ public class AddBlogDataActionWrapper implements WebServiceAction{
     public void processResult() {
 
         try{
-
+            String response = DataHelper.parseStringFromStream(inputStream);
+            Log.e("Add blog", response);
         }catch (Exception e){
             e.printStackTrace();
         }

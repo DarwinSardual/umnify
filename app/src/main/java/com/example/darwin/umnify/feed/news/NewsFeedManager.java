@@ -86,6 +86,7 @@ public class NewsFeedManager extends RecyclerView.Adapter<NewsFeedManager.ViewHo
         private ImageButton newsStarButton;
         private CardView container;
         private TextView newsStarsCountView;
+        private ImageButton newsCommentButton;
 
         private ViewHolder(LayoutInflater inflater, ViewGroup parent) {
             super(inflater.inflate(R.layout.feed_news, parent, false));
@@ -97,8 +98,10 @@ public class NewsFeedManager extends RecyclerView.Adapter<NewsFeedManager.ViewHo
             newsImageView = (ImageView) itemView.findViewById(R.id.news_image);
             newsAuthorImageView = (ImageView) itemView.findViewById(R.id.author_image);
             newsStarButton = (ImageButton) itemView.findViewById(R.id.news_stars);
+            newsCommentButton = (ImageButton) itemView.findViewById(R.id.news_comment);
 
             newsStarButton.setTag(newsStarsCountView);
+
         }
     }
 
@@ -113,29 +116,19 @@ public class NewsFeedManager extends RecyclerView.Adapter<NewsFeedManager.ViewHo
 
         if(position < feedList.size()){
 
-            News news = feedList.get(position);
+            final News news = feedList.get(position);
             holder.newsAuthorView.setText(news.getAuthorFirstname() + " " + news.getAuthorLastname());
             holder.newsContentView.setText(news.getContent());
             holder.newsAuthorImageView.setImageBitmap(news.getAuthorImage());
             holder.newsImageView.setImageBitmap(news.getImage());
 
             if(news.isStarred()){
-                //holder.newsStarButton.setTextColor(Color.YELLOW);
+
                 holder.newsStarButton.setImageDrawable(filledStar);
             }else{
                 holder.newsStarButton.setImageDrawable(emptyStar);
             }
             holder.newsStarsCountView.setText(news.getStars() + " have starred this");
-
-
-            // refactor this two code, this is heavy in memory
-            holder.container.setOnClickListener(new View.OnClickListener() {
-                @Override
-                public void onClick(View view) {
-                    Intent intent = new Intent(view.getContext(), NewsActivity.class);
-                    view.getContext().startActivity(intent);
-                }
-            });
 
             HashMap<String, String> textData = new HashMap<>();
             textData.put("user", userData.getInt("USER_ID") + "");
@@ -145,6 +138,16 @@ public class NewsFeedManager extends RecyclerView.Adapter<NewsFeedManager.ViewHo
             starTextData.put("id", userData.getInt("USER_ID") + "");
 
             newsViewHolderMap.put(news, holder);
+
+            holder.newsCommentButton.setOnClickListener(new View.OnClickListener() {
+                @Override
+                public void onClick(View view) {
+                    Intent intent = new Intent(NewsFeedManager.this.activity, NewsCommentActivity.class);
+                    intent.putExtra("NEWS_ID", news.getId());
+                    intent.putExtra("NEWS_STARS", news.getStars() + "");
+                    NewsFeedManager.this.activity.startActivity(intent);
+                }
+            });
         }
     }
 
@@ -174,8 +177,8 @@ public class NewsFeedManager extends RecyclerView.Adapter<NewsFeedManager.ViewHo
 
             asyncFetchAuthorImage = new WebServiceAsync();
             asyncFetchAuthorImage.execute(fetchAuthorImageDataActionWrapper);
-            //asyncFetchNewsImage = new WebServiceAsync();
-            //asyncFetchNewsImage.execute(fetchNewsImageDataActionWrapper);
+            asyncFetchNewsImage = new WebServiceAsync();
+            asyncFetchNewsImage.execute(fetchNewsImageDataActionWrapper);
         }
 
 
@@ -185,6 +188,7 @@ public class NewsFeedManager extends RecyclerView.Adapter<NewsFeedManager.ViewHo
         asyncFetchAuthorImage = null;
         asyncFetchNewsImage = null;
         dataList = null;
+        isFetching = false;
         swipeRefreshLayout.setRefreshing(false);
     }
 
@@ -196,6 +200,8 @@ public class NewsFeedManager extends RecyclerView.Adapter<NewsFeedManager.ViewHo
         FetchNewsDataActionWrapper fetchNewsWrapper;
 
         if(direction == 1){
+
+            isFetching = true;
 
             HashMap<String, String> fetchNewsDataParamsUpdate = new HashMap<>();
             fetchNewsDataParamsUpdate.put("order", "desc");
@@ -211,6 +217,8 @@ public class NewsFeedManager extends RecyclerView.Adapter<NewsFeedManager.ViewHo
         }else if(direction == -1){
             feedList.clear();
             notifyDataSetChanged();
+
+            isFetching = true;
 
             HashMap<String, String> fetchNewsDataParams = new HashMap<>();
             fetchNewsDataParams.put("order", "desc");
@@ -261,6 +269,7 @@ public class NewsFeedManager extends RecyclerView.Adapter<NewsFeedManager.ViewHo
 
             textData.put("content", data.getStringExtra("ADD_NEWS_CONTENT"));
             textData.put("author", userData.getInt("USER_ID") +"");
+            textData.put("image_file", imageFile);
             textData.put("user_type", userData.getInt("USER_TYPE") +"");
 
             fileData.put(imageFile, byteArray);

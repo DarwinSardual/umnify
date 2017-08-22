@@ -44,6 +44,15 @@ public class StartActivity extends AppCompatActivity {
         if(!directory.exists())
             directory.mkdirs();
 
+        //File newsImageDirectory = this.getDir("umnify/images/feed/news/", Context.MODE_PRIVATE);
+        File newsImageDirectory = new File(directory.getAbsolutePath() + "/images/feed/news");
+        if(!newsImageDirectory.exists())
+            newsImageDirectory.mkdirs();
+
+        File blogImageDirectory = new File(directory.getAbsolutePath() + "/images/feed/blog");
+        if(!blogImageDirectory.exists())
+            blogImageDirectory.mkdirs();
+
         //handle start
         databaseConnection = UMnifyDbHelper.getInstance(this);
         handleUserCheck();
