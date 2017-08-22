@@ -65,9 +65,9 @@
                 <EditText
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
-                        android:hint="Username"
+                        android:hint="ID Number"
                         android:id="@+id/login_username_field"
-                        android:inputType="text"
+                        android:inputType="number"
                         android:drawableLeft="@drawable/login_user_icon"
                 />
             </android.support.design.widget.TextInputLayout>

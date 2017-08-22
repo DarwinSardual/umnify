@@ -62,7 +62,7 @@
             android:layout_height="wrap_content"
             android:layout_width="wrap_content"
             android:layout_margin="@dimen/activity_horizontal_margin"
-            android:src="@drawable/filled_star"
+            android:src="@drawable/blog_edit_icon"
             app:layout_anchor="@id/appBar"
             app:layout_anchorGravity="bottom|end" />
 </android.support.design.widget.CoordinatorLayout>
