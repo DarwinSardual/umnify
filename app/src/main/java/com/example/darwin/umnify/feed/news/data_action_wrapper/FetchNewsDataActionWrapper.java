@@ -9,6 +9,7 @@ import com.example.darwin.umnify.wrapper.DataHelper;
 import com.example.darwin.umnify.wrapper.WebServiceAction;
 import org.json.JSONObject;
 
+import java.io.IOException;
 import java.io.InputStream;
 import java.util.HashMap;
 
@@ -19,6 +20,7 @@ public class FetchNewsDataActionWrapper implements WebServiceAction {
     private InputStream inputStream;
     private WebServiceConnection connection;
     private Activity activity;
+    private String response;
 
     public FetchNewsDataActionWrapper(HashMap<String, String> textDataOutput, Activity activity, NewsFeedManager manager){
 
@@ -41,6 +43,13 @@ public class FetchNewsDataActionWrapper implements WebServiceAction {
         DataHelper.writeTextUpload(textDataOutput, connection);
         connection.flushOutputStream();
         inputStream = connection.getInputStream();
+        try{
+            response = DataHelper.parseStringFromStream(inputStream);
+        }catch (IOException e){
+            e.printStackTrace();
+        }
+
+
 
     }
 
@@ -48,7 +57,7 @@ public class FetchNewsDataActionWrapper implements WebServiceAction {
     public void processResult() {
 
         try {
-            String response = DataHelper.parseStringFromStream(inputStream);
+
             JSONObject str = new JSONObject(response);
             String data = str.getString("data");
 
