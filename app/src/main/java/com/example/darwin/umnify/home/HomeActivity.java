@@ -14,6 +14,7 @@ import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentManager;
 import android.support.v4.app.FragmentPagerAdapter;
 import android.support.v4.view.GravityCompat;
+import android.support.v4.view.ViewGroupCompat;
 import android.support.v4.view.ViewPager;
 import android.support.v4.widget.DrawerLayout;
 import android.support.v7.app.ActionBar;
@@ -23,6 +24,7 @@ import android.support.v7.widget.Toolbar;
 import android.util.Log;
 import android.view.MenuItem;
 import android.view.View;
+import android.view.ViewGroup;
 import android.widget.ImageView;
 import android.widget.TextView;
 import android.widget.Toast;
@@ -44,7 +46,6 @@ import com.example.darwin.umnify.start.StartActivity;
 import com.example.darwin.umnify.wrapper.WebServiceAction;
 
 import java.io.File;
-import java.io.IOException;
 import java.io.InputStream;
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -53,7 +54,6 @@ import java.util.List;
 public class HomeActivity extends AppCompatActivity {
 
     private DrawerLayout drawerLayout;
-    FloatingActionButton fab;
     private static final int ADD_NEWS_CODE = 1;
     private static final int ADD_BLOG_CODE = 2;
 
@@ -89,23 +89,26 @@ public class HomeActivity extends AppCompatActivity {
 
         HomeActivityLayout homeActivityLayout = new HomeActivityLayout(HomeActivity.this, USER_TYPE);
         drawerLayout = homeActivityLayout.getDrawerLayout();
+        if(USER_TYPE != AuthenticationCodes.GUEST_USER){
 
-        HashMap<String, String> textData = new HashMap<>();
-        textData.put("email", USER_EMAIL);
-        textData.put("name", USER_FIRSTNAME +" " + USER_LASTNAME);
+            HashMap<String, String> textData = new HashMap<>();
+            textData.put("email", USER_EMAIL);
+            textData.put("name", USER_FIRSTNAME +" " + USER_LASTNAME);
 
 
+            FetchUserImageDataActionWrapper fetchUserImageDataActionWrapper = new FetchUserImageDataActionWrapper(
+                    textData, null, homeActivityLayout.getUserNameView(), homeActivityLayout.getUserEmailView(),
+                    homeActivityLayout.getUserIconView());
 
-        FetchUserImageDataActionWrapper fetchUserImageDataActionWrapper = new FetchUserImageDataActionWrapper(
-            textData, null, homeActivityLayout.getUserNameView(), homeActivityLayout.getUserEmailView(),
-                homeActivityLayout.getUserIconView());
+            WebServiceAsync async = new WebServiceAsync();
+            async.execute(fetchUserImageDataActionWrapper);
 
-        WebServiceAsync async = new WebServiceAsync();
-        async.execute(fetchUserImageDataActionWrapper);
-
-        textData = null;
-        fetchUserImageDataActionWrapper = null;
-        async = null;
+            textData = null;
+            fetchUserImageDataActionWrapper = null;
+            async = null;
+        }else{
+            drawerLayout
+        }
     }
 
     @Override
@@ -127,7 +130,7 @@ public class HomeActivity extends AppCompatActivity {
         private ViewPager viewPager;
 
         private TabLayout tabLayout;
-        private AppCompatActivity activity;
+        private Activity activity;
         private DrawerLayout drawerLayout;
         private NavigationView navigationView;
 
@@ -136,18 +139,13 @@ public class HomeActivity extends AppCompatActivity {
         private TextView userEmailView;
         private View headerLayout;
         private FloatingActionButton fab;
-
-
         private int userType;
 
-        public HomeActivityLayout(AppCompatActivity activity, int userType){
+        public HomeActivityLayout(Activity activity, int userType){
             this.activity = activity;
             this.userType = userType;
 
-        }
-
-        private void setUpFromUserType(){
-
+            setUpFloatingActionButton();
             setUpToolbar();
             setUpViewPager();
             setUpTabLayout();
@@ -155,15 +153,6 @@ public class HomeActivity extends AppCompatActivity {
             setUpSupportActionBar();
             setUpNavigationView();
 
-
-            if(userType == AuthenticationCodes.SUPER_ADMIN_USER || userType == AuthenticationCodes.ADMIN_USER){
-                setUpFloatingActionButton();
-
-            }else if(userType == AuthenticationCodes.NORMAL_USER){
-
-            }else if(userType == AuthenticationCodes.GUEST_USER){
-
-            }
         }
 
         private void setUpToolbar(){
@@ -172,12 +161,20 @@ public class HomeActivity extends AppCompatActivity {
         }
 
         private void setUpFloatingActionButton(){
+
             fab = (FloatingActionButton) findViewById(R.id.home_fab);
+            // user type check
+            if(userType == AuthenticationCodes.GUEST_USER || userType == AuthenticationCodes.NORMAL_USER){
+                fab.hide();
+                fab.setEnabled(false);
+            }else{
+                fab.show();
+            }
         }
 
         private void setUpSupportActionBar(){
             actionBar = getSupportActionBar();
-            if (actionBar != null) {
+            if (actionBar != null && userType != AuthenticationCodes.GUEST_USER) {
                 actionBar.setHomeAsUpIndicator(R.drawable.drawer_icon);
                 actionBar.setDisplayHomeAsUpEnabled(true);
             }
@@ -187,33 +184,33 @@ public class HomeActivity extends AppCompatActivity {
             viewPager = (ViewPager) activity.findViewById(R.id.home_viewpager);
             viewPager.setOffscreenPageLimit(3);
 
-            final FabAction addNewsAction = new FabAction(activity, AddNewsActivity.class, null, HomeActivity.ADD_NEWS_CODE);
-            final FabAction addBlogAction = new FabAction(activity, AddBlogActivity.class, null, HomeActivity.ADD_BLOG_CODE);
+            // user type check according to fab
+            if(fab.isEnabled()){
+                final FabAction addNewsAction = new FabAction(activity, AddNewsActivity.class, null, HomeActivity.ADD_NEWS_CODE);
+                final FabAction addBlogAction = new FabAction(activity, AddBlogActivity.class, null, HomeActivity.ADD_BLOG_CODE);
+                // default position is 0
+                fab.setOnClickListener(addNewsAction);
 
-            // default position is 0
-            fab.setOnClickListener(addNewsAction);
+                viewPager.addOnPageChangeListener(new ViewPager.OnPageChangeListener() {
+                    @Override
+                    public void onPageScrolled(int position, float positionOffset, int positionOffsetPixels) {}
 
-            viewPager.addOnPageChangeListener(new ViewPager.OnPageChangeListener() {
-                @Override
-                public void onPageScrolled(int position, float positionOffset, int positionOffsetPixels) {}
-
-                @Override
-                public void onPageSelected(int position) {
-                    if(position == 0){
-                        fab.setOnClickListener(addNewsAction);
-                        fab.show();
-                    }else if(position == 1){
-                        fab.setOnClickListener(addBlogAction);
-                        fab.show();
-                    }else if(position == 2){
-                        fab.hide();
+                    @Override
+                    public void onPageSelected(int position) {
+                        if(position == 0){
+                            fab.setOnClickListener(addNewsAction);
+                            fab.show();
+                        }else if(position == 1){
+                            fab.setOnClickListener(addBlogAction);
+                            fab.show();
+                        }else if(position == 2){
+                            fab.hide();
+                        }
                     }
-                }
-
-                @Override
-                public void onPageScrollStateChanged(int state) {}
-            });
-
+                    @Override
+                    public void onPageScrollStateChanged(int state) {}
+                });
+            }
             setUpViewPagerAdapter();
         }
 
@@ -230,14 +227,19 @@ public class HomeActivity extends AppCompatActivity {
             blogFragment = new BlogFeedFragment();
             blogFragment.setArguments(args);
 
-            notificationsFragment = new NotificationsFeedFragment();
-            notificationsFragment.setArguments(args);
-
             Adapter adapter = new Adapter(getSupportFragmentManager());
 
             adapter.addFragment(newsFragment, "News Feed");
             adapter.addFragment(blogFragment, "Blogs");
-            adapter.addFragment(notificationsFragment, "Updates");
+
+            // user type check
+            if(userType != AuthenticationCodes.GUEST_USER){
+                notificationsFragment = new NotificationsFeedFragment();
+                notificationsFragment.setArguments(args);
+                adapter.addFragment(notificationsFragment, "Updates");
+            }
+
+
 
             viewPager.setAdapter(adapter);
         }
@@ -251,11 +253,17 @@ public class HomeActivity extends AppCompatActivity {
 
             tabLayout.getTabAt(0).setIcon(R.drawable.newsfeed_icon);
             tabLayout.getTabAt(1).setIcon(R.drawable.blogfeed_icon);
-            tabLayout.getTabAt(2).setIcon(R.drawable.notificationsfeed_icon);
             tabLayout.getTabAt(0).select();
+
+            if(userType != AuthenticationCodes.GUEST_USER){
+                tabLayout.getTabAt(2).setIcon(R.drawable.notificationsfeed_icon);
+            }
         }
 
         private void setUpNavigationView(){
+
+            if(userType == AuthenticationCodes.GUEST_USER)
+                return;
 
             navigationView = (NavigationView) activity.findViewById(R.id.home_navigation_view);
             headerLayout = navigationView.getHeaderView(0);
@@ -333,13 +341,12 @@ public class HomeActivity extends AppCompatActivity {
 
     private class Adapter extends FragmentPagerAdapter {
 
-        private final int size;
+        private int size = 0;
         private final List<Fragment> tabFragments = new ArrayList<Fragment>();
         private final List<String> tabFragmentTitles = new ArrayList<String>();
 
-        public Adapter(FragmentManager manager, int size){
+        public Adapter(FragmentManager manager){
             super(manager);
-            this.size = size;
         }
 
         @Override
@@ -352,6 +359,7 @@ public class HomeActivity extends AppCompatActivity {
 
             tabFragments.add(fragment);
             tabFragmentTitles.add(title);
+            size++;
         }
 
         @Override
