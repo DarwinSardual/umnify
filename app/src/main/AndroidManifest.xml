@@ -28,8 +28,6 @@
         </activity>
         <activity android:name=".calendar.CalendarActivity">
         </activity>
-        <activity android:name=".scratch.SampleConnActivity">
-        </activity>
         <activity android:name=".feed.blogs.BlogActivity">
         </activity>
         <activity android:name=".feed.news.NewsActivity">
@@ -50,8 +48,6 @@
         <activity android:name=".feed.news.AddNewsActivity">
         </activity>
         <activity android:name=".feed.blogs.AddBlogActivity">
-        </activity>
-        <activity android:name=".scratch.CollapsingToolbar">
         </activity>
         <activity android:name=".feed.news.NewsCommentActivity"
             android:theme="@style/NewsCommentThemeWithCorners">

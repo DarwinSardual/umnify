@@ -189,8 +189,6 @@ public class StartActivity extends AppCompatActivity {
                 }
 
                 finish();
-            }catch (IOException e){
-                e.printStackTrace();
             }catch (JSONException e){
                 e.printStackTrace();
             }

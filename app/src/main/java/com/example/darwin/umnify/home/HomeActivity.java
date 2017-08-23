@@ -29,6 +29,7 @@ import android.widget.Toast;
 import com.example.darwin.umnify.R;
 import com.example.darwin.umnify.async.WebServiceAsync;
 import com.example.darwin.umnify.authentication.AuthenticationAddress;
+import com.example.darwin.umnify.authentication.AuthenticationCodes;
 import com.example.darwin.umnify.calendar.CalendarActivity;
 import com.example.darwin.umnify.connection.WebServiceConnection;
 import com.example.darwin.umnify.database.UMnifyDbHelper;
@@ -39,7 +40,6 @@ import com.example.darwin.umnify.feed.news.AddNewsActivity;
 import com.example.darwin.umnify.feed.news.NewsFeedFragment;
 import com.example.darwin.umnify.feed.notifications.NotificationsFeedFragment;
 import com.example.darwin.umnify.groups.GroupsActivity;
-import com.example.darwin.umnify.scratch.CollapsingToolbar;
 import com.example.darwin.umnify.start.StartActivity;
 import com.example.darwin.umnify.wrapper.WebServiceAction;
 
@@ -73,7 +73,7 @@ public class HomeActivity extends AppCompatActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_home);
-        fab = (FloatingActionButton) findViewById(R.id.home_fab);
+
 
         Bundle extra = getIntent().getExtras();
 
@@ -87,7 +87,7 @@ public class HomeActivity extends AppCompatActivity {
 
         extra = null;
 
-        HomeActivityLayout homeActivityLayout = new HomeActivityLayout(HomeActivity.this);
+        HomeActivityLayout homeActivityLayout = new HomeActivityLayout(HomeActivity.this, USER_TYPE);
         drawerLayout = homeActivityLayout.getDrawerLayout();
 
         HashMap<String, String> textData = new HashMap<>();
@@ -135,9 +135,18 @@ public class HomeActivity extends AppCompatActivity {
         private TextView userNameView;
         private TextView userEmailView;
         private View headerLayout;
+        private FloatingActionButton fab;
 
-        public HomeActivityLayout(AppCompatActivity activity){
+
+        private int userType;
+
+        public HomeActivityLayout(AppCompatActivity activity, int userType){
             this.activity = activity;
+            this.userType = userType;
+
+        }
+
+        private void setUpFromUserType(){
 
             setUpToolbar();
             setUpViewPager();
@@ -145,11 +154,25 @@ public class HomeActivity extends AppCompatActivity {
             setDrawerLayout();
             setUpSupportActionBar();
             setUpNavigationView();
+
+
+            if(userType == AuthenticationCodes.SUPER_ADMIN_USER || userType == AuthenticationCodes.ADMIN_USER){
+                setUpFloatingActionButton();
+
+            }else if(userType == AuthenticationCodes.NORMAL_USER){
+
+            }else if(userType == AuthenticationCodes.GUEST_USER){
+
+            }
         }
 
         private void setUpToolbar(){
             toolbar = (Toolbar) activity.findViewById(R.id.home_toolbar);
             setSupportActionBar(toolbar);
+        }
+
+        private void setUpFloatingActionButton(){
+            fab = (FloatingActionButton) findViewById(R.id.home_fab);
         }
 
         private void setUpSupportActionBar(){
@@ -165,8 +188,7 @@ public class HomeActivity extends AppCompatActivity {
             viewPager.setOffscreenPageLimit(3);
 
             final FabAction addNewsAction = new FabAction(activity, AddNewsActivity.class, null, HomeActivity.ADD_NEWS_CODE);
-            //final FabAction addBlogAction = new FabAction(activity, AddBlogActivity.class, null, HomeActivity.ADD_BLOG_CODE);
-            final FabAction addBlogAction = new FabAction(activity, CollapsingToolbar.class, null, HomeActivity.ADD_BLOG_CODE);
+            final FabAction addBlogAction = new FabAction(activity, AddBlogActivity.class, null, HomeActivity.ADD_BLOG_CODE);
 
             // default position is 0
             fab.setOnClickListener(addNewsAction);
@@ -294,6 +316,10 @@ public class HomeActivity extends AppCompatActivity {
         public TextView getUserEmailView() {
             return userEmailView;
         }
+
+        public FloatingActionButton getFab() {
+            return fab;
+        }
     }
 
     private void deleteDirectoryRecursive(File directory){
@@ -307,13 +333,13 @@ public class HomeActivity extends AppCompatActivity {
 
     private class Adapter extends FragmentPagerAdapter {
 
-        //private final int size = 2;
-        private final int size = 3;
+        private final int size;
         private final List<Fragment> tabFragments = new ArrayList<Fragment>();
         private final List<String> tabFragmentTitles = new ArrayList<String>();
 
-        public Adapter(FragmentManager manager){
+        public Adapter(FragmentManager manager, int size){
             super(manager);
+            this.size = size;
         }
 
         @Override

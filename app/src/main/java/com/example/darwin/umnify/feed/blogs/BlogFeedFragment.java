@@ -64,8 +64,5 @@ public class BlogFeedFragment extends Fragment{
 
         Bundle args = super.getArguments();
         manager.addBlog(data, args);
-
-
     }
-
 }

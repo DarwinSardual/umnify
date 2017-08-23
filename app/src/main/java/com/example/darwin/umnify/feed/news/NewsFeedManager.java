@@ -24,6 +24,7 @@ import android.widget.TextView;
 import android.support.v7.widget.RecyclerView;
 import com.example.darwin.umnify.R;;
 import com.example.darwin.umnify.async.WebServiceAsync;
+import com.example.darwin.umnify.feed.FeedManager;
 import com.example.darwin.umnify.feed.news.data_action_wrapper.*;
 import org.json.JSONArray;
 import org.json.JSONException;
@@ -34,14 +35,12 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 
-public class NewsFeedManager extends RecyclerView.Adapter<NewsFeedManager.ViewHolder> {
+public class NewsFeedManager extends FeedManager<NewsFeedManager.ViewHolder> {
 
-    private SwipeRefreshLayout swipeRefreshLayout;
 
     private List<News> feedList;
     public HashMap<News, ViewHolder> newsViewHolderMap;
 
-    private Activity activity;
     private Bundle userData;
 
     public boolean isFetching = false;
@@ -51,14 +50,14 @@ public class NewsFeedManager extends RecyclerView.Adapter<NewsFeedManager.ViewHo
 
     public NewsFeedManager(Activity activity, SwipeRefreshLayout swipeRefreshLayout, RecyclerView recyclerView, Bundle userData) {
 
-        this.activity = activity;
-        this.swipeRefreshLayout = swipeRefreshLayout;
+        super(activity, swipeRefreshLayout, recyclerView);
+
         this.userData = userData;
         this.userData = userData;
         newsViewHolderMap = new HashMap<>();
 
-        filledStar = ContextCompat.getDrawable(NewsFeedManager.this.activity, R.drawable.filled_star);
-        emptyStar = ContextCompat.getDrawable(NewsFeedManager.this.activity, R.drawable.empty_star);
+        filledStar = ContextCompat.getDrawable(NewsFeedManager.super.getActivity(), R.drawable.filled_star);
+        emptyStar = ContextCompat.getDrawable(NewsFeedManager.super.getActivity(), R.drawable.empty_star);
 
         feedList = new ArrayList<>();
 
@@ -142,10 +141,10 @@ public class NewsFeedManager extends RecyclerView.Adapter<NewsFeedManager.ViewHo
             holder.newsCommentButton.setOnClickListener(new View.OnClickListener() {
                 @Override
                 public void onClick(View view) {
-                    Intent intent = new Intent(NewsFeedManager.this.activity, NewsCommentActivity.class);
+                    Intent intent = new Intent(NewsFeedManager.super.getActivity(), NewsCommentActivity.class);
                     intent.putExtra("NEWS_ID", news.getId());
                     intent.putExtra("NEWS_STARS", news.getStars() + "");
-                    NewsFeedManager.this.activity.startActivity(intent);
+                    NewsFeedManager.super.getActivity().startActivity(intent);
                 }
             });
         }
@@ -156,42 +155,45 @@ public class NewsFeedManager extends RecyclerView.Adapter<NewsFeedManager.ViewHo
         return feedList.size();
     }
 
-    public void addEntries(String data) throws JSONException{
+    @Override
+    public void addFeedEntry(String jsonData) throws JSONException {
 
         FetchAuthorImageDataActionWrapper fetchAuthorImageDataActionWrapper;
         FetchNewsImageDataActionWrapper fetchNewsImageDataActionWrapper;
         WebServiceAsync asyncFetchAuthorImage;
         WebServiceAsync asyncFetchNewsImage;
-        News news;
+
+        JSONObject newsData = new JSONObject(jsonData);
+        News news = NewsHelper.createNewsFromJSON(newsData, feedList.size());
+
+        fetchAuthorImageDataActionWrapper = new FetchAuthorImageDataActionWrapper( news, super.getActivity(), this);
+        fetchNewsImageDataActionWrapper = new FetchNewsImageDataActionWrapper(news, super.getActivity(), this);
+        feedList.add(news);
+        notifyItemInserted(news.getIndex());
+
+        asyncFetchAuthorImage = new WebServiceAsync();
+        asyncFetchAuthorImage.execute(fetchAuthorImageDataActionWrapper);
+        asyncFetchNewsImage = new WebServiceAsync();
+        asyncFetchNewsImage.execute(fetchNewsImageDataActionWrapper);
+    }
+
+    @Override
+    public void addFeedEntries(String data) throws JSONException{
+
 
         JSONArray dataList = new JSONArray(data);
 
         for(int i = 0; i < dataList.length(); i++){
 
-            JSONObject newsData = new JSONObject(dataList.getString(i));
-            news = NewsHelper.createNewsFromJSON(newsData, feedList.size());
-            fetchAuthorImageDataActionWrapper = new FetchAuthorImageDataActionWrapper( news, activity, this);
-            fetchNewsImageDataActionWrapper = new FetchNewsImageDataActionWrapper(news, activity, this);
-            feedList.add(news);
-            notifyItemInserted(news.getIndex());
-
-            asyncFetchAuthorImage = new WebServiceAsync();
-            asyncFetchAuthorImage.execute(fetchAuthorImageDataActionWrapper);
-            asyncFetchNewsImage = new WebServiceAsync();
-            asyncFetchNewsImage.execute(fetchNewsImageDataActionWrapper);
+            addFeedEntry(dataList.getString(i));
         }
 
-
-        news = null;
-        fetchAuthorImageDataActionWrapper = null;
-        fetchNewsImageDataActionWrapper = null;
-        asyncFetchAuthorImage = null;
-        asyncFetchNewsImage = null;
         dataList = null;
         isFetching = false;
-        swipeRefreshLayout.setRefreshing(false);
+        super.getSwipeRefreshLayout().setRefreshing(false);
     }
 
+    @Override
     public void updateFeed(int direction){
 
         if(isFetching) return;
@@ -209,7 +211,7 @@ public class NewsFeedManager extends RecyclerView.Adapter<NewsFeedManager.ViewHo
             fetchNewsDataParamsUpdate.put("limit", "3");
             fetchNewsDataParamsUpdate.put("id", "-1");
 
-            fetchNewsWrapper = new FetchNewsDataActionWrapper(fetchNewsDataParamsUpdate, activity, this);
+            fetchNewsWrapper = new FetchNewsDataActionWrapper(fetchNewsDataParamsUpdate, super.getActivity(), this);
             asyncFetchNews.execute(fetchNewsWrapper);
 
             fetchNewsDataParamsUpdate = null;
@@ -226,7 +228,7 @@ public class NewsFeedManager extends RecyclerView.Adapter<NewsFeedManager.ViewHo
             fetchNewsDataParams.put("limit", "5");
             fetchNewsDataParams.put("id", "-1");
 
-            fetchNewsWrapper = new FetchNewsDataActionWrapper(fetchNewsDataParams, activity, this);
+            fetchNewsWrapper = new FetchNewsDataActionWrapper(fetchNewsDataParams, super.getActivity(), this);
             asyncFetchNews.execute(fetchNewsWrapper);
 
             fetchNewsDataParams = null;
@@ -247,7 +249,7 @@ public class NewsFeedManager extends RecyclerView.Adapter<NewsFeedManager.ViewHo
         if(uri != null){
 
             returnCursor =
-                    activity.getContentResolver()
+                    super.getActivity().getContentResolver()
                             .query(uri,
                                     null, null,
                                     null, null);
@@ -259,7 +261,7 @@ public class NewsFeedManager extends RecyclerView.Adapter<NewsFeedManager.ViewHo
             byte[] byteArray = null;
 
             try{
-                image = MediaStore.Images.Media.getBitmap(activity.getContentResolver(), uri);
+                image = MediaStore.Images.Media.getBitmap(super.getActivity().getContentResolver(), uri);
                 ByteArrayOutputStream stream = new ByteArrayOutputStream();
                 image.compress(Bitmap.CompressFormat.JPEG, 100, stream);
                 byteArray = stream.toByteArray();
@@ -281,7 +283,7 @@ public class NewsFeedManager extends RecyclerView.Adapter<NewsFeedManager.ViewHo
         }
 
         AddNewsDataActionWrapper addNewsDataActionWrapper = new AddNewsDataActionWrapper(textData,
-                fileData, activity);
+                fileData, super.getActivity());
 
         WebServiceAsync asyncAddNews = new WebServiceAsync();
         asyncAddNews.execute(addNewsDataActionWrapper);
@@ -304,7 +306,7 @@ public class NewsFeedManager extends RecyclerView.Adapter<NewsFeedManager.ViewHo
         public void onClick(View view) {
 
             StarredNewsDataActionWrapper starredNewsDataActionWrapper  = new StarredNewsDataActionWrapper(textDataOutput, news,
-                    view, NewsFeedManager.this.activity, NewsFeedManager.this);
+                    view, NewsFeedManager.super.getActivity(), NewsFeedManager.this);
 
             WebServiceAsync asyncStarredNews = new WebServiceAsync();
             asyncStarredNews.execute(starredNewsDataActionWrapper);

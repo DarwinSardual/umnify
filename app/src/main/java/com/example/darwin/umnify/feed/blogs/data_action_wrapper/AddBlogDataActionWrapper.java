@@ -18,6 +18,7 @@ public class AddBlogDataActionWrapper implements WebServiceAction{
 
     private InputStream inputStream;
     private WebServiceConnection connection = null;
+    String response;
 
     public AddBlogDataActionWrapper(HashMap<String, String> textDataOutput,
                                     HashMap<String, byte[]> fileDataOutput,
@@ -44,6 +45,9 @@ public class AddBlogDataActionWrapper implements WebServiceAction{
             connection.flushOutputStream();
 
             inputStream = connection.getInputStream();
+            response = DataHelper.parseStringFromStream(inputStream);
+        }else{
+
         }
 
     }
@@ -52,7 +56,7 @@ public class AddBlogDataActionWrapper implements WebServiceAction{
     public void processResult() {
 
         try{
-            String response = DataHelper.parseStringFromStream(inputStream);
+
             Log.e("Add blog", response);
         }catch (Exception e){
             e.printStackTrace();

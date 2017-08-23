@@ -11,7 +11,12 @@
                 android:icon="@drawable/groups_icon"
                 android:tint="@color/button_grey"
                 android:id="@+id/navigation_groups"
-                android:title="Groups" />
+                android:title="Groups">
+                <item
+                    android:title="Submenu">
+
+                </item>
+        </item>
         <item
                 android:icon="@drawable/calendar_icon"
                 android:tint="@color/button_grey"

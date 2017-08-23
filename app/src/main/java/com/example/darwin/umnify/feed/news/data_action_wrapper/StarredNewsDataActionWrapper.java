@@ -28,6 +28,8 @@ public class StarredNewsDataActionWrapper implements WebServiceAction {
     private NewsFeedManager manager;
     private Activity activity;
 
+    private String response;
+
     public StarredNewsDataActionWrapper(HashMap<String, String> textDataOuput, News news,
                                         View source, Activity activity, NewsFeedManager manager){
 
@@ -62,6 +64,7 @@ public class StarredNewsDataActionWrapper implements WebServiceAction {
         }
 
         inputStream = connection.getInputStream();
+        response = DataHelper.parseStringFromStream(inputStream);
 
     }
 
@@ -69,8 +72,6 @@ public class StarredNewsDataActionWrapper implements WebServiceAction {
     public void processResult() {
 
         try{
-            String response = DataHelper.parseStringFromStream(inputStream);
-
             if(response != null){
 
                 JSONObject json = new JSONObject(response);
@@ -103,8 +104,6 @@ public class StarredNewsDataActionWrapper implements WebServiceAction {
                     }
                 }
             }
-        }catch (IOException e){
-            e.printStackTrace();
         }catch (JSONException e){
             e.printStackTrace();
         }

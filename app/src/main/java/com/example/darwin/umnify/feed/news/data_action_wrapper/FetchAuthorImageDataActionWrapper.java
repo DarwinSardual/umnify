@@ -35,8 +35,13 @@ public class FetchAuthorImageDataActionWrapper implements WebServiceAction {
         connection = new WebServiceConnection(AuthenticationAddress.AVATAR_IMAGE_FOLDER + "/" + news.getAuthorImageFile(), activity,
                 true, true, true);
 
-        inputStream = connection.getInputStream();
-        image = BitmapFactory.decodeStream(inputStream);
+        if(connection != null){
+            inputStream = connection.getInputStream();
+            image = BitmapFactory.decodeStream(inputStream);
+        }else{
+
+        }
+
     }
 
     @Override

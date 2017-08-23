@@ -37,8 +37,13 @@ public class FetchBlogImageDataActionWrapper implements WebServiceAction{
         connection = new WebServiceConnection(AuthenticationAddress.BLOG_IMAGE_FOLDER + "/" + tile.getImageFile(),
                 activity, true, true, false);
 
-        inputStream = connection.getInputStream();
-        image = BitmapFactory.decodeStream(inputStream);
+        if(connection != null){
+            inputStream = connection.getInputStream();
+            image = BitmapFactory.decodeStream(inputStream);
+        }else{
+
+        }
+
     }
 
     @Override

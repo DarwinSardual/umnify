@@ -19,6 +19,7 @@ public class FetchBlogTileDataActionWrapper implements WebServiceAction {
 
     private InputStream inputStream;
     private WebServiceConnection connection = null;
+    private String response;
 
     public FetchBlogTileDataActionWrapper(HashMap<String, String> textDataOutput,
                                           Activity activity, BlogFeedManager manager){
@@ -42,6 +43,7 @@ public class FetchBlogTileDataActionWrapper implements WebServiceAction {
             connection.flushOutputStream();
 
             inputStream = connection.getInputStream();
+            response = DataHelper.parseStringFromStream(inputStream);
         }
     }
 
@@ -50,11 +52,9 @@ public class FetchBlogTileDataActionWrapper implements WebServiceAction {
 
         try {
 
-            String response = DataHelper.parseStringFromStream(inputStream);
             JSONObject json = new JSONObject(response);
             String data = json.getString("data");
-
-            manager.addEntries(data);
+            manager.addFeedEntries(data);
 
         }catch (Exception e){
             e.printStackTrace();

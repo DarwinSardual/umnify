@@ -18,6 +18,7 @@ public class AddNewsDataActionWrapper implements WebServiceAction {
     private WebServiceConnection connection;
     private InputStream inputStream;
     private Activity activity;
+    private String response;
 
     public AddNewsDataActionWrapper(HashMap<String, String> textDataOutput, HashMap<String, byte[]> fileDataOutput,
                                     Activity activity){
@@ -33,24 +34,23 @@ public class AddNewsDataActionWrapper implements WebServiceAction {
         connection = new WebServiceConnection(AuthenticationAddress.ADD_NEWS, activity,
                 true, true, true);
 
-        connection.addAuthentication();
-        DataHelper.writeFileUpload("image", fileDataOutput, connection);
-        DataHelper.writeTextUpload(textDataOutput, connection);
-        connection.flushOutputStream();
+        if(connection != null){
 
-        inputStream = connection.getInputStream();
+            connection.addAuthentication();
+            DataHelper.writeFileUpload("image", fileDataOutput, connection);
+            DataHelper.writeTextUpload(textDataOutput, connection);
+            connection.flushOutputStream();
+
+            inputStream = connection.getInputStream();
+            response = DataHelper.parseStringFromStream(inputStream);
+        }
     }
 
     @Override
     public void processResult() {
 
-        try{
 
-            String response = DataHelper.parseStringFromStream(inputStream);
             Log.e("AddNewsData", response);
-        }catch (IOException e){
-            e.printStackTrace();
-        }
 
     }
 }

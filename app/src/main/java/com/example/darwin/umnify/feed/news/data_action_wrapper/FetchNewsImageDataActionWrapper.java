@@ -32,8 +32,13 @@ public class FetchNewsImageDataActionWrapper implements WebServiceAction {
 
         connection = new WebServiceConnection(AuthenticationAddress.NEWS_IMAGE_FOLDER + "/" + news.getImageFile(), activity,
                 true, true, true);
-        inputStream = connection.getInputStream();
-        image = BitmapFactory.decodeStream(inputStream);
+
+        if(connection != null){
+            inputStream = connection.getInputStream();
+            image = BitmapFactory.decodeStream(inputStream);
+        }else{
+
+        }
     }
 
     @Override

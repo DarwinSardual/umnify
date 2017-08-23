@@ -25,22 +25,31 @@ public class DataHelper {
         }
     }
 
-    public static String parseStringFromStream(InputStream inputStream) throws IOException{
+    public static String parseStringFromStream(InputStream inputStream){
 
         if(inputStream == null)
             return null;
 
-        BufferedReader reader = new BufferedReader(new InputStreamReader(inputStream));
-        String buffer = "";
+        try{
 
-        while(true){
+            BufferedReader reader = new BufferedReader(new InputStreamReader(inputStream));
+            String buffer = "";
 
-            String temp = reader.readLine();
-            if(temp != null)
-                buffer += temp;
-            else break;
+            while(true){
+
+                String temp = reader.readLine();
+                if(temp != null)
+                    buffer += temp;
+                else break;
+            }
+
+            return buffer;
+
+        }catch (IOException e){
+            e.printStackTrace();
+            return null;
         }
 
-        return buffer;
+
     }
 }

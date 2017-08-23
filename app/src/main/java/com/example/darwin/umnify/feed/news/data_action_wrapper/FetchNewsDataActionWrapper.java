@@ -39,18 +39,17 @@ public class FetchNewsDataActionWrapper implements WebServiceAction {
         connection = new WebServiceConnection(AuthenticationAddress.FETCH_NEWS, activity,
                 true, true, true);
 
-        connection.addAuthentication();
-        DataHelper.writeTextUpload(textDataOutput, connection);
-        connection.flushOutputStream();
-        inputStream = connection.getInputStream();
-        try{
+        if(connection != null){
+
+            connection.addAuthentication();
+            DataHelper.writeTextUpload(textDataOutput, connection);
+            connection.flushOutputStream();
+            inputStream = connection.getInputStream();
+
             response = DataHelper.parseStringFromStream(inputStream);
-        }catch (IOException e){
-            e.printStackTrace();
+        }else{
+
         }
-
-
-
     }
 
     @Override
@@ -61,7 +60,7 @@ public class FetchNewsDataActionWrapper implements WebServiceAction {
             JSONObject str = new JSONObject(response);
             String data = str.getString("data");
 
-            manager.addEntries(data);
+            manager.addFeedEntries(data);
             manager.isFetching = false;
         }catch (Exception e){
             e.printStackTrace();

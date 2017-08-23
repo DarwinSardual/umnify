@@ -29,6 +29,7 @@ public class FetchBlogDataActionWrapper implements WebServiceAction {
     private int id;
     private String heading;
     private String imageFile;
+    private String response;
 
     public FetchBlogDataActionWrapper(int id, String heading, String imageFile,
                                       HashMap<String, String> textDataOutput,
@@ -54,11 +55,17 @@ public class FetchBlogDataActionWrapper implements WebServiceAction {
         connection = new WebServiceConnection(AuthenticationAddress.FETCH_BLOGS, activity,
                 true, true, true);
 
-        connection.addAuthentication();
-        DataHelper.writeTextUpload(textDataOutput, connection);
-        connection.flushOutputStream();
+        if(connection != null){
+            connection.addAuthentication();
+            DataHelper.writeTextUpload(textDataOutput, connection);
+            connection.flushOutputStream();
 
-        inputStream = connection.getInputStream();
+            inputStream = connection.getInputStream();
+            response = DataHelper.parseStringFromStream(inputStream);
+        }else{
+
+        }
+
     }
 
     @Override
@@ -66,7 +73,7 @@ public class FetchBlogDataActionWrapper implements WebServiceAction {
 
         try{
 
-            String response = DataHelper.parseStringFromStream(inputStream);
+
             Log.e("fetch blog", response);
 
             JSONObject json = new JSONObject(response);
@@ -99,11 +106,8 @@ public class FetchBlogDataActionWrapper implements WebServiceAction {
                 }
             }
 
-        }catch (JSONException e){
+        }catch (JSONException e) {
             e.printStackTrace();
-        }catch (IOException i){
-            i.printStackTrace();
         }
-
     }
 }

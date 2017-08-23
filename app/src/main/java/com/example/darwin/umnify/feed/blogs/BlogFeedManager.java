@@ -10,7 +10,6 @@ import android.provider.MediaStore;
 import android.provider.OpenableColumns;
 import android.support.v4.widget.SwipeRefreshLayout;
 import android.support.v7.widget.RecyclerView;
-import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -19,12 +18,9 @@ import android.widget.RelativeLayout;
 import android.widget.TextView;
 
 import com.example.darwin.umnify.R;
-//import com.example.darwin.umnify.connection.RemoteDbConn;
 import com.example.darwin.umnify.async.WebServiceAsync;
-import com.example.darwin.umnify.authentication.AuthenticationAddress;
-import com.example.darwin.umnify.authentication.AuthenticationKeys;
 
-import com.example.darwin.umnify.connection.WebServiceConnection;
+import com.example.darwin.umnify.feed.FeedManager;
 import com.example.darwin.umnify.feed.blogs.data_action_wrapper.AddBlogDataActionWrapper;
 import com.example.darwin.umnify.feed.blogs.data_action_wrapper.FetchBlogImageDataActionWrapper;
 import com.example.darwin.umnify.feed.blogs.data_action_wrapper.FetchBlogTileDataActionWrapper;
@@ -33,32 +29,20 @@ import org.json.JSONException;
 import org.json.JSONObject;
 
 import java.io.*;
-import java.net.HttpURLConnection;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 
-public class BlogFeedManager extends RecyclerView.Adapter<BlogFeedManager.ViewHolder>{
+//public class BlogFeedManager extends RecyclerView.Adapter<BlogFeedManager.ViewHolder>
 
-    private SwipeRefreshLayout swipeRefreshLayout;
-    private RecyclerView recyclerView;
+public class BlogFeedManager extends FeedManager<BlogFeedManager.ViewHolder>{
 
     private List<BlogTile> feedList;
-    //private BlogFeedAsync blogHandler;
-
     private boolean isFetching = false;
-
-    private String crlf = "\r\n";
-    private String twoHyphens = "--";
-    private String boundary = "*****";
-
-    private Activity activity;
 
     public BlogFeedManager(Activity activity, SwipeRefreshLayout swipeRefreshLayout, RecyclerView recyclerView){
 
-        this.activity = activity;
-        this.swipeRefreshLayout = swipeRefreshLayout;
-        this.recyclerView = recyclerView;
+        super(activity, swipeRefreshLayout, recyclerView);
 
         feedList = new ArrayList<>();
 
@@ -127,38 +111,44 @@ public class BlogFeedManager extends RecyclerView.Adapter<BlogFeedManager.ViewHo
         return feedList.size();
     }
 
-    public void addEntries(String data) throws JSONException{
+    @Override
+    public void addFeedEntry(String jsonData)throws JSONException{
+
+        FetchBlogImageDataActionWrapper fetchBlogImageDataActionWrapper;
+        WebServiceAsync asyncFetchBlogImage;
+
+        JSONObject blogData = new JSONObject(jsonData);
+        BlogTile blogTile = BlogHelper.createBlogTileFromJSON(blogData, feedList.size());
+        fetchBlogImageDataActionWrapper = new FetchBlogImageDataActionWrapper(blogTile,
+                super.getActivity(), this);
+
+        feedList.add(blogTile);
+        notifyItemInserted(blogTile.getIndex());
+
+        asyncFetchBlogImage = new WebServiceAsync();
+        asyncFetchBlogImage.execute(fetchBlogImageDataActionWrapper);
+
+    }
+
+    @Override
+    public void addFeedEntries(String data) throws JSONException{
 
         /* Everytime we add an entry we save it to the database
          * Save the image in the internal folder for caching */
 
         JSONArray dataList = new JSONArray(data);
-        WebServiceAsync asyncFetchBlogImage;
-        FetchBlogImageDataActionWrapper fetchBlogImageDataActionWrapper;
-        int temp = feedList.size();
-
         for(int i = 0; i < dataList.length(); i++){
 
-            JSONObject blogData = new JSONObject(dataList.getString(i));
-            BlogTile blogTile = BlogHelper.createBlogTileFromJSON(blogData, feedList.size());
-            fetchBlogImageDataActionWrapper = new FetchBlogImageDataActionWrapper(blogTile,
-                    activity, this);
+            addFeedEntry(dataList.getString(i));
 
-            feedList.add(blogTile);
-            notifyItemInserted(blogTile.getIndex());
-
-            /* We fetch image here
-            *  before doing any rescaling ie. thumbnails, save the original image first */
-
-            asyncFetchBlogImage = new WebServiceAsync();
-            asyncFetchBlogImage.execute(fetchBlogImageDataActionWrapper);
         }
 
         isFetching = false;
-        swipeRefreshLayout.setRefreshing(false);
+        super.getSwipeRefreshLayout().setRefreshing(false);
         dataList = null;
     }
 
+    @Override
     public void updateFeed(int direction){
 
         if(isFetching) return;
@@ -170,7 +160,6 @@ public class BlogFeedManager extends RecyclerView.Adapter<BlogFeedManager.ViewHo
         fetchBlogTextData.put("type", "tile");
         fetchBlogTextData.put("order", "desc");
 
-
         if(direction == 1){
 
             isFetching = true;
@@ -179,7 +168,7 @@ public class BlogFeedManager extends RecyclerView.Adapter<BlogFeedManager.ViewHo
             String oddEven = feedList.size()/2 ==0? "2":"3";
             fetchBlogTextData.put("limit", oddEven);
             fetchBlogTileDataActionWrapper = new FetchBlogTileDataActionWrapper(fetchBlogTextData,
-                    activity, this);
+                    super.getActivity(), this);
 
             asyncFetchBlog.execute(fetchBlogTileDataActionWrapper);
 
@@ -193,7 +182,7 @@ public class BlogFeedManager extends RecyclerView.Adapter<BlogFeedManager.ViewHo
             fetchBlogTextData.put("limit", "8");
 
             fetchBlogTileDataActionWrapper = new FetchBlogTileDataActionWrapper(fetchBlogTextData,
-                    activity, this);
+                    super.getActivity(), this);
 
             asyncFetchBlog.execute(fetchBlogTileDataActionWrapper);
 
@@ -215,7 +204,7 @@ public class BlogFeedManager extends RecyclerView.Adapter<BlogFeedManager.ViewHo
 
         if(uri != null){
 
-            cursor = activity.getContentResolver().query(uri,
+            cursor = super.getActivity().getContentResolver().query(uri,
                     null, null,
                     null, null);
 
@@ -227,7 +216,7 @@ public class BlogFeedManager extends RecyclerView.Adapter<BlogFeedManager.ViewHo
             byte[] byteArray = null;
 
             try{
-                image = MediaStore.Images.Media.getBitmap(activity.getContentResolver(), uri);
+                image = MediaStore.Images.Media.getBitmap(super.getActivity().getContentResolver(), uri);
                 ByteArrayOutputStream stream = new ByteArrayOutputStream();
                 image.compress(Bitmap.CompressFormat.JPEG, 100, stream);
                 byteArray = stream.toByteArray();
@@ -252,7 +241,7 @@ public class BlogFeedManager extends RecyclerView.Adapter<BlogFeedManager.ViewHo
         }
 
         AddBlogDataActionWrapper addBlogDataActionWrapper = new AddBlogDataActionWrapper(textData,
-                fileData, activity);
+                fileData, super.getActivity());
 
         WebServiceAsync asyncAddBlog = new WebServiceAsync();
         asyncAddBlog.execute(addBlogDataActionWrapper);

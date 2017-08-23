@@ -9,6 +9,7 @@ import com.example.darwin.umnify.R;
 class LoginActivityLayout{
 
     private Button login;
+    private Button guest;
     private EditText usernameField;
     private EditText passwordField;
     private Activity activity;
@@ -26,10 +27,14 @@ class LoginActivityLayout{
         setLoginButton();
         setUsernameField();
         setPasswordField();
+        setGuestButton();
     }
 
     private void setLoginButton(){
         login = (Button) activity.findViewById(R.id.login);
+    }
+    private void setGuestButton(){
+        guest = (Button) activity.findViewById(R.id.guest);
     }
 
     private void setUsernameField(){
@@ -50,6 +55,10 @@ class LoginActivityLayout{
     public EditText getUsernameField(){
 
         return usernameField;
+    }
+
+    public Button getGuestButton() {
+        return guest;
     }
 
     public EditText getPasswordField() {

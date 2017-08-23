@@ -14,7 +14,6 @@ import com.example.darwin.umnify.R;
 import com.example.darwin.umnify.async.WebServiceAsync;
 import com.example.darwin.umnify.authentication.AuthenticationKeys;
 import com.example.darwin.umnify.feed.blogs.data_action_wrapper.FetchBlogDataActionWrapper;
-import com.example.darwin.umnify.scratch.CollapsingToolbar;
 
 import java.io.*;
 import java.net.HttpURLConnection;
