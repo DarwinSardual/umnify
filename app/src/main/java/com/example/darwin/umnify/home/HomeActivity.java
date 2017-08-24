@@ -14,7 +14,6 @@ import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentManager;
 import android.support.v4.app.FragmentPagerAdapter;
 import android.support.v4.view.GravityCompat;
-import android.support.v4.view.ViewGroupCompat;
 import android.support.v4.view.ViewPager;
 import android.support.v4.widget.DrawerLayout;
 import android.support.v7.app.ActionBar;
@@ -24,42 +23,35 @@ import android.support.v7.widget.Toolbar;
 import android.util.Log;
 import android.view.MenuItem;
 import android.view.View;
-import android.view.ViewGroup;
 import android.widget.ImageView;
 import android.widget.TextView;
 import android.widget.Toast;
 import com.example.darwin.umnify.R;
-import com.example.darwin.umnify.async.WebServiceAsync;
-import com.example.darwin.umnify.authentication.AuthenticationAddress;
 import com.example.darwin.umnify.authentication.AuthenticationCodes;
 import com.example.darwin.umnify.calendar.CalendarActivity;
-import com.example.darwin.umnify.connection.WebServiceConnection;
 import com.example.darwin.umnify.database.UMnifyDbHelper;
 import com.example.darwin.umnify.feed.blogs.AddBlogActivity;
-//import com.example.darwin.umnify.feed.blogs.BlogFeedFragment;
 import com.example.darwin.umnify.feed.blogs.BlogFeedFragment;
 import com.example.darwin.umnify.feed.news.AddNewsActivity;
 import com.example.darwin.umnify.feed.news.NewsFeedFragment;
 import com.example.darwin.umnify.feed.notifications.NotificationsFeedFragment;
 import com.example.darwin.umnify.groups.GroupsActivity;
 import com.example.darwin.umnify.start.StartActivity;
-import com.example.darwin.umnify.wrapper.WebServiceAction;
 
 import java.io.File;
-import java.io.InputStream;
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.List;
 
 public class HomeActivity extends AppCompatActivity {
 
-    private DrawerLayout drawerLayout;
     private static final int ADD_NEWS_CODE = 1;
     private static final int ADD_BLOG_CODE = 2;
 
     private NewsFeedFragment newsFragment;
     private BlogFeedFragment blogFragment;
     private NotificationsFeedFragment notificationsFragment;
+
+    private Bundle userData;
 
     private int USER_ID;
     private int USER_TYPE;
@@ -69,46 +61,58 @@ public class HomeActivity extends AppCompatActivity {
     private String USER_EMAIL;
     private String USER_IMAGE_FILE;
 
+    private DrawerLayout drawerLayout;
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        setContentView(R.layout.activity_home);
+         userData = getIntent().getExtras();
+
+        if(userData != null){
+
+            USER_TYPE = userData.getInt("USER_TYPE");
+            if(USER_TYPE == AuthenticationCodes.GUEST_USER){
+
+                setContentView(R.layout.activity_home_guest);
+                HomeActivityControllerGuest homeActivityManagerGuest = new HomeActivityControllerGuest(this);
+                homeActivityManagerGuest.init();
+
+            }else if(USER_TYPE == AuthenticationCodes.NORMAL_USER ||
+                    USER_TYPE == AuthenticationCodes.ADMIN_USER ||
+                    USER_TYPE == AuthenticationCodes.SUPER_ADMIN_USER){
+
+                USER_ID = userData.getInt("USER_ID");
+                USER_PASSWORD = userData.getString("USER_PASSWORD");
+                USER_FIRSTNAME = userData.getString("USER_FIRSTNAME");
+                USER_LASTNAME = userData.getString("USER_LASTNAME");
+                USER_EMAIL = userData.getString("USER_EMAIL");
+                USER_IMAGE_FILE = userData.getString("USER_IMAGE_FILE");
+
+                if(USER_TYPE == AuthenticationCodes.NORMAL_USER){
+
+                    setContentView(R.layout.activity_home_normal);
+                    HomeActivityControllerNormal homeActivityControllerNormal = new HomeActivityControllerNormal(this, userData);
+                    homeActivityControllerNormal.init();
+                    drawerLayout = homeActivityControllerNormal.getDrawerLayout();
+                }else if(USER_TYPE == AuthenticationCodes.ADMIN_USER){
+
+                    setContentView(R.layout.activity_home_admin);
+                    HomeActivityControllerAdmin homeActivityControllerAdmin = new HomeActivityControllerAdmin(this, userData);
+                    homeActivityControllerAdmin.init();
+                    drawerLayout = homeActivityControllerAdmin.getDrawerLayout();
+                }
 
 
-        Bundle extra = getIntent().getExtras();
-
-        USER_ID = extra.getInt("USER_ID");
-        USER_TYPE = extra.getInt("USER_TYPE");
-        USER_PASSWORD = extra.getString("USER_PASSWORD");
-        USER_FIRSTNAME = extra.getString("USER_FIRSTNAME");
-        USER_LASTNAME = extra.getString("USER_LASTNAME");
-        USER_EMAIL = extra.getString("USER_EMAIL");
-        USER_IMAGE_FILE = extra.getString("USER_IMAGE_FILE");
-
-        extra = null;
-
-        HomeActivityLayout homeActivityLayout = new HomeActivityLayout(HomeActivity.this, USER_TYPE);
-        drawerLayout = homeActivityLayout.getDrawerLayout();
-        if(USER_TYPE != AuthenticationCodes.GUEST_USER){
-
-            HashMap<String, String> textData = new HashMap<>();
-            textData.put("email", USER_EMAIL);
-            textData.put("name", USER_FIRSTNAME +" " + USER_LASTNAME);
+            }else{
+                Toast.makeText(this, "Fatal error: Unknown user type.", Toast.LENGTH_SHORT).show();
+                finish();
+            }
 
 
-            FetchUserImageDataActionWrapper fetchUserImageDataActionWrapper = new FetchUserImageDataActionWrapper(
-                    textData, null, homeActivityLayout.getUserNameView(), homeActivityLayout.getUserEmailView(),
-                    homeActivityLayout.getUserIconView());
-
-            WebServiceAsync async = new WebServiceAsync();
-            async.execute(fetchUserImageDataActionWrapper);
-
-            textData = null;
-            fetchUserImageDataActionWrapper = null;
-            async = null;
         }else{
-            drawerLayout
+            //try to restore from saved instance
         }
+
     }
 
     @Override
@@ -330,7 +334,7 @@ public class HomeActivity extends AppCompatActivity {
         }
     }
 
-    private void deleteDirectoryRecursive(File directory){
+    public static void deleteDirectoryRecursive(File directory){
         if (directory.isDirectory()) {
             for (File child : directory.listFiles()) {
                 deleteDirectoryRecursive(child);
@@ -451,54 +455,5 @@ public class HomeActivity extends AppCompatActivity {
         }
     }
 
-    private class FetchUserImageDataActionWrapper implements WebServiceAction{
 
-        private HashMap<String, String> textDataOutput;
-        private WebServiceConnection connection;
-
-        private InputStream inputStream;
-
-        private ImageView userImageView;
-        private TextView userNameView;
-        private TextView userEmailView;
-        private Activity activity;
-        Bitmap image;
-
-        public FetchUserImageDataActionWrapper(HashMap<String, String> textDataOutput,
-                                               Activity activity,
-                                               TextView userNameView, TextView userEmailView,
-                                               ImageView userImageView){
-
-            this.textDataOutput = textDataOutput;
-            this.connection = connection;
-            this.activity = activity;
-            this.userNameView = userNameView;
-            this.userEmailView = userEmailView;
-            this.userImageView = userImageView;
-        }
-
-        @Override
-        public void processRequest() {
-
-            connection = new WebServiceConnection(AuthenticationAddress.AVATAR_IMAGE_FOLDER + "/" + USER_IMAGE_FILE,
-                    activity, true, true, false);
-
-            inputStream = connection.getInputStream();
-            image = BitmapFactory.decodeStream(inputStream);
-        }
-
-        @Override
-        public void processResult() {
-
-
-            if(image != null){
-                userImageView.setImageBitmap(image);
-            }
-
-            userNameView.setText(textDataOutput.get("name"));
-            userEmailView.setText(textDataOutput.get("email"));
-
-
-        }
-    }
 }

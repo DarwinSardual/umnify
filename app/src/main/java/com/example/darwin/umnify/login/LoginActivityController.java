@@ -5,9 +5,7 @@ import android.content.Intent;
 import android.view.View;
 import android.widget.Button;
 import com.example.darwin.umnify.async.WebServiceAsync;
-import com.example.darwin.umnify.authentication.AuthenticationAddress;
 import com.example.darwin.umnify.authentication.AuthenticationCodes;
-import com.example.darwin.umnify.database.UMnifyDbHelper;
 
 import com.example.darwin.umnify.authentication.AuthenticationKeys;
 import com.example.darwin.umnify.home.HomeActivity;

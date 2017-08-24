@@ -121,7 +121,7 @@ public class NewsFeedManager extends FeedManager<NewsFeedManager.ViewHolder> {
             holder.newsAuthorImageView.setImageBitmap(news.getAuthorImage());
             holder.newsImageView.setImageBitmap(news.getImage());
 
-            if(news.isStarred()){
+            /*if(news.isStarred()){
 
                 holder.newsStarButton.setImageDrawable(filledStar);
             }else{
@@ -146,7 +146,7 @@ public class NewsFeedManager extends FeedManager<NewsFeedManager.ViewHolder> {
                     intent.putExtra("NEWS_STARS", news.getStars() + "");
                     NewsFeedManager.super.getActivity().startActivity(intent);
                 }
-            });
+            });*/
         }
     }
 

@@ -5,7 +5,6 @@ import android.content.Context;
 import android.content.Intent;
 import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
-import android.net.Uri;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.util.Log;
@@ -24,9 +23,7 @@ import com.example.darwin.umnify.wrapper.WebServiceAction;
 import org.json.JSONException;
 import org.json.JSONObject;
 
-import java.io.BufferedReader;
 import java.io.File;
-import java.io.IOException;
 import java.io.InputStream;
 import java.util.HashMap;
 
@@ -56,6 +53,7 @@ public class StartActivity extends AppCompatActivity {
         //handle start
         databaseConnection = UMnifyDbHelper.getInstance(this);
         handleUserCheck();
+
 
     }
 

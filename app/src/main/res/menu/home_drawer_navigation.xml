@@ -12,10 +12,6 @@
                 android:tint="@color/button_grey"
                 android:id="@+id/navigation_groups"
                 android:title="Groups">
-                <item
-                    android:title="Submenu">
-
-                </item>
         </item>
         <item
                 android:icon="@drawable/calendar_icon"

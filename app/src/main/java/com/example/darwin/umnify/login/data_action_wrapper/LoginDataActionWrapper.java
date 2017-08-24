@@ -12,7 +12,6 @@ import com.example.darwin.umnify.connection.WebServiceConnection;
 import com.example.darwin.umnify.database.UMnifyContract;
 import com.example.darwin.umnify.database.UMnifyDbHelper;
 import com.example.darwin.umnify.home.HomeActivity;
-import com.example.darwin.umnify.login.LoginActivityController;
 import com.example.darwin.umnify.wrapper.DataHelper;
 import com.example.darwin.umnify.wrapper.WebServiceAction;
 import org.json.JSONException;
