@@ -15,21 +15,20 @@ import com.example.darwin.umnify.feed.news.NewsFeedFragment;
 import java.util.ArrayList;
 import java.util.List;
 
-public class HomeActivityControllerGuest {
+public class HomeActivityControllerGuests {
 
     private Toolbar toolbar;
     private ViewPager viewPager;
     private TabLayout tabLayout;
 
     private AppCompatActivity activity;
-    public static final int LAYOUT_ID = R.layout.activity_home_guest;
 
     private NewsFeedFragment newsFeedFragment;
     private BlogFeedFragment blogFeedFragment;
 
     private Adapter adapter;
 
-    public HomeActivityControllerGuest(AppCompatActivity activity){
+    public HomeActivityControllerGuests(AppCompatActivity activity){
 
         toolbar = (Toolbar) activity.findViewById(R.id.home_toolbar);
         viewPager = (ViewPager) activity.findViewById(R.id.home_viewpager);
@@ -45,7 +44,7 @@ public class HomeActivityControllerGuest {
         setUpViewPager(3);
         setUpViewPagerAdapter(null);
         bindViewPagerToAdapter();
-        setUpTabLayout();
+        //setUpTabLayout();
     }
 
     public void setSupportActionBar(){
@@ -88,6 +87,10 @@ public class HomeActivityControllerGuest {
 
     public NewsFeedFragment getNewsFeedFragment() {
         return newsFeedFragment;
+    }
+
+    public ViewPager getViewPager() {
+        return viewPager;
     }
 
     public AppCompatActivity getActivity() {

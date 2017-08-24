@@ -171,10 +171,10 @@ public class NewsFeedManager extends FeedManager<NewsFeedManager.ViewHolder> {
         feedList.add(news);
         notifyItemInserted(news.getIndex());
 
-        asyncFetchAuthorImage = new WebServiceAsync();
-        asyncFetchAuthorImage.execute(fetchAuthorImageDataActionWrapper);
-        asyncFetchNewsImage = new WebServiceAsync();
-        asyncFetchNewsImage.execute(fetchNewsImageDataActionWrapper);
+        //asyncFetchAuthorImage = new WebServiceAsync();
+        //asyncFetchAuthorImage.execute(fetchAuthorImageDataActionWrapper);
+        //asyncFetchNewsImage = new WebServiceAsync();
+        //asyncFetchNewsImage.execute(fetchNewsImageDataActionWrapper);
     }
 
     @Override

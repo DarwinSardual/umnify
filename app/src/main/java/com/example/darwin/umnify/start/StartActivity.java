@@ -185,7 +185,6 @@ public class StartActivity extends AppCompatActivity {
                     intent = new Intent(StartActivity.this, LoginActivity.class);
                     startActivity(intent);
                 }
-
                 finish();
             }catch (JSONException e){
                 e.printStackTrace();

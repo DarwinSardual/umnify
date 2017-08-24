@@ -14,26 +14,32 @@
             android:title="About">
         </item>
         <item
-                android:icon="@drawable/groups_icon"
-                android:tint="@color/button_grey"
-                android:id="@+id/navigation_groups"
-                android:title="Groups">
+            android:icon="@drawable/groups_icon"
+            android:tint="@color/button_grey"
+            android:id="@+id/navigation_groups"
+            android:title="Groups">
         </item>
         <item
-                android:icon="@drawable/calendar_icon"
-                android:tint="@color/button_grey"
-                android:id="@+id/navigation_calendar"
-                android:title="Calendar" />
+            android:icon="@drawable/calendar_icon"
+            android:tint="@color/button_grey"
+            android:id="@+id/navigation_calendar"
+            android:title="Calendar" />
         <!--<item
                 android:icon="@drawable/preferences_icon"
                 android:tint="@color/button_grey"
                 android:id="@+id/navigation_preferences"
                 android:title="Preferences" />-->
+
         <item
-                android:icon="@drawable/logout_icon"
-                android:tint="@color/button_grey"
-                android:id="@+id/navigation_logout"
-                android:title="Log out" />
+            android:icon="@drawable/navigation_pending"
+            android:tint="@color/button_grey"
+            android:id="@+id/navigation_pending"
+            android:title="Pending" />
+        <item
+            android:icon="@drawable/logout_icon"
+            android:tint="@color/button_grey"
+            android:id="@+id/navigation_logout"
+            android:title="Log out" />
     </group>
 
 </menu>
