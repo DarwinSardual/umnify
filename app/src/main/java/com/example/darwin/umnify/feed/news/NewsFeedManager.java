@@ -48,11 +48,10 @@ public class NewsFeedManager extends FeedManager<NewsFeedManager.ViewHolder> {
     public Drawable emptyStar;
     public Drawable filledStar;
 
-    public NewsFeedManager(Activity activity, SwipeRefreshLayout swipeRefreshLayout, RecyclerView recyclerView, Bundle userData) {
+    public NewsFeedManager(Activity activity, SwipeRefreshLayout swipeRefreshLayout, Bundle userData) {
 
-        super(activity, swipeRefreshLayout, recyclerView);
+        super(activity, swipeRefreshLayout);
 
-        this.userData = userData;
         this.userData = userData;
         newsViewHolderMap = new HashMap<>();
 
@@ -107,7 +106,15 @@ public class NewsFeedManager extends FeedManager<NewsFeedManager.ViewHolder> {
     @Override
     public ViewHolder onCreateViewHolder(ViewGroup parent, int viewType) {
 
-        return new ViewHolder(LayoutInflater.from(parent.getContext()), parent);
+        ViewHolder t = new ViewHolder(LayoutInflater.from(parent.getContext()), parent);
+
+        if(t == null){
+            Log.e("onCreate", "null");
+        }else{
+            Log.e("onCreate", "not null");
+        }
+
+        return t;
     }
 
     @Override

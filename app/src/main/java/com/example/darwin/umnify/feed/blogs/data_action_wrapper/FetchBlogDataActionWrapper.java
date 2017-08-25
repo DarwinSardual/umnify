@@ -73,9 +73,6 @@ public class FetchBlogDataActionWrapper implements WebServiceAction {
 
         try{
 
-
-            Log.e("fetch blog", response);
-
             JSONObject json = new JSONObject(response);
 
             int authenticatedCode = json.getInt("authenticated");

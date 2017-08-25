@@ -141,20 +141,10 @@ public class StartActivity extends AppCompatActivity {
         @Override
         public void processResult() {
 
-            Log.e("process", "result");
-
             try{
 
                 Intent intent;
                 String response = DataHelper.parseStringFromStream(inputStream);
-
-                if(response == null){
-                    Log.e("Response", "null");
-                    return;
-
-                }else{
-                    Log.e("Response", response);
-                }
 
                 JSONObject json = new JSONObject(response);
                 int code = json.getInt("code");
@@ -187,7 +177,7 @@ public class StartActivity extends AppCompatActivity {
                 }
                 finish();
             }catch (JSONException e){
-                e.printStackTrace();
+                Log.e("JSONException", "StartActivity - Can't parse response json");
             }
         }
     }

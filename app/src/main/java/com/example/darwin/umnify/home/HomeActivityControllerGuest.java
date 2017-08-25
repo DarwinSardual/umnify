@@ -44,7 +44,7 @@ public class HomeActivityControllerGuest {
         setUpViewPager(3);
         setUpViewPagerAdapter(null);
         bindViewPagerToAdapter();
-        //setUpTabLayout();
+        setUpTabLayout();
     }
 
     public void setSupportActionBar(){

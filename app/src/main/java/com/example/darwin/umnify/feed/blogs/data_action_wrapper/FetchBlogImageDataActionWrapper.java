@@ -54,7 +54,6 @@ public class FetchBlogImageDataActionWrapper implements WebServiceAction{
 
 
         String path = BlogHelper.saveImageToInternal(image, tile.getImageFile(), activity);
-        Log.e("Path", path);
 
         /* rescale the image */
 

@@ -4,6 +4,7 @@ import android.app.Activity;
 import android.util.Log;
 import com.example.darwin.umnify.authentication.AuthenticationAddress;
 import com.example.darwin.umnify.connection.WebServiceConnection;
+import com.example.darwin.umnify.feed.FeedManager;
 import com.example.darwin.umnify.feed.news.NewsFeedManager;
 import com.example.darwin.umnify.wrapper.DataHelper;
 import com.example.darwin.umnify.wrapper.WebServiceAction;
@@ -16,13 +17,13 @@ import java.util.HashMap;
 public class FetchNewsDataActionWrapper implements WebServiceAction {
 
     private HashMap<String, String> textDataOutput;
-    private NewsFeedManager manager;
+    private FeedManager manager;
     private InputStream inputStream;
     private WebServiceConnection connection;
     private Activity activity;
     private String response;
 
-    public FetchNewsDataActionWrapper(HashMap<String, String> textDataOutput, Activity activity, NewsFeedManager manager){
+    public FetchNewsDataActionWrapper(HashMap<String, String> textDataOutput, Activity activity, FeedManager manager){
 
         this.textDataOutput = textDataOutput;
         this.manager = manager;
@@ -61,7 +62,8 @@ public class FetchNewsDataActionWrapper implements WebServiceAction {
             String data = str.getString("data");
 
             manager.addFeedEntries(data);
-            manager.isFetching = false;
+            manager.setFetchingNews(false);
+            Log.e("Size", manager.getFeedListSize() + "");
         }catch (Exception e){
             e.printStackTrace();
         }

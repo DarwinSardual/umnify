@@ -5,6 +5,7 @@ import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import com.example.darwin.umnify.authentication.AuthenticationAddress;
 import com.example.darwin.umnify.connection.WebServiceConnection;
+import com.example.darwin.umnify.feed.FeedManager;
 import com.example.darwin.umnify.feed.news.News;
 import com.example.darwin.umnify.feed.news.NewsFeedManager;
 import com.example.darwin.umnify.wrapper.WebServiceAction;
@@ -16,11 +17,11 @@ public class FetchNewsImageDataActionWrapper implements WebServiceAction {
     private InputStream inputStream;
     private News news;
     private WebServiceConnection connection;
-    private NewsFeedManager manager;
+    private FeedManager manager;
     private Activity activity;
     private Bitmap image;
 
-    public FetchNewsImageDataActionWrapper(News news, Activity activity, NewsFeedManager manager){
+    public FetchNewsImageDataActionWrapper(News news, Activity activity, FeedManager manager){
 
         this.manager = manager;
         this.news = news;

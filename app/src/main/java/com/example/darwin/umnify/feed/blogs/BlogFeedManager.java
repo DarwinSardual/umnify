@@ -42,7 +42,7 @@ public class BlogFeedManager extends FeedManager<BlogFeedManager.ViewHolder>{
 
     public BlogFeedManager(Activity activity, SwipeRefreshLayout swipeRefreshLayout, RecyclerView recyclerView){
 
-        super(activity, swipeRefreshLayout, recyclerView);
+        super(activity, swipeRefreshLayout);
 
         feedList = new ArrayList<>();
 

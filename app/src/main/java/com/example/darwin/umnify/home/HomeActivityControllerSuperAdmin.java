@@ -6,6 +6,7 @@ import android.os.Bundle;
 import android.support.annotation.NonNull;
 import android.support.design.widget.NavigationView;
 import android.support.v7.app.AppCompatActivity;
+import android.util.Log;
 import android.view.MenuItem;
 
 import com.example.darwin.umnify.R;
@@ -26,6 +27,22 @@ public class HomeActivityControllerSuperAdmin extends HomeActivityControllerAdmi
         super(activity, userData);
     }
 
+    public void init(){
+        super.setSupportActionBar();
+        super.setUpSupportActionBar();
+        super.setUpViewPager(3);
+        super.setUpViewPagerAdapter();
+        super.bindViewPagerToAdapter();
+        super.setDrawerLayout();
+        super.setUpTabLayout();
+        super.setUpNavigationView();
+        setUpNavigationListener();
+        super.setUpNavigationUser();
+
+        setFloatingActionButton();
+        setUpViewPagerOnPageChangeListener();
+    }
+
     public void setUpNavigationListener(){
 
         super.getNavigationView().setNavigationItemSelectedListener(new NavigationView.OnNavigationItemSelectedListener() {
@@ -44,7 +61,7 @@ public class HomeActivityControllerSuperAdmin extends HomeActivityControllerAdmi
                     intent = new Intent(HomeActivityControllerSuperAdmin.super.getActivity(), CalendarActivity.class);
                     HomeActivityControllerSuperAdmin.super.getActivity().startActivity(intent);
                 }else if(id == R.id.navigation_pending){
-
+                    Log.e("Clicked", "Pending");
                 }else if(id == R.id.navigation_logout){
                     //erase all the folders
                     File directory = HomeActivityControllerSuperAdmin.super.getActivity().getDir("umnify", Context.MODE_PRIVATE);

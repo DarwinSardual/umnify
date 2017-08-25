@@ -11,13 +11,16 @@ import android.view.View;
 import android.view.ViewGroup;
 
 import com.example.darwin.umnify.R;
+import com.example.darwin.umnify.feed.news.view_holder.NewsViewHolderGuest;
 
 
 public class NewsFeedFragment extends Fragment{
 
     private RecyclerView recyclerView;
     private SwipeRefreshLayout swipeRefreshLayout;
-    private NewsFeedManager manager;
+    //private NewsFeedManager manager;
+    //private NewsFeedManagerGuest<NewsViewHolderGuest> manager;
+    private NewsFeedManagerGuest<NewsViewHolderGuest> manager;
 
     private Bundle userData;
 
@@ -37,7 +40,10 @@ public class NewsFeedFragment extends Fragment{
         swipeRefreshLayout = (SwipeRefreshLayout) view.findViewById(R.id.swipe_refresher_layout);
         recyclerView = (RecyclerView) view.findViewById(R.id.recycler_view);
 
-        manager = new NewsFeedManager(this.getActivity(), swipeRefreshLayout, recyclerView, userData);
+        //manager = new NewsFeedManager(this.getActivity(), swipeRefreshLayout, userData);
+        manager = new NewsFeedManagerGuest(this.getActivity(), swipeRefreshLayout, userData,
+                NewsViewHolderGuest.class, R.layout.feed_news_guest);
+
 
         recyclerView.setAdapter(manager);
         recyclerView.setHasFixedSize(true);
@@ -72,7 +78,7 @@ public class NewsFeedFragment extends Fragment{
 
         Bundle args = super.getArguments();
 
-        manager.addNews(data, args);
+        //manager.addNews(data, args);
     }
 
 }

@@ -57,8 +57,6 @@ public class LoginDataActionWrapper implements WebServiceAction {
         try{
 
             String response = DataHelper.parseStringFromStream(inputStream);
-
-
             JSONObject json = new JSONObject(response);
             int code = json.getInt("code");
 
