@@ -15,7 +15,7 @@ import com.example.darwin.umnify.feed.news.NewsFeedFragment;
 import java.util.ArrayList;
 import java.util.List;
 
-public class HomeActivityControllerGuests {
+public class HomeActivityControllerGuest {
 
     private Toolbar toolbar;
     private ViewPager viewPager;
@@ -28,7 +28,7 @@ public class HomeActivityControllerGuests {
 
     private Adapter adapter;
 
-    public HomeActivityControllerGuests(AppCompatActivity activity){
+    public HomeActivityControllerGuest(AppCompatActivity activity){
 
         toolbar = (Toolbar) activity.findViewById(R.id.home_toolbar);
         viewPager = (ViewPager) activity.findViewById(R.id.home_viewpager);

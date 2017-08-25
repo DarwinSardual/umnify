@@ -24,7 +24,7 @@ import com.example.darwin.umnify.start.StartActivity;
 import java.io.File;
 import java.util.HashMap;
 
-public class HomeActivityControllerNormal extends HomeActivityControllerGuests {
+public class HomeActivityControllerNormal extends HomeActivityControllerGuest {
 
     private Bundle userData;
     private NotificationsFeedFragment notificationsFeedFragment;

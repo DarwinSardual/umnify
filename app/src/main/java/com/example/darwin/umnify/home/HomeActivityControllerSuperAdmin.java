@@ -1,5 +1,4 @@
-package com.example.darwin.umnify.home.data_action_wrapper;
-
+package com.example.darwin.umnify.home;
 
 import android.content.Context;
 import android.content.Intent;
@@ -13,34 +12,18 @@ import com.example.darwin.umnify.R;
 import com.example.darwin.umnify.calendar.CalendarActivity;
 import com.example.darwin.umnify.database.UMnifyDbHelper;
 import com.example.darwin.umnify.groups.GroupsActivity;
-import com.example.darwin.umnify.home.HomeActivity;
-import com.example.darwin.umnify.home.HomeActivityControllerAdmin;
-import com.example.darwin.umnify.home.HomeActivityControllerNormal;
 import com.example.darwin.umnify.start.StartActivity;
 
 import java.io.File;
 
-public class HomeActivityControllerSuperAdmin extends HomeActivityControllerAdmin {
+/**
+ * Created by darwin on 8/25/17.
+ */
+
+public class HomeActivityControllerSuperAdmin extends HomeActivityControllerAdmin{
 
     public HomeActivityControllerSuperAdmin(AppCompatActivity activity, Bundle userData){
         super(activity, userData);
-    }
-
-    public void init(){
-
-        setSupportActionBar();
-        setUpSupportActionBar();
-        setUpViewPager(3);
-        setUpViewPagerAdapter();
-        bindViewPagerToAdapter();
-        setUpTabLayout();
-        setDrawerLayout();
-        setUpNavigationView();
-        setUpNavigationListener();
-        setUpNavigationUser();
-
-        setFloatingActionButton();
-        setUpViewPagerOnPageChangeListener();
     }
 
     public void setUpNavigationListener(){
