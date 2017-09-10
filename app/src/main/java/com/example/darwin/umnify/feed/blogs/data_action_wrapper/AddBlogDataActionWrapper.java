@@ -61,6 +61,5 @@ public class AddBlogDataActionWrapper implements WebServiceAction{
         }catch (Exception e){
             e.printStackTrace();
         }
-
     }
 }

@@ -64,6 +64,7 @@ public class LoginDataActionWrapper implements WebServiceAction {
 
                 JSONObject user = new JSONObject(json.getString("user"));
                 JSONObject person = new JSONObject(json.getString("person"));
+                JSONObject academePerson = new JSONObject(json.getString("academe_person"));
 
                 //store database credentials here
                 UMnifyDbHelper databaseConnection = UMnifyDbHelper.getInstance(activity);
@@ -83,7 +84,7 @@ public class LoginDataActionWrapper implements WebServiceAction {
                 values.put(UMnifyContract.UMnifyColumns.Person.IMAGE.toString(), person.getString("image"));
                 values.put(UMnifyContract.UMnifyColumns.Person.EMAIL.toString(), person.getString("email"));
 
-                long person_id = databaseConnectionWrite.insert(
+                long personId = databaseConnectionWrite.insert(
                         UMnifyContract.UMnifyColumns.Person.TABLE_NAME.toString(),
                         null,
                         values
@@ -95,7 +96,19 @@ public class LoginDataActionWrapper implements WebServiceAction {
                 values.put(UMnifyContract.UMnifyColumns.User.TYPE.toString(), user.getInt("type"));
                 values.put(UMnifyContract.UMnifyColumns.User.PASSWORD.toString(), user.getString("password"));
 
-                long user_id = databaseConnectionWrite.insert(
+                long userId = databaseConnectionWrite.insert(
+                        UMnifyContract.UMnifyColumns.User.TABLE_NAME.toString(),
+                        null,
+                        values
+                );
+
+                values = new ContentValues();
+                values.put(UMnifyContract.UMnifyColumns.AcademePerson.ID.toString(), user.getInt("id"));
+                values.put(UMnifyContract.UMnifyColumns.AcademePerson.COURSE.toString(), academePerson.getInt("course"));
+                values.put(UMnifyContract.UMnifyColumns.AcademePerson.YEAR.toString(), academePerson.getInt("year"));
+                values.put(UMnifyContract.UMnifyColumns.AcademePerson.TYPE.toString(), academePerson.getInt("type"));
+
+                long academePersonId = databaseConnectionWrite.insert(
                         UMnifyContract.UMnifyColumns.User.TABLE_NAME.toString(),
                         null,
                         values
@@ -109,6 +122,7 @@ public class LoginDataActionWrapper implements WebServiceAction {
                 intent.putExtra("USER_LASTNAME", person.getString("lastname"));
                 intent.putExtra("USER_EMAIL", person.getString("email"));
                 intent.putExtra("USER_IMAGE_FILE", person.getString("image"));
+                intent.putExtra("USER_COURSE", academePerson.getInt("course"));
 
                 activity.startActivity(intent);
                 activity.finish();

@@ -12,18 +12,27 @@ import android.view.View;
 import android.view.ViewGroup;
 
 import com.example.darwin.umnify.R;
+import com.example.darwin.umnify.authentication.AuthenticationCodes;
+import com.example.darwin.umnify.feed.FeedManager;
+import com.example.darwin.umnify.feed.blogs.feed_manager.BlogFeedManagerAdmin;
+import com.example.darwin.umnify.feed.blogs.feed_manager.BlogFeedManagerGuest;
+import com.example.darwin.umnify.feed.blogs.feed_manager.BlogFeedManagerSuperAdmin;
+import com.example.darwin.umnify.feed.blogs.view_holder.BlogTileViewHolderGuest;
 
 public class BlogFeedFragment extends Fragment{
 
     private RecyclerView recyclerView;
     private SwipeRefreshLayout swipeRefreshLayout;
-    private BlogFeedManager manager;
+    //private BlogFeedManager manager;
+    private FeedManager manager;
+    private Bundle userData;
 
 
     @Override
     public void onCreate(Bundle savedInstanceState){
 
         super.onCreate(savedInstanceState);
+        userData = super.getArguments();
     }
 
     @Override
@@ -34,7 +43,28 @@ public class BlogFeedFragment extends Fragment{
         recyclerView = (RecyclerView) view.findViewById(R.id.recycler_view);
         swipeRefreshLayout = (SwipeRefreshLayout) view.findViewById(R.id.swipe_refresher_layout);
 
-        manager = new BlogFeedManager(getActivity(), swipeRefreshLayout, recyclerView);
+        //manager = new BlogFeedManager(getActivity(), swipeRefreshLayout, recyclerView);
+
+
+        if(userData == null){
+            manager = new BlogFeedManagerGuest<BlogTileViewHolderGuest>(getActivity(), swipeRefreshLayout,
+                    BlogTileViewHolderGuest.class, R.layout.feed_blog_tile_guest);
+        }else{
+            int type = userData.getInt("USER_TYPE");
+
+            if(type == AuthenticationCodes.NORMAL_USER){
+                manager = new BlogFeedManagerGuest<BlogTileViewHolderGuest>(getActivity(), swipeRefreshLayout,
+                        BlogTileViewHolderGuest.class, R.layout.feed_blog_tile_guest);
+            }else if(type == AuthenticationCodes.ADMIN_USER){
+                manager = new BlogFeedManagerAdmin<BlogTileViewHolderGuest>(getActivity(), swipeRefreshLayout,
+                BlogTileViewHolderGuest.class, R.layout.feed_blog_tile_guest, userData);
+            }else if(type == AuthenticationCodes.SUPER_ADMIN_USER){
+                manager = new BlogFeedManagerSuperAdmin<BlogTileViewHolderGuest>(getActivity(), swipeRefreshLayout,
+                        BlogTileViewHolderGuest.class, R.layout.feed_blog_tile_guest, userData);
+            }
+        }
+
+
         recyclerView.setAdapter(manager);
         recyclerView.setHasFixedSize(true);
         recyclerView.setLayoutManager(new GridLayoutManager(getActivity(), 2));
@@ -62,7 +92,6 @@ public class BlogFeedFragment extends Fragment{
 
     public void addBlog(Intent data){
 
-        Bundle args = super.getArguments();
-        manager.addBlog(data, args);
+        manager.newFeedEntry(data);
     }
 }

@@ -6,6 +6,7 @@ import android.graphics.BitmapFactory;
 import android.util.Log;
 import com.example.darwin.umnify.authentication.AuthenticationAddress;
 import com.example.darwin.umnify.connection.WebServiceConnection;
+import com.example.darwin.umnify.feed.FeedManager;
 import com.example.darwin.umnify.feed.blogs.BlogFeedManager;
 import com.example.darwin.umnify.feed.blogs.BlogHelper;
 import com.example.darwin.umnify.feed.blogs.BlogTile;
@@ -17,14 +18,14 @@ public class FetchBlogImageDataActionWrapper implements WebServiceAction{
 
     private BlogTile tile;
     private Activity activity;
-    private BlogFeedManager manager;
+    private FeedManager manager;
 
     private WebServiceConnection connection = null;
     private InputStream inputStream;
     private Bitmap image;
 
     public FetchBlogImageDataActionWrapper(BlogTile tile, Activity activity,
-                                           BlogFeedManager manager){
+                                           FeedManager manager){
 
         this.tile = tile;
         this.activity = activity;
@@ -53,12 +54,14 @@ public class FetchBlogImageDataActionWrapper implements WebServiceAction{
         * save the original image to internal before thumbnailing or resizing */
 
 
-        String path = BlogHelper.saveImageToInternal(image, tile.getImageFile(), activity);
+       BlogHelper.saveImageToInternal(image, tile.getImageFile(), activity);
 
         /* rescale the image */
+        Bitmap resizeImage = Bitmap.createScaledBitmap(image, 589, 400, true);
 
-        tile.setImage(image);
+        tile.setImage(resizeImage);
         manager.notifyItemChanged(tile.getIndex());
+        image = null;
 
     }
 }

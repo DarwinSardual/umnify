@@ -7,7 +7,6 @@ import com.example.darwin.umnify.authentication.AuthenticationAddress;
 import com.example.darwin.umnify.connection.WebServiceConnection;
 import com.example.darwin.umnify.feed.FeedManager;
 import com.example.darwin.umnify.feed.news.News;
-import com.example.darwin.umnify.feed.news.NewsFeedManager;
 import com.example.darwin.umnify.wrapper.WebServiceAction;
 
 import java.io.InputStream;

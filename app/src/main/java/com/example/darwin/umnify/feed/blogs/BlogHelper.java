@@ -23,8 +23,9 @@ public class BlogHelper {
         int id = data.getInt("id");
         String heading = data.getString("heading");
         String imageFile = data.getString("image");
+        int author = data.getInt("author");
 
-        BlogTile blog = new BlogTile(id, heading, imageFile, index);
+        BlogTile blog = new BlogTile(id, heading, imageFile, author,index);
 
         return blog;
     }

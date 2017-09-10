@@ -3,6 +3,7 @@ package com.example.darwin.umnify.feed.blogs.data_action_wrapper;
 import android.app.Activity;
 import com.example.darwin.umnify.authentication.AuthenticationAddress;
 import com.example.darwin.umnify.connection.WebServiceConnection;
+import com.example.darwin.umnify.feed.FeedManager;
 import com.example.darwin.umnify.feed.blogs.BlogFeedManager;
 import com.example.darwin.umnify.wrapper.DataHelper;
 import com.example.darwin.umnify.wrapper.WebServiceAction;
@@ -15,14 +16,14 @@ public class FetchBlogTileDataActionWrapper implements WebServiceAction {
 
     private HashMap<String, String> textDataOutput;
     private Activity activity;
-    private BlogFeedManager manager;
+    private FeedManager manager;
 
     private InputStream inputStream;
     private WebServiceConnection connection = null;
     private String response;
 
     public FetchBlogTileDataActionWrapper(HashMap<String, String> textDataOutput,
-                                          Activity activity, BlogFeedManager manager){
+                                          Activity activity, FeedManager manager){
 
         this.textDataOutput = textDataOutput;
         this.activity = activity;

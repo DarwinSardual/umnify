@@ -1,6 +1,7 @@
-package com.example.darwin.umnify.feed.news;
+package com.example.darwin.umnify.feed.news.feed_manager;
 
 import android.app.Activity;
+import android.content.Intent;
 import android.os.Bundle;
 import android.support.v4.widget.SwipeRefreshLayout;
 import android.support.v7.widget.RecyclerView;
@@ -11,6 +12,8 @@ import android.view.ViewGroup;
 import com.example.darwin.umnify.R;
 import com.example.darwin.umnify.async.WebServiceAsync;
 import com.example.darwin.umnify.feed.FeedManager;
+import com.example.darwin.umnify.feed.news.News;
+import com.example.darwin.umnify.feed.news.NewsHelper;
 import com.example.darwin.umnify.feed.news.data_action_wrapper.FetchAuthorImageDataActionWrapper;
 import com.example.darwin.umnify.feed.news.data_action_wrapper.FetchNewsDataActionWrapper;
 import com.example.darwin.umnify.feed.news.data_action_wrapper.FetchNewsImageDataActionWrapper;
@@ -23,26 +26,27 @@ import org.json.JSONObject;
 import java.util.HashMap;
 import java.util.List;
 
-public class NewsFeedManagerGuest<E extends NewsViewHolderGuest> extends FeedManager<E>{
+public class NewsFeedManagerGuest<E extends NewsViewHolderGuest> extends FeedManager<E, News>{
 
     private E viewHolder;
-    private Bundle userData;
     private Class<E> cls;
     private int layoutId;
 
 
     public NewsFeedManagerGuest(Activity activity, SwipeRefreshLayout swipeRefreshLayout,
-                                Bundle userData, Class<E> cls, int layoutId){
+                                Class<E> cls, int layoutId){
 
         super(activity, swipeRefreshLayout);
-        this.userData = userData;
+
         this.cls = cls;
         this.layoutId = layoutId;
+
+        //load from cache first
 
         HashMap<String, String> fetchNewsDataParams = new HashMap<>();
         fetchNewsDataParams.put("order", "desc");
         fetchNewsDataParams.put("offset", super.getFeedListSize() + "");
-        fetchNewsDataParams.put("limit", "5");
+        fetchNewsDataParams.put("limit", "10");
         fetchNewsDataParams.put("id", "-1");
 
         WebServiceAsync asyncFetchNews = new WebServiceAsync();
@@ -67,7 +71,7 @@ public class NewsFeedManagerGuest<E extends NewsViewHolderGuest> extends FeedMan
 
         fetchAuthorImageDataActionWrapper = new FetchAuthorImageDataActionWrapper( news, super.getActivity(), this);
         fetchNewsImageDataActionWrapper = new FetchNewsImageDataActionWrapper(news, super.getActivity(), this);
-        super.addToFeedList(news);
+        super.addToFeedList(super.getFeedListSize(), news);
         notifyItemInserted(news.getIndex());
 
         asyncFetchAuthorImage = new WebServiceAsync();
@@ -87,7 +91,7 @@ public class NewsFeedManagerGuest<E extends NewsViewHolderGuest> extends FeedMan
         }
 
         dataList = null;
-        super.setFetchingNews(false);
+        super.setFetchingFeedEntry(false);
         super.getSwipeRefreshLayout().setRefreshing(false);
 
     }
@@ -95,14 +99,14 @@ public class NewsFeedManagerGuest<E extends NewsViewHolderGuest> extends FeedMan
     @Override
     public void updateFeed(int direction) {
 
-        if(super.isFetchingNews()) return;
+        if(super.isFetchingFeedEntry()) return;
 
         WebServiceAsync asyncFetchNews = new WebServiceAsync();
         FetchNewsDataActionWrapper fetchNewsWrapper;
 
         if(direction == 1){
 
-            super.setFetchingNews(true);
+            super.setFetchingFeedEntry(true);
 
             HashMap<String, String> fetchNewsDataParamsUpdate = new HashMap<>();
             fetchNewsDataParamsUpdate.put("order", "desc");
@@ -119,7 +123,7 @@ public class NewsFeedManagerGuest<E extends NewsViewHolderGuest> extends FeedMan
             super.clearFeedList();
             notifyDataSetChanged();
 
-            super.setFetchingNews(true);
+            super.setFetchingFeedEntry(true);
 
             HashMap<String, String> fetchNewsDataParams = new HashMap<>();
             fetchNewsDataParams.put("order", "desc");
@@ -138,6 +142,16 @@ public class NewsFeedManagerGuest<E extends NewsViewHolderGuest> extends FeedMan
     }
 
     @Override
+    public void newFeedEntry(Intent data){
+        //dummy
+    }
+
+    @Override
+    public void deleteFeedEntry(News news) {
+
+    }
+
+    @Override
     public E onCreateViewHolder(ViewGroup parent, int viewType){
 
 
@@ -147,7 +161,7 @@ public class NewsFeedManagerGuest<E extends NewsViewHolderGuest> extends FeedMan
     private E createViewHolder(ViewGroup parent){
         E viewHolder = null;
         try{
-           viewHolder=  cls.getConstructor(LayoutInflater.class, ViewGroup.class, int.class).newInstance(LayoutInflater.from(parent.getContext()), parent, R.layout.feed_news_guest);
+           viewHolder=  cls.getConstructor(LayoutInflater.class, ViewGroup.class, int.class).newInstance(LayoutInflater.from(parent.getContext()), parent, layoutId);
         }catch (Exception e){
             e.printStackTrace();
         }
@@ -156,14 +170,17 @@ public class NewsFeedManagerGuest<E extends NewsViewHolderGuest> extends FeedMan
 
     @Override
     public void onBindViewHolder(E holder, int position) {
-        if(position < super.getFeedListSize()){
 
-            final News news = super.getNewsFromFeedList(position);
-            holder.getNewsAuthorView().setText(news.getAuthorFirstname() + " " + news.getAuthorLastname());
-            holder.getNewsContentView().setText(news.getContent());
-            holder.getNewsAuthorImageView().setImageBitmap(news.getAuthorImage());
-            holder.getNewsImageView().setImageBitmap(news.getImage());
-        }
+
+
+            News news = super.getEntryFromFeedList(position);
+
+            if(news != null){
+                holder.getNewsAuthorView().setText(news.getAuthorFirstname() + " " + news.getAuthorLastname());
+                holder.getNewsContentView().setText(news.getContent());
+                holder.getNewsAuthorImageView().setImageBitmap(news.getAuthorImage());
+                holder.getNewsImageView().setImageBitmap(news.getImage());
+            }
     }
 
     @Override
@@ -174,4 +191,5 @@ public class NewsFeedManagerGuest<E extends NewsViewHolderGuest> extends FeedMan
     public E getViewHolder() {
         return viewHolder;
     }
+
 }

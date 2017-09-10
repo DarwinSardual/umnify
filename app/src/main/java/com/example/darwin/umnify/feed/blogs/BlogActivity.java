@@ -12,6 +12,7 @@ import android.widget.TextView;
 import android.widget.Toolbar;
 import com.example.darwin.umnify.R;
 import com.example.darwin.umnify.async.WebServiceAsync;
+import com.example.darwin.umnify.authentication.AuthenticationCodes;
 import com.example.darwin.umnify.authentication.AuthenticationKeys;
 import com.example.darwin.umnify.feed.blogs.data_action_wrapper.FetchBlogDataActionWrapper;
 
@@ -41,7 +42,9 @@ public class BlogActivity extends AppCompatActivity {
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        setContentView(R.layout.activity_blog);
+
+        Log.e("Blog Activity", "called");
+
 
         extraData = getIntent().getExtras();
 
@@ -50,31 +53,24 @@ public class BlogActivity extends AppCompatActivity {
         heading = extraData.getString("BLOG_TILE_HEADING");
         imageFile = extraData.getString("BLOG_TILE_IMAGE_FILE");
 
-        toolbarLayout = (CollapsingToolbarLayout) findViewById(R.id.blog_collapsing_toolbar);
-        featuredImageView = (ImageView) findViewById(R.id.blog_featured_image);
-        contentView = (TextView) findViewById(R.id.blog_content);
+        if(extraData.containsKey("USER_TYPE")){
+            int type = extraData.getInt("USER_TYPE");
+            if(type == AuthenticationCodes.ADMIN_USER){
+                setContentView(R.layout.activity_blog_admin);
+                BlogActivityControllerAdmin blogActivityControllerAdmin = new BlogActivityControllerAdmin(this, extraData);
+            }else if(type == AuthenticationCodes.SUPER_ADMIN_USER){
+                setContentView(R.layout.activity_blog_admin);
+                BlogActivityControllerSuperAdmin blogActivityControllerSuperAdmin = new BlogActivityControllerSuperAdmin(this, extraData);
+            }else if(type == AuthenticationCodes.NORMAL_USER){
 
-        WebServiceAsync async = new WebServiceAsync();
-        HashMap<String, String> textDataOutput = new HashMap<>();
-        textDataOutput.put("id", id + "");
-        textDataOutput.put("type", "activity");
-
-
-        FetchBlogDataActionWrapper fetchBlogDataActionWrapper = new FetchBlogDataActionWrapper(id, heading, imageFile,
-                textDataOutput, this);
-
-        async.execute(fetchBlogDataActionWrapper);
+            }
+        }else{
+            setContentView(R.layout.activity_blog_guest);
+            BlogActivityControllerGuest blogActivityControllerGuest = new BlogActivityControllerGuest(this, extraData);
+        }
     }
 
-    public CollapsingToolbarLayout getToolbarLayout() {
-        return toolbarLayout;
-    }
-
-    public TextView getContentView() {
-        return contentView;
-    }
-
-    public ImageView getFeaturedImageView() {
-        return featuredImageView;
+    public Bundle getExtraData() {
+        return extraData;
     }
 }

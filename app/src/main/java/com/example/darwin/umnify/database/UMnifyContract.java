@@ -44,6 +44,39 @@ public final class UMnifyContract {
             public String toString(){ return str;}
         }
 
+        public enum AcademePerson{
+
+            TABLE_NAME("AcademePerson"),
+            ID("id"),
+            COURSE("course"),
+            YEAR("year"),
+            TYPE("type");
+
+            private String str;
+
+            AcademePerson(String str){ this.str = str; }
+
+            public String toString(){ return str;}
+        }
+
+        public enum News{
+
+            TABLE_NAME("News"),
+            ID("id"),
+            CONTENT("course"),
+            IMAGE("year"),
+            AUTHOR("type"),
+            PUBLISHED_DATE("published_date"),
+            SIGNATURE("signature"),
+            ACTIVE("active");
+
+            private String str;
+
+            News(String str){ this.str = str; }
+
+            public String toString(){ return str;}
+        }
+
 
     }
 }

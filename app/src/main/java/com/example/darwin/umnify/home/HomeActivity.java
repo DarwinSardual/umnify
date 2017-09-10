@@ -62,11 +62,17 @@ public class HomeActivity extends AppCompatActivity {
                     HomeActivityControllerAdmin homeActivityControllerAdmin = new HomeActivityControllerAdmin(this, userData);
                     homeActivityControllerAdmin.init();
                     drawerLayout = homeActivityControllerAdmin.getDrawerLayout();
+
+                    newsFragment = homeActivityControllerAdmin.getNewsFeedFragment();
+                    blogFragment = homeActivityControllerAdmin.getBlogFeedFragment();
                 }else if(USER_TYPE == AuthenticationCodes.SUPER_ADMIN_USER){
                     setContentView(R.layout.activity_home_super_admin);
                     HomeActivityControllerSuperAdmin homeActivityControllerSuperAdmin = new HomeActivityControllerSuperAdmin(this, userData);
                     homeActivityControllerSuperAdmin.init();
                     drawerLayout = homeActivityControllerSuperAdmin.getDrawerLayout();
+
+                    newsFragment = homeActivityControllerSuperAdmin.getNewsFeedFragment();
+                    blogFragment = homeActivityControllerSuperAdmin.getBlogFeedFragment();
                 }
 
             }else{
@@ -129,8 +135,6 @@ public class HomeActivity extends AppCompatActivity {
 
     @Override
     protected void onActivityResult(int requestCode, int resultCode, Intent data) {
-
-        Log.e("code", requestCode + "");
 
         if(requestCode == HomeActivity.ADD_NEWS_CODE){
 

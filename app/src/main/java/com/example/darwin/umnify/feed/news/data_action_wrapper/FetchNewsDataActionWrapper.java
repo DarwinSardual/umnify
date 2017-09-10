@@ -5,12 +5,10 @@ import android.util.Log;
 import com.example.darwin.umnify.authentication.AuthenticationAddress;
 import com.example.darwin.umnify.connection.WebServiceConnection;
 import com.example.darwin.umnify.feed.FeedManager;
-import com.example.darwin.umnify.feed.news.NewsFeedManager;
 import com.example.darwin.umnify.wrapper.DataHelper;
 import com.example.darwin.umnify.wrapper.WebServiceAction;
 import org.json.JSONObject;
 
-import java.io.IOException;
 import java.io.InputStream;
 import java.util.HashMap;
 
@@ -62,8 +60,7 @@ public class FetchNewsDataActionWrapper implements WebServiceAction {
             String data = str.getString("data");
 
             manager.addFeedEntries(data);
-            manager.setFetchingNews(false);
-            Log.e("Size", manager.getFeedListSize() + "");
+            manager.setFetchingFeedEntry(false);
         }catch (Exception e){
             e.printStackTrace();
         }

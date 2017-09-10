@@ -50,6 +50,14 @@ public class StartActivity extends AppCompatActivity {
         if(!blogImageDirectory.exists())
             blogImageDirectory.mkdirs();
 
+        File galleryNewsImageDirectory = new File(directory.getAbsolutePath() + "/images/gallery/news");
+        if(!galleryNewsImageDirectory.exists())
+            galleryNewsImageDirectory.mkdirs();
+
+        File galleryBlogImageDirectory = new File(directory.getAbsolutePath() + "/images/gallery/blog");
+        if(!galleryBlogImageDirectory.exists())
+            galleryBlogImageDirectory.mkdirs();
+
         //handle start
         databaseConnection = UMnifyDbHelper.getInstance(this);
         handleUserCheck();
@@ -161,6 +169,7 @@ public class StartActivity extends AppCompatActivity {
                     intent.putExtra("USER_LASTNAME", data.getString("lastname"));
                     intent.putExtra("USER_IMAGE_FILE", data.getString("image"));
                     intent.putExtra("USER_EMAIL", data.getString("email"));
+                    intent.putExtra("USER_COURSE", data.getInt("course"));
                     startActivity(intent);
 
                 }else if(code == AuthenticationCodes.INVALID_USER_ID_PASSWORD){

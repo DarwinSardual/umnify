@@ -11,14 +11,41 @@
             android:icon="@drawable/navigation_about"
             android:tint="@color/button_grey"
             android:id="@+id/navigation_about"
+            android:visible="true"
             android:title="About">
+            
         </item>
-        <item
+        <!--<item
                 android:icon="@drawable/groups_icon"
                 android:tint="@color/button_grey"
                 android:id="@+id/navigation_groups"
                 android:title="Groups">
-        </item>
+        </item>-->
+        <item
+            android:icon="@drawable/navigation_gallery"
+            android:tint="@color/button_grey"
+            android:id="@+id/navigation_maps"
+            android:title="Maps" />
+        <item
+            android:icon="@drawable/navigation_gallery"
+            android:tint="@color/button_grey"
+            android:id="@+id/navigation_gallery"
+            android:title="Gallery" />
+        <item
+            android:icon="@drawable/navigation_subjects_enrolled"
+            android:tint="@color/button_grey"
+            android:id="@+id/navigation_subjects_enrolled"
+            android:title="Subjects Enrolled" />
+        <item
+            android:icon="@drawable/navigation_evaluation"
+            android:tint="@color/button_grey"
+            android:id="@+id/navigation_evalution"
+            android:title="Evaluation" />
+        <item
+            android:icon="@drawable/navigation_student_permanent_record"
+            android:tint="@color/button_grey"
+            android:id="@+id/navigation_spr"
+            android:title="Student Permanent Record" />
         <item
                 android:icon="@drawable/calendar_icon"
                 android:tint="@color/button_grey"

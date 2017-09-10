@@ -52,6 +52,8 @@ public class HomeActivityControllerAdmin extends HomeActivityControllerNormal{
         final FabActionAdmin addBlogAction = new FabActionAdmin(super.getActivity(),
                 AddBlogActivity.class, null, HomeActivity.ADD_BLOG_CODE);
 
+        floatingActionButton.setOnClickListener(addNewsAction);
+
         super.getViewPager().addOnPageChangeListener(new ViewPager.OnPageChangeListener() {
             @Override
             public void onPageScrolled(int position, float positionOffset, int positionOffsetPixels) {}

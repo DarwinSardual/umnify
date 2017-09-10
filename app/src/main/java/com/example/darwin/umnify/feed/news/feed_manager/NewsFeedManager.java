@@ -1,10 +1,9 @@
-package com.example.darwin.umnify.feed.news;
+package com.example.darwin.umnify.feed.news.feed_manager;
 
 import android.app.Activity;
 import android.content.Intent;
 import android.database.Cursor;
 import android.graphics.Bitmap;
-import android.graphics.BitmapFactory;
 import android.graphics.drawable.Drawable;
 import android.net.Uri;
 import android.os.Bundle;
@@ -25,6 +24,8 @@ import android.support.v7.widget.RecyclerView;
 import com.example.darwin.umnify.R;;
 import com.example.darwin.umnify.async.WebServiceAsync;
 import com.example.darwin.umnify.feed.FeedManager;
+import com.example.darwin.umnify.feed.news.News;
+import com.example.darwin.umnify.feed.news.NewsHelper;
 import com.example.darwin.umnify.feed.news.data_action_wrapper.*;
 import org.json.JSONArray;
 import org.json.JSONException;
@@ -35,7 +36,7 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 
-public class NewsFeedManager extends FeedManager<NewsFeedManager.ViewHolder> {
+public class NewsFeedManager extends FeedManager<NewsFeedManager.ViewHolder, News> {
 
 
     private List<News> feedList;
@@ -294,6 +295,13 @@ public class NewsFeedManager extends FeedManager<NewsFeedManager.ViewHolder> {
 
         WebServiceAsync asyncAddNews = new WebServiceAsync();
         asyncAddNews.execute(addNewsDataActionWrapper);
+
+    }
+
+    public void newFeedEntry(Intent data){}
+
+    @Override
+    public void deleteFeedEntry(News news) {
 
     }
 

@@ -17,8 +17,13 @@ import com.example.darwin.umnify.async.WebServiceAsync;
 import com.example.darwin.umnify.calendar.CalendarActivity;
 import com.example.darwin.umnify.database.UMnifyDbHelper;
 import com.example.darwin.umnify.feed.notifications.NotificationsFeedFragment;
+import com.example.darwin.umnify.gallery.GalleryActivity;
 import com.example.darwin.umnify.groups.GroupsActivity;
 import com.example.darwin.umnify.home.data_action_wrapper.FetchUserImageDataActionWrapper;
+import com.example.darwin.umnify.maps.CampusMapActivity;
+import com.example.darwin.umnify.personal.EvaluationActivity;
+import com.example.darwin.umnify.personal.StudentPermanentRecordActivity;
+import com.example.darwin.umnify.personal.SubjectsEnrolledActivity;
 import com.example.darwin.umnify.start.StartActivity;
 
 import java.io.File;
@@ -102,11 +107,27 @@ public class HomeActivityControllerNormal extends HomeActivityControllerGuest {
 
                 if(id == R.id.navigation_about){
 
-                }else if(id == R.id.navigation_groups){
-                    intent = new Intent(HomeActivityControllerNormal.super.getActivity(), GroupsActivity.class);
-                    HomeActivityControllerNormal.super.getActivity().startActivity(intent);
                 }else if (id == R.id.navigation_calendar) {
                     intent = new Intent(HomeActivityControllerNormal.super.getActivity(), CalendarActivity.class);
+                    intent.putExtras(getUserData());
+                    HomeActivityControllerNormal.super.getActivity().startActivity(intent);
+                }else if (id == R.id.navigation_gallery) {
+                    intent = new Intent(HomeActivityControllerNormal.super.getActivity(), GalleryActivity.class);
+                    HomeActivityControllerNormal.super.getActivity().startActivity(intent);
+                }else if (id == R.id.navigation_maps) {
+                    intent = new Intent(HomeActivityControllerNormal.super.getActivity(), CampusMapActivity.class);
+                    HomeActivityControllerNormal.super.getActivity().startActivity(intent);
+                }else if (id == R.id.navigation_subjects_enrolled) {
+                    intent = new Intent(HomeActivityControllerNormal.super.getActivity(), SubjectsEnrolledActivity.class);
+                    intent.putExtras(userData);
+                    HomeActivityControllerNormal.super.getActivity().startActivity(intent);
+                }else if (id == R.id.navigation_spr) {
+                    intent = new Intent(HomeActivityControllerNormal.super.getActivity(), StudentPermanentRecordActivity.class);
+                    intent.putExtras(userData);
+                    HomeActivityControllerNormal.super.getActivity().startActivity(intent);
+                }else if (id == R.id.navigation_evalution) {
+                    intent = new Intent(HomeActivityControllerNormal.super.getActivity(), EvaluationActivity.class);
+                    intent.putExtras(userData);
                     HomeActivityControllerNormal.super.getActivity().startActivity(intent);
                 }else if(id == R.id.navigation_logout){
                     //erase all the folders

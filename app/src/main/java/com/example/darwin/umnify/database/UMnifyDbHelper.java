@@ -32,6 +32,15 @@ public class UMnifyDbHelper extends SQLiteOpenHelper{
                     "FOREIGN KEY("+ UMnifyContract.UMnifyColumns.User.ID.toString() + ") REFERENCES " +
                     UMnifyContract.UMnifyColumns.Person.TABLE_NAME.toString() + "("+ UMnifyContract.UMnifyColumns.Person.ID.toString() +"));";
 
+    private static final String CREATE_TABLE_ACADEME_PERSON =
+            "CREATE TABLE " + UMnifyContract.UMnifyColumns.AcademePerson.TABLE_NAME.toString() + "(" +
+                    UMnifyContract.UMnifyColumns.AcademePerson.ID.toString() + " INTEGER PRIMARY KEY," +
+                    UMnifyContract.UMnifyColumns.AcademePerson.COURSE.toString() + " INTEGER," +
+                    UMnifyContract.UMnifyColumns.AcademePerson.YEAR.toString() + " INTEGER," +
+                    UMnifyContract.UMnifyColumns.AcademePerson.TYPE.toString() + " INTEGER," +
+                    "FOREIGN KEY("+ UMnifyContract.UMnifyColumns.AcademePerson.ID.toString() + ") REFERENCES " +
+                    UMnifyContract.UMnifyColumns.Person.TABLE_NAME.toString() + "("+ UMnifyContract.UMnifyColumns.Person.ID.toString() +"));";
+
     public static synchronized UMnifyDbHelper getInstance(Context context){
 
         if(databaseConnection == null){
@@ -46,6 +55,7 @@ public class UMnifyDbHelper extends SQLiteOpenHelper{
 
         db.execSQL(CREATE_TABLE_PERSON);
         db.execSQL(CREATE_TABLE_USER);
+        db.execSQL(CREATE_TABLE_ACADEME_PERSON);
     }
 
     @Override

@@ -12,7 +12,12 @@ import android.view.MenuItem;
 import com.example.darwin.umnify.R;
 import com.example.darwin.umnify.calendar.CalendarActivity;
 import com.example.darwin.umnify.database.UMnifyDbHelper;
+import com.example.darwin.umnify.gallery.GalleryActivity;
 import com.example.darwin.umnify.groups.GroupsActivity;
+import com.example.darwin.umnify.maps.CampusMapActivity;
+import com.example.darwin.umnify.personal.EvaluationActivity;
+import com.example.darwin.umnify.personal.StudentPermanentRecordActivity;
+import com.example.darwin.umnify.personal.SubjectsEnrolledActivity;
 import com.example.darwin.umnify.start.StartActivity;
 
 import java.io.File;
@@ -54,13 +59,30 @@ public class HomeActivityControllerSuperAdmin extends HomeActivityControllerAdmi
 
                 if(id == R.id.navigation_about){
 
-                }else if(id == R.id.navigation_groups){
-                    intent = new Intent(HomeActivityControllerSuperAdmin.super.getActivity(), GroupsActivity.class);
-                    HomeActivityControllerSuperAdmin.super.getActivity().startActivity(intent);
                 }else if (id == R.id.navigation_calendar) {
                     intent = new Intent(HomeActivityControllerSuperAdmin.super.getActivity(), CalendarActivity.class);
+                    intent.putExtras(HomeActivityControllerSuperAdmin.super.getUserData());
                     HomeActivityControllerSuperAdmin.super.getActivity().startActivity(intent);
-                }else if(id == R.id.navigation_pending){
+                }else if (id == R.id.navigation_gallery) {
+                    intent = new Intent(HomeActivityControllerSuperAdmin.super.getActivity(), GalleryActivity.class);
+                    HomeActivityControllerSuperAdmin.super.getActivity().startActivity(intent);
+                }else if (id == R.id.navigation_maps) {
+                    intent = new Intent(HomeActivityControllerSuperAdmin.super.getActivity(), CampusMapActivity.class);
+                    HomeActivityControllerSuperAdmin.super.getActivity().startActivity(intent);
+                }else if (id == R.id.navigation_subjects_enrolled) {
+                    intent = new Intent(HomeActivityControllerSuperAdmin.super.getActivity(), SubjectsEnrolledActivity.class);
+                    intent.putExtras(HomeActivityControllerSuperAdmin.super.getUserData());
+                    HomeActivityControllerSuperAdmin.super.getActivity().startActivity(intent);
+                }else if (id == R.id.navigation_spr) {
+                    intent = new Intent(HomeActivityControllerSuperAdmin.super.getActivity(), StudentPermanentRecordActivity.class);
+                    intent.putExtras(HomeActivityControllerSuperAdmin.super.getUserData());
+                    HomeActivityControllerSuperAdmin.super.getActivity().startActivity(intent);
+                }else if (id == R.id.navigation_evalution) {
+                    intent = new Intent(HomeActivityControllerSuperAdmin.super.getActivity(), EvaluationActivity.class);
+                    intent.putExtras(HomeActivityControllerSuperAdmin.super.getUserData());
+                    HomeActivityControllerSuperAdmin.super.getActivity().startActivity(intent);
+                }
+                else if(id == R.id.navigation_pending){
                     Log.e("Clicked", "Pending");
                 }else if(id == R.id.navigation_logout){
                     //erase all the folders

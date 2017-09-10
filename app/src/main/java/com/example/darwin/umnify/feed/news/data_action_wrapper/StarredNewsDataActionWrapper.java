@@ -8,13 +8,12 @@ import com.example.darwin.umnify.authentication.AuthenticationAddress;
 import com.example.darwin.umnify.authentication.AuthenticationCodes;
 import com.example.darwin.umnify.connection.WebServiceConnection;
 import com.example.darwin.umnify.feed.news.News;
-import com.example.darwin.umnify.feed.news.NewsFeedManager;
+import com.example.darwin.umnify.feed.news.feed_manager.NewsFeedManager;
 import com.example.darwin.umnify.wrapper.DataHelper;
 import com.example.darwin.umnify.wrapper.WebServiceAction;
 import org.json.JSONException;
 import org.json.JSONObject;
 
-import java.io.IOException;
 import java.io.InputStream;
 import java.util.HashMap;
 

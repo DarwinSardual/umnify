@@ -35,7 +35,7 @@ import java.util.List;
 
 //public class BlogFeedManager extends RecyclerView.Adapter<BlogFeedManager.ViewHolder>
 
-public class BlogFeedManager extends FeedManager<BlogFeedManager.ViewHolder>{
+public class BlogFeedManager extends FeedManager<BlogFeedManager.ViewHolder, BlogTile>{
 
     private List<BlogTile> feedList;
     private boolean isFetching = false;
@@ -245,5 +245,15 @@ public class BlogFeedManager extends FeedManager<BlogFeedManager.ViewHolder>{
 
         WebServiceAsync asyncAddBlog = new WebServiceAsync();
         asyncAddBlog.execute(addBlogDataActionWrapper);
+    }
+
+    @Override
+    public void newFeedEntry(Intent data) {
+
+    }
+
+    @Override
+    public void deleteFeedEntry(BlogTile tile) {
+
     }
 }

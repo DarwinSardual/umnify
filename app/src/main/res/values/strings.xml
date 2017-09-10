@@ -12,4 +12,10 @@
         happen when the dependent view has changed. In the sample below, we check for the position of the Toolbar
         relative to the CircleImageView, and increase the size of the CircleImageView correspondingly using setScale().
     </string>
+
+    <string-array name="feed_news_spinner">
+        <item>Actions</item>
+        <item>Edit</item>
+        <item>Delete</item>
+    </string-array>
 </resources>

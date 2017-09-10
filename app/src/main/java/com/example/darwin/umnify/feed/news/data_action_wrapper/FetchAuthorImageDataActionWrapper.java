@@ -7,11 +7,8 @@ import com.example.darwin.umnify.authentication.AuthenticationAddress;
 import com.example.darwin.umnify.connection.WebServiceConnection;
 import com.example.darwin.umnify.feed.FeedManager;
 import com.example.darwin.umnify.feed.news.News;
-import com.example.darwin.umnify.feed.news.NewsFeedManager;
 import com.example.darwin.umnify.wrapper.WebServiceAction;
 
-import java.io.ByteArrayInputStream;
-import java.io.ByteArrayOutputStream;
 import java.io.InputStream;
 
 public class FetchAuthorImageDataActionWrapper implements WebServiceAction {
@@ -53,9 +50,14 @@ public class FetchAuthorImageDataActionWrapper implements WebServiceAction {
 
         //Bitmap decoded = BitmapFactory.decodeStream(new ByteArrayInputStream(out.toByteArray()));
 
-        news.setAuthorImage(Bitmap.createScaledBitmap(image, 100, 100, false));
-        manager.notifyItemChanged(news.getIndex());
+        if(image != null){
+            news.setAuthorImage(Bitmap.createScaledBitmap(image, 100, 100, false));
+            manager.notifyItemChanged(news.getIndex());
+            image = null;
+        }
 
-        image = null;
+
+
+
     }
 }

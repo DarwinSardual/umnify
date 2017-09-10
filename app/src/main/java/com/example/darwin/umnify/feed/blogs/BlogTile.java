@@ -12,11 +12,13 @@ public class BlogTile {
     private String imageFile;
     private Bitmap image;
     private int index;
+    int author;
 
-    public BlogTile(int id, String heading, String imageFile, int index){
+    public BlogTile(int id, String heading, String imageFile, int author, int index){
         this.id = id;
         this.heading = heading;
         this.imageFile = imageFile;
+        this.author = author;
 
         this.index = index;
     }
@@ -50,5 +52,9 @@ public class BlogTile {
 
     public Bitmap getImage() {
         return image;
+    }
+
+    public int getAuthor() {
+        return author;
     }
 }
