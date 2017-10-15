@@ -54,17 +54,18 @@ public class FetchSubjectsEnrolledDataActionWrapper implements WebServiceAction{
     @Override
     public void processResult() {
 
-        try{
+        if(response != null){
+            try{
 
-            SubjectsEnrolledActivity subjectsEnrolledActivity = (SubjectsEnrolledActivity)activity;
-            JSONObject json = new JSONObject(response);
-            String data = json.getString("data");
+                SubjectsEnrolledActivity subjectsEnrolledActivity = (SubjectsEnrolledActivity)activity;
+                JSONObject json = new JSONObject(response);
+                String data = json.getString("data");
 
-            subjectsEnrolledActivity.displayData(data);
+                subjectsEnrolledActivity.displayData(data);
 
-        }catch (JSONException e){
-            e.printStackTrace();
+            }catch (JSONException e){
+                e.printStackTrace();
+            }
         }
-
     }
 }

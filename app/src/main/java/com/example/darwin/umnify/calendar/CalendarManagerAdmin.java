@@ -33,7 +33,7 @@ public class CalendarManagerAdmin extends CalendarManager {
     public CalendarManagerAdmin(Activity activity, MaterialCalendarView calendarView,
                                 Bundle userData){
         super(activity, calendarView);
-        fab = (FloatingActionButton) super.getActivity().findViewById(R.id.calendar_fab);
+        fab = (FloatingActionButton) super.getActivity().findViewById(R.id.fab);
 
         fab.setOnClickListener(new FabActionAdmin(CalendarManagerAdmin.super.getActivity(),
                 AddEventActivity.class, null ,CalendarActivity.ADD_EVENT_CODE));

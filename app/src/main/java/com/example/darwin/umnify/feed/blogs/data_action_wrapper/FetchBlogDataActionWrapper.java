@@ -1,24 +1,13 @@
 package com.example.darwin.umnify.feed.blogs.data_action_wrapper;
 
 import android.app.Activity;
-import android.graphics.Bitmap;
-import android.util.Log;
-import android.widget.ImageView;
 
 import com.example.darwin.umnify.authentication.AuthenticationAddress;
-import com.example.darwin.umnify.authentication.AuthenticationCodes;
 import com.example.darwin.umnify.connection.WebServiceConnection;
-import com.example.darwin.umnify.feed.blogs.BlogActivity;
-import com.example.darwin.umnify.feed.blogs.BlogActivityActions;
-import com.example.darwin.umnify.feed.blogs.BlogHelper;
-import com.example.darwin.umnify.feed.news.data_action_wrapper.FetchNewsDataActionWrapper;
+import com.example.darwin.umnify.feed.PostAsyncAction;
 import com.example.darwin.umnify.wrapper.DataHelper;
 import com.example.darwin.umnify.wrapper.WebServiceAction;
-import org.json.JSONArray;
-import org.json.JSONException;
-import org.json.JSONObject;
 
-import java.io.IOException;
 import java.io.InputStream;
 import java.util.HashMap;
 
@@ -30,20 +19,20 @@ public class FetchBlogDataActionWrapper implements WebServiceAction {
     private InputStream inputStream;
 
     private String response;
-    private BlogActivityActions actions;
+    private PostAsyncAction postAsyncAction;
 
     public FetchBlogDataActionWrapper(HashMap<String, String> textDataOutput,
-                                      Activity activity, BlogActivityActions actions){
+                                      Activity activity, PostAsyncAction postAsyncAction){
 
         this.textDataOutput = textDataOutput;
         this.activity = activity;
-        this.actions = actions;
+        this.postAsyncAction = postAsyncAction;
     }
 
     @Override
     public void processRequest() {
 
-        connection = new WebServiceConnection(AuthenticationAddress.FETCH_BLOGS, activity,
+        connection = new WebServiceConnection(AuthenticationAddress.FETCH_BLOG, activity,
                 true, true, true);
 
         if(connection != null){
@@ -61,7 +50,6 @@ public class FetchBlogDataActionWrapper implements WebServiceAction {
     @Override
     public void processResult() {
 
-            actions.processResult(response);
-
+        postAsyncAction.processResult(response);
     }
 }

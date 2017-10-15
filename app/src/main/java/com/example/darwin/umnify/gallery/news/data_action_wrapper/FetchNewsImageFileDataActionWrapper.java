@@ -60,10 +60,15 @@ public class FetchNewsImageFileDataActionWrapper implements WebServiceAction {
 
         try{
 
-            JSONObject json = new JSONObject(response);
-            String data = json.getString("data");
+            if(response != null){
+                JSONObject json = new JSONObject(response);
+                String data = json.getString("data");
 
-            action.onPostResultAction(data);
+                action.onPostResultAction(data);
+            }else{
+                action.onPostResultAction(null);
+            }
+
         }catch (JSONException e){
             e.printStackTrace();
         }

@@ -7,6 +7,7 @@ import android.graphics.BitmapFactory;
 import com.example.darwin.umnify.authentication.AuthenticationAddress;
 import com.example.darwin.umnify.connection.WebServiceConnection;
 import com.example.darwin.umnify.feed.FeedManager;
+import com.example.darwin.umnify.gallery.GalleryHelper;
 import com.example.darwin.umnify.gallery.ImageWrapper;
 import com.example.darwin.umnify.wrapper.WebServiceAction;
 
@@ -49,8 +50,14 @@ public class FetchBlogImageDataActionWrapper implements WebServiceAction{
     @Override
     public void processResult() {
 
-        wrapper.setImage(image);
-        manager.notifyItemChanged(wrapper.getIndex());
+        if(image != null){
+            wrapper.setImage(image);
+            manager.notifyItemChanged(wrapper.getIndex());
+            GalleryHelper.saveImageToInternal(wrapper.getImage(),
+                    wrapper.getImageFile(), activity, "feed/blog");
+        }
+
+
     }
 }
 

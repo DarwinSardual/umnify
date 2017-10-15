@@ -52,15 +52,19 @@ public class FetchCurrentDateDataActionWrapper implements WebServiceAction{
     @Override
     public void processResult() {
 
-        try{
+        if(response != null){
+            try{
 
-            JSONObject json = new JSONObject(response);
-            String data = json.getString("current_date");
+                JSONObject json = new JSONObject(response);
+                String data = json.getString("current_date");
 
-            int date[] = DateHelper.convertDbDateToCalendarDate(data, "-");
-            manager.setFirstCurrentDate(date[0], date[1], date[2]);
-        }catch (JSONException e){
-            e.printStackTrace();
+                int date[] = DateHelper.convertDbDateToCalendarDate(data, "-");
+                manager.setFirstCurrentDate(date[0], date[1], date[2]);
+            }catch (JSONException e){
+                e.printStackTrace();
+            }
         }
+
+
     }
 }

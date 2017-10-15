@@ -7,6 +7,8 @@ import android.widget.ImageView;
 import android.widget.TextView;
 import com.example.darwin.umnify.authentication.AuthenticationAddress;
 import com.example.darwin.umnify.connection.WebServiceConnection;
+import com.example.darwin.umnify.gallery.GalleryHelper;
+import com.example.darwin.umnify.home.HomeHelper;
 import com.example.darwin.umnify.wrapper.WebServiceAction;
 
 import java.io.InputStream;
@@ -20,20 +22,15 @@ public class FetchUserImageDataActionWrapper implements WebServiceAction {
     private InputStream inputStream;
 
     private ImageView userImageView;
-    private TextView userNameView;
-    private TextView userEmailView;
     private Activity activity;
     Bitmap image;
 
     public FetchUserImageDataActionWrapper(HashMap<String, String> textDataOutput,
                                            Activity activity,
-                                           TextView userNameView, TextView userEmailView,
                                            ImageView userImageView){
 
         this.textDataOutput = textDataOutput;
         this.activity = activity;
-        this.userNameView = userNameView;
-        this.userEmailView = userEmailView;
         this.userImageView = userImageView;
     }
 
@@ -53,11 +50,8 @@ public class FetchUserImageDataActionWrapper implements WebServiceAction {
 
         if(image != null){
             userImageView.setImageBitmap(image);
+            GalleryHelper.saveImageToInternal(image, textDataOutput.get("image_file"), activity, "avatar");
+
         }
-
-        userNameView.setText(textDataOutput.get("name"));
-        userEmailView.setText(textDataOutput.get("email"));
-
-
     }
 }

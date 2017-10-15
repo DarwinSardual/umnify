@@ -1,13 +1,12 @@
 package com.example.darwin.umnify.feed.news.data_action_wrapper;
 
 import android.app.Activity;
-import android.util.Log;
+
 import com.example.darwin.umnify.authentication.AuthenticationAddress;
 import com.example.darwin.umnify.connection.WebServiceConnection;
-import com.example.darwin.umnify.feed.FeedManager;
+import com.example.darwin.umnify.feed.PostAsyncAction;
 import com.example.darwin.umnify.wrapper.DataHelper;
 import com.example.darwin.umnify.wrapper.WebServiceAction;
-import org.json.JSONObject;
 
 import java.io.InputStream;
 import java.util.HashMap;
@@ -15,17 +14,17 @@ import java.util.HashMap;
 public class FetchNewsDataActionWrapper implements WebServiceAction {
 
     private HashMap<String, String> textDataOutput;
-    private FeedManager manager;
     private InputStream inputStream;
     private WebServiceConnection connection;
     private Activity activity;
-    private String response;
+    private String response = null;
+    private PostAsyncAction postAsyncAction;
 
-    public FetchNewsDataActionWrapper(HashMap<String, String> textDataOutput, Activity activity, FeedManager manager){
+    public FetchNewsDataActionWrapper(HashMap<String, String> textDataOutput, Activity activity, PostAsyncAction postAsyncAction){
 
         this.textDataOutput = textDataOutput;
-        this.manager = manager;
         this.activity = activity;
+        this.postAsyncAction = postAsyncAction;
     }
 
     public void setTextDataOutput(HashMap<String, String> textDataOutput) {
@@ -54,15 +53,6 @@ public class FetchNewsDataActionWrapper implements WebServiceAction {
     @Override
     public void processResult() {
 
-        try {
-
-            JSONObject str = new JSONObject(response);
-            String data = str.getString("data");
-
-            manager.addFeedEntries(data);
-            manager.setFetchingFeedEntry(false);
-        }catch (Exception e){
-            e.printStackTrace();
-        }
+        postAsyncAction.processResult(response);
     }
 }

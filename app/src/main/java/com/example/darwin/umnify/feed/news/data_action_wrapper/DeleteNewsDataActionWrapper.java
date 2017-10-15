@@ -1,13 +1,10 @@
 package com.example.darwin.umnify.feed.news.data_action_wrapper;
 
 import android.app.Activity;
-import android.util.Log;
-import android.util.LruCache;
 
 import com.example.darwin.umnify.authentication.AuthenticationAddress;
 import com.example.darwin.umnify.connection.WebServiceConnection;
-import com.example.darwin.umnify.feed.FeedManager;
-import com.example.darwin.umnify.feed.news.News;
+import com.example.darwin.umnify.feed.PostAsyncDeleteAction;
 import com.example.darwin.umnify.wrapper.DataHelper;
 import com.example.darwin.umnify.wrapper.WebServiceAction;
 
@@ -25,16 +22,14 @@ public class DeleteNewsDataActionWrapper implements WebServiceAction{
     private WebServiceConnection connection;
     private InputStream inputStream;
     private String response;
-    private FeedManager manager;
-    private News news;
+    private PostAsyncDeleteAction postAsyncDeleteAction;
 
-    public DeleteNewsDataActionWrapper(HashMap<String, String> textDataOutput, News news, Activity activity,
-                                       FeedManager manager){
+    public DeleteNewsDataActionWrapper(HashMap<String, String> textDataOutput, Activity activity,
+                                       PostAsyncDeleteAction postAsyncDeleteAction){
 
         this.textDataOutput = textDataOutput;
         this.activity = activity;
-        this.manager= manager;
-        this.news = news;
+        this.postAsyncDeleteAction = postAsyncDeleteAction;
     }
 
     @Override
@@ -55,10 +50,6 @@ public class DeleteNewsDataActionWrapper implements WebServiceAction{
 
     @Override
     public void processResult(){
-
-        manager.removeFromFeedList(news);
-        manager.notifyItemRemoved(news.getIndex());
-        news = null;
-
+        postAsyncDeleteAction.processResult(response);
     }
 }

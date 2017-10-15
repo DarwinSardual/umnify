@@ -57,19 +57,19 @@ public class FetchStudentPermanentRecordDataActionWrapper implements WebServiceA
     @Override
     public void processResult() {
 
-        StudentPermanentRecordActivity studentPermanentRecordActivity = (StudentPermanentRecordActivity) activity;
-        try{
+        if(response != null){
+            StudentPermanentRecordActivity studentPermanentRecordActivity = (StudentPermanentRecordActivity) activity;
+            try{
 
-            JSONObject json = new JSONObject(response);
-            String data = json.getString("data");
-            studentPermanentRecordActivity.displayData(data);
+                JSONObject json = new JSONObject(response);
+                String data = json.getString("data");
+                studentPermanentRecordActivity.displayData(data);
 
-        }catch (JSONException e){
-            e.printStackTrace();
+            }catch (JSONException e){
+                e.printStackTrace();
+            }
+
         }
-
-
-
 
     }
 }

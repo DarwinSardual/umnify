@@ -1,6 +1,7 @@
 package com.example.darwin.umnify.gallery.blog.data_action_wrapper;
 
 import android.app.Activity;
+import android.util.Log;
 
 import com.example.darwin.umnify.PostResultAction;
 import com.example.darwin.umnify.authentication.AuthenticationAddress;
@@ -59,9 +60,14 @@ public class FetchBlogImageFileDataActionWrapper implements WebServiceAction {
 
         try{
 
-            JSONObject json = new JSONObject(response);
-            String data = json.getString("data");
-            action.onPostResultAction(data);
+            if(response != null){
+
+                JSONObject json = new JSONObject(response);
+                String data = json.getString("data");
+                action.onPostResultAction(data);
+            }else{
+                action.onPostResultAction(null);
+            }
 
         }catch (JSONException e){
             e.printStackTrace();

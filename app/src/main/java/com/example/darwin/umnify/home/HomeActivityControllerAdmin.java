@@ -1,25 +1,15 @@
 package com.example.darwin.umnify.home;
 
-import android.content.Context;
-import android.content.Intent;
 import android.os.Bundle;
-import android.support.annotation.NonNull;
 import android.support.design.widget.FloatingActionButton;
-import android.support.design.widget.NavigationView;
 import android.support.v4.view.ViewPager;
 import android.support.v7.app.AppCompatActivity;
-import android.view.MenuItem;
-import android.view.View;
 
 import com.example.darwin.umnify.R;
-import com.example.darwin.umnify.calendar.CalendarActivity;
-import com.example.darwin.umnify.database.UMnifyDbHelper;
 import com.example.darwin.umnify.feed.blogs.AddBlogActivity;
+import com.example.darwin.umnify.feed.blogs.BlogCode;
 import com.example.darwin.umnify.feed.news.AddNewsActivity;
-import com.example.darwin.umnify.groups.GroupsActivity;
-import com.example.darwin.umnify.start.StartActivity;
-
-import java.io.File;
+import com.example.darwin.umnify.feed.news.NewsCode;
 
 public class HomeActivityControllerAdmin extends HomeActivityControllerNormal{
 
@@ -47,10 +37,10 @@ public class HomeActivityControllerAdmin extends HomeActivityControllerNormal{
     public void setUpViewPagerOnPageChangeListener(){
 
         final FabActionAdmin addNewsAction = new FabActionAdmin(super.getActivity(),
-                AddNewsActivity.class, null, HomeActivity.ADD_NEWS_CODE);
+                AddNewsActivity.class, null, NewsCode.ADD_NEWS);
 
         final FabActionAdmin addBlogAction = new FabActionAdmin(super.getActivity(),
-                AddBlogActivity.class, null, HomeActivity.ADD_BLOG_CODE);
+                AddBlogActivity.class, null, BlogCode.ADD_BLOG);
 
         floatingActionButton.setOnClickListener(addNewsAction);
 
@@ -68,12 +58,16 @@ public class HomeActivityControllerAdmin extends HomeActivityControllerNormal{
                     floatingActionButton.show();
                 }else if(position == 2){
                     floatingActionButton.hide();
-                }else{
-                    // unknown index
+                }else if(position == 3){
+                    floatingActionButton.hide();
                 }
             }
             @Override
             public void onPageScrollStateChanged(int state) {}
         });
+    }
+
+    public FloatingActionButton getFloatingActionButton() {
+        return floatingActionButton;
     }
 }

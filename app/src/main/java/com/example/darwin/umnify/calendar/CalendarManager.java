@@ -77,6 +77,8 @@ public class CalendarManager {
             @Override
             public void onDateSelected(@NonNull MaterialCalendarView widget, @NonNull CalendarDay date, boolean selected) {
 
+
+
                 String key = date.getYear() + "-" + date.getMonth() + "-" + date.getDay();
                 SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd");
                 if(cacheDayEvent.containsKey(key)){

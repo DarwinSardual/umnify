@@ -5,6 +5,7 @@ import android.content.ContentValues;
 import android.content.Intent;
 import android.database.sqlite.SQLiteDatabase;
 import android.support.design.widget.Snackbar;
+import android.util.Log;
 import android.view.View;
 import com.example.darwin.umnify.authentication.AuthenticationAddress;
 import com.example.darwin.umnify.authentication.AuthenticationCodes;
@@ -28,6 +29,7 @@ public class LoginDataActionWrapper implements WebServiceAction {
 
     private InputStream inputStream;
     private View source;
+    String response;
 
     public LoginDataActionWrapper(HashMap<String, String> textDataOutput, Activity activity, View source) {
 
@@ -48,93 +50,106 @@ public class LoginDataActionWrapper implements WebServiceAction {
 
         inputStream = connection.getInputStream();
 
-
+        response = DataHelper.parseStringFromStream(inputStream);
     }
 
     @Override
     public void processResult() {
 
-        try{
+        if(response != null){
+            try{
 
-            String response = DataHelper.parseStringFromStream(inputStream);
-            JSONObject json = new JSONObject(response);
-            int code = json.getInt("code");
 
-            if (code == AuthenticationCodes.USER_AUTHENTICATED) {
+                JSONObject json = new JSONObject(response);
+                int code = json.getInt("code");
 
-                JSONObject user = new JSONObject(json.getString("user"));
-                JSONObject person = new JSONObject(json.getString("person"));
-                JSONObject academePerson = new JSONObject(json.getString("academe_person"));
+                if (code == AuthenticationCodes.USER_AUTHENTICATED) {
 
-                //store database credentials here
-                UMnifyDbHelper databaseConnection = UMnifyDbHelper.getInstance(activity);
-                SQLiteDatabase databaseConnectionWrite = databaseConnection.getWritableDatabase();
+                    JSONObject user = new JSONObject(json.getString("user"));
+                    JSONObject person = new JSONObject(json.getString("person"));
+                    JSONObject academePerson = new JSONObject(json.getString("academe_person"));
 
-                // insert person data here
-                ContentValues values = new ContentValues();
-                values.put(UMnifyContract.UMnifyColumns.Person.ID.toString(), user.getInt("id"));
-                values.put(UMnifyContract.UMnifyColumns.Person.FIRSTNAME.toString(), person.getString("firstname"));
-                values.put(UMnifyContract.UMnifyColumns.Person.MIDDLENAME.toString(), person.getString("middlename"));
-                values.put(UMnifyContract.UMnifyColumns.Person.LASTNAME.toString(), person.getString("lastname"));
-                values.put(UMnifyContract.UMnifyColumns.Person.NAME_EXT.toString(), person.getString("name_ext"));
-                values.put(UMnifyContract.UMnifyColumns.Person.BIRTHDATE.toString(), person.getString("birthdate"));
-                values.put(UMnifyContract.UMnifyColumns.Person.GENDER.toString(), person.getString("gender"));
-                values.put(UMnifyContract.UMnifyColumns.Person.ADDRESS.toString(), person.getString("address"));
-                values.put(UMnifyContract.UMnifyColumns.Person.CONTACT.toString(), person.getString("contact"));
-                values.put(UMnifyContract.UMnifyColumns.Person.IMAGE.toString(), person.getString("image"));
-                values.put(UMnifyContract.UMnifyColumns.Person.EMAIL.toString(), person.getString("email"));
+                    //store database credentials here
+                    UMnifyDbHelper databaseConnection = UMnifyDbHelper.getInstance(activity);
+                    SQLiteDatabase databaseConnectionWrite = databaseConnection.getWritableDatabase();
 
-                long personId = databaseConnectionWrite.insert(
-                        UMnifyContract.UMnifyColumns.Person.TABLE_NAME.toString(),
-                        null,
-                        values
-                );
+                    // insert person data here
+                    ContentValues values = new ContentValues();
+                    values.put(UMnifyContract.UMnifyColumns.Person.ID.toString(), user.getInt("id"));
+                    values.put(UMnifyContract.UMnifyColumns.Person.FIRSTNAME.toString(), person.getString("firstname"));
+                    values.put(UMnifyContract.UMnifyColumns.Person.MIDDLENAME.toString(), person.getString("middlename"));
+                    values.put(UMnifyContract.UMnifyColumns.Person.LASTNAME.toString(), person.getString("lastname"));
+                    values.put(UMnifyContract.UMnifyColumns.Person.NAME_EXT.toString(), person.getString("name_ext"));
+                    values.put(UMnifyContract.UMnifyColumns.Person.BIRTHDATE.toString(), person.getString("birthdate"));
+                    values.put(UMnifyContract.UMnifyColumns.Person.GENDER.toString(), person.getString("gender"));
+                    values.put(UMnifyContract.UMnifyColumns.Person.ADDRESS.toString(), person.getString("address"));
+                    values.put(UMnifyContract.UMnifyColumns.Person.CONTACT.toString(), person.getString("contact"));
+                    values.put(UMnifyContract.UMnifyColumns.Person.IMAGE.toString(), person.getString("image"));
+                    values.put(UMnifyContract.UMnifyColumns.Person.EMAIL.toString(), person.getString("email"));
 
-                //insert user data
-                values = new ContentValues();
-                values.put(UMnifyContract.UMnifyColumns.User.ID.toString(), user.getInt("id"));
-                values.put(UMnifyContract.UMnifyColumns.User.TYPE.toString(), user.getInt("type"));
-                values.put(UMnifyContract.UMnifyColumns.User.PASSWORD.toString(), user.getString("password"));
+                    long personId = databaseConnectionWrite.insert(
+                            UMnifyContract.UMnifyColumns.Person.TABLE_NAME.toString(),
+                            null,
+                            values
+                    );
 
-                long userId = databaseConnectionWrite.insert(
-                        UMnifyContract.UMnifyColumns.User.TABLE_NAME.toString(),
-                        null,
-                        values
-                );
+                    Log.e("Message", "Person credentials stored with id " + personId);
 
-                values = new ContentValues();
-                values.put(UMnifyContract.UMnifyColumns.AcademePerson.ID.toString(), user.getInt("id"));
-                values.put(UMnifyContract.UMnifyColumns.AcademePerson.COURSE.toString(), academePerson.getInt("course"));
-                values.put(UMnifyContract.UMnifyColumns.AcademePerson.YEAR.toString(), academePerson.getInt("year"));
-                values.put(UMnifyContract.UMnifyColumns.AcademePerson.TYPE.toString(), academePerson.getInt("type"));
+                    //insert user data
+                    values = new ContentValues();
+                    values.put(UMnifyContract.UMnifyColumns.User.ID.toString(), user.getInt("id"));
+                    values.put(UMnifyContract.UMnifyColumns.User.TYPE.toString(), user.getInt("type"));
+                    values.put(UMnifyContract.UMnifyColumns.User.PASSWORD.toString(), user.getString("password"));
 
-                long academePersonId = databaseConnectionWrite.insert(
-                        UMnifyContract.UMnifyColumns.User.TABLE_NAME.toString(),
-                        null,
-                        values
-                );
+                    long userId = databaseConnectionWrite.insert(
+                            UMnifyContract.UMnifyColumns.User.TABLE_NAME.toString(),
+                            null,
+                            values
+                    );
 
-                Intent intent = new Intent(activity, HomeActivity.class);
-                intent.putExtra("USER_ID", user.getInt("id"));
-                intent.putExtra("USER_TYPE", user.getInt("type"));
-                intent.putExtra("USER_PASSWORD", user.getString("password"));
-                intent.putExtra("USER_FIRSTNAME", person.getString("firstname"));
-                intent.putExtra("USER_LASTNAME", person.getString("lastname"));
-                intent.putExtra("USER_EMAIL", person.getString("email"));
-                intent.putExtra("USER_IMAGE_FILE", person.getString("image"));
-                intent.putExtra("USER_COURSE", academePerson.getInt("course"));
+                    Log.e("Message", "User credentials stored with id " + userId);
 
-                activity.startActivity(intent);
-                activity.finish();
+                    values = new ContentValues();
+                    values.put(UMnifyContract.UMnifyColumns.AcademePerson.ID.toString(), user.getInt("id"));
+                    values.put(UMnifyContract.UMnifyColumns.AcademePerson.COURSE.toString(), academePerson.getInt("course"));
+                    values.put(UMnifyContract.UMnifyColumns.AcademePerson.YEAR.toString(), academePerson.getInt("year"));
+                    values.put(UMnifyContract.UMnifyColumns.AcademePerson.TYPE.toString(), academePerson.getInt("type"));
 
-            } else if (code == AuthenticationCodes.INVALID_USER_ID_PASSWORD) {
+                    long academePersonId = databaseConnectionWrite.insert(
+                            UMnifyContract.UMnifyColumns.AcademePerson.TABLE_NAME.toString(),
+                            null,
+                            values
+                    );
 
-                Snackbar.make(source, "User not authenticated!",
-                        Snackbar.LENGTH_SHORT).show();
+                    Intent intent = new Intent(activity, HomeActivity.class);
+                    intent.putExtra("USER_ID", user.getInt("id"));
+                    intent.putExtra("USER_TYPE", user.getInt("type"));
+                    intent.putExtra("USER_PASSWORD", user.getString("password"));
+                    intent.putExtra("USER_FIRSTNAME", person.getString("firstname"));
+                    intent.putExtra("USER_LASTNAME", person.getString("lastname"));
+                    intent.putExtra("USER_EMAIL", person.getString("email"));
+                    intent.putExtra("USER_IMAGE_FILE", person.getString("image"));
+                    intent.putExtra("USER_COURSE", academePerson.getInt("course"));
+
+                    Log.e("Login", "User authenticated");
+                    activity.startActivity(intent);
+                    activity.finish();
+
+                } else if (code == AuthenticationCodes.INVALID_USER_ID_PASSWORD) {
+
+                    Snackbar.make(source, "User not authenticated!",
+                            Snackbar.LENGTH_SHORT).show();
+                }
+
+            }catch (JSONException e){
+                e.printStackTrace();
             }
+        }else{
 
-        }catch (JSONException e){
-            e.printStackTrace();
+            Snackbar.make(source, "No internet connection",
+                    Snackbar.LENGTH_SHORT).show();
         }
+
+
     }
 }

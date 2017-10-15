@@ -21,11 +21,14 @@ public class CampusLocation {
     private String description;
     private Marker marker;
     private Bitmap icon;
+    private Bitmap windowImage;
 
-    public CampusLocation(String title, String description, LatLng coordinates, Bitmap icon){
+    public CampusLocation(String title, String description, LatLng coordinates, Bitmap icon, Bitmap windowImage){
         this.title = title;
         this.coordinates = coordinates;
+        this.description = description;
         this.icon = icon;
+        this.windowImage = windowImage;
 
         markerOptions = new MarkerOptions().position(coordinates).title(title).snippet(description);
 
@@ -36,14 +39,36 @@ public class CampusLocation {
 
     }
 
-    public void addMapMarker(GoogleMap map){
-        marker = map.addMarker(markerOptions);
-        //marker.showInfoWindow();
+    public Marker addMapMarker(GoogleMap map){
+        if(marker == null)
+            marker = map.addMarker(markerOptions);
+
+        return marker;
+    }
+
+    public void removeMarker(){
+        marker.remove();
     }
 
     public void showMarker(){
         if(marker != null){
             marker.showInfoWindow();
         }
+    }
+
+    public LatLng getCoordinates() {
+        return coordinates;
+    }
+
+    public String getTitle() {
+        return title;
+    }
+
+    public String getDescription() {
+        return description;
+    }
+
+    public Bitmap getWindowImage() {
+        return windowImage;
     }
 }

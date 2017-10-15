@@ -2,6 +2,8 @@ package com.example.darwin.umnify.personal;
 
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
+import android.view.View;
+import android.widget.ImageButton;
 import android.widget.TableLayout;
 import android.widget.TableRow;
 import android.widget.TextView;
@@ -20,6 +22,7 @@ public class EvaluationActivity extends AppCompatActivity {
 
     private Bundle userData;
     private TableLayout table;
+    private ImageButton toolbarBackButton;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -27,7 +30,16 @@ public class EvaluationActivity extends AppCompatActivity {
         setContentView(R.layout.activity_evaluation);
 
         userData = getIntent().getExtras();
-        table = (TableLayout) findViewById(R.id.evalutation_table);
+        table = (TableLayout) findViewById(R.id.evaluation_table);
+
+        toolbarBackButton = (ImageButton) findViewById(R.id.back);
+
+        toolbarBackButton.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                finish();
+            }
+        });
 
         HashMap<String, String> textDataOutput = new HashMap<>();
         textDataOutput.put("id", userData.getInt("USER_ID") + "");
@@ -85,7 +97,9 @@ public class EvaluationActivity extends AppCompatActivity {
             nameView.setText(data.getString("name"));
             descriptionView.setText(data.getString("description"));
             unitsView.setText(data.getString("units"));
-            prerequisiteView.setText(data.getString("prerequisite"));
+            String prerequisite = data.isNull("prerequisite")? "" : data.getString("prerequisite");
+
+            prerequisiteView.setText(prerequisite);
 
             row = new TableRow(this);
 
@@ -97,6 +111,11 @@ public class EvaluationActivity extends AppCompatActivity {
             table.addView(row);
         }
 
-
+        toolbarBackButton.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                finish();
+            }
+        });
     }
 }

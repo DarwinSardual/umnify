@@ -59,19 +59,20 @@ public class FetchEventDataActionWrapper implements WebServiceAction {
 
     @Override
     public void processResult() {
+        if(response != null){
+            try{
 
-        Log.e("Rsult", response);
+                JSONObject json = new JSONObject(response);
+                String dataArray = json.getString("data");
 
-        try{
+                manager.addEvents(dataArray);
 
-            JSONObject json = new JSONObject(response);
-            String dataArray = json.getString("data");
-
-            manager.addEvents(dataArray);
-
-        }catch (JSONException e){
-            e.printStackTrace();
+            }catch (JSONException e){
+                e.printStackTrace();
+            }
         }
+
+
 
     }
 }

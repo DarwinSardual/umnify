@@ -5,6 +5,8 @@ import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.support.v7.widget.GridLayoutManager;
 import android.support.v7.widget.RecyclerView;
+import android.view.View;
+import android.widget.ImageButton;
 
 import com.example.darwin.umnify.PostResultAction;
 import com.example.darwin.umnify.R;
@@ -23,6 +25,8 @@ public class GalleryNewsActivity extends AppCompatActivity {
     private RecyclerView recyclerView;
     private FeedManager manager;
 
+    private ImageButton toolbarBackButton;
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -30,6 +34,13 @@ public class GalleryNewsActivity extends AppCompatActivity {
 
         swipeRefreshLayout = (SwipeRefreshLayout) findViewById(R.id.swipe_refresher_layout);
         recyclerView = (RecyclerView) findViewById(R.id.recycler_view);
+        toolbarBackButton = (ImageButton) findViewById(R.id.back);
+        toolbarBackButton.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                finish();
+            }
+        });
 
         manager = new GalleryNewsFeedManager(this, swipeRefreshLayout,
                 GalleryViewHolder.class);
@@ -38,6 +49,27 @@ public class GalleryNewsActivity extends AppCompatActivity {
         recyclerView.setHasFixedSize(true);
         GridLayoutManager layoutManager = new GridLayoutManager(this,4);
         recyclerView.setLayoutManager(layoutManager);
+
+        recyclerView.addOnScrollListener(new RecyclerView.OnScrollListener() {
+            @Override
+            public void onScrolled(RecyclerView recyclerView, int dx, int dy) {
+
+                if(dy > 0){
+                    if(!recyclerView.canScrollVertically(1)){
+                        manager.updateFeed(1);
+                    }
+                }
+            }
+        });
+
+
+        swipeRefreshLayout.setOnRefreshListener(new SwipeRefreshLayout.OnRefreshListener() {
+            @Override
+            public void onRefresh() {
+                manager.updateFeed(-1);
+
+            }
+        });
     }
 
 }

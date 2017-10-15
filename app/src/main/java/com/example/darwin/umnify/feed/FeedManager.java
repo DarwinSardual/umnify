@@ -19,8 +19,9 @@ public abstract class FeedManager<E extends RecyclerView.ViewHolder, T> extends 
     private Activity activity;
     private SwipeRefreshLayout swipeRefreshLayout;
     //private List<T> feedList;
-    private LruCache<Integer, T> feedList;
+    private LruCache<String, T> feedList;
     private boolean isFetchingFeedEntry = false;
+    private RecyclerView recyclerView;
 
 
     public FeedManager(Activity activity, SwipeRefreshLayout swipeRefreshLayout){
@@ -31,17 +32,24 @@ public abstract class FeedManager<E extends RecyclerView.ViewHolder, T> extends 
         this.feedList = new LruCache<>(50);
     }
 
+    @Override
+    public void onAttachedToRecyclerView(RecyclerView recyclerView) {
+        super.onAttachedToRecyclerView(recyclerView);
+
+        this.recyclerView = recyclerView;
+    }
+
     public abstract void updateFeed(int direction);
     public abstract void addFeedEntry(String jsonData) throws JSONException;
     public abstract void addFeedEntries(String jsonDataArray) throws JSONException;
-    public abstract void deleteFeedEntry(T item);
+    public abstract void deleteFeedEntry(String key);
 
     public void removeFromFeedList(T item){
         //feedList.remove(item);
     }
 
-    public void removeFromFeedList(int pos){
-        feedList.remove(pos);
+    public void removeFromFeedList(String key){
+        feedList.remove(key);
     }
 
     public Activity getActivity() {
@@ -52,7 +60,7 @@ public abstract class FeedManager<E extends RecyclerView.ViewHolder, T> extends 
         return swipeRefreshLayout;
     }
 
-    public void addToFeedList(int pos, T feed){
+    public void addToFeedList(String pos, T feed){
 
         //feedList.add(feed);
         feedList.put(pos,feed);
@@ -66,15 +74,16 @@ public abstract class FeedManager<E extends RecyclerView.ViewHolder, T> extends 
         return feedList.size();
     }
 
-    public T getEntryFromFeedList(int position){
+    public T getEntryFromFeedList(String id){
 
-        if(position >= feedList.size())
-            return null;
+        T t = feedList.get(id);
 
-        return feedList.get(position);
+        return t;
     }
 
+
     public abstract void newFeedEntry(Intent data);
+    public abstract void updateFeedContent(Intent data);
 
     public void setFetchingFeedEntry(boolean fetching) {
         isFetchingFeedEntry = fetching;
@@ -82,5 +91,9 @@ public abstract class FeedManager<E extends RecyclerView.ViewHolder, T> extends 
 
     public boolean isFetchingFeedEntry() {
         return isFetchingFeedEntry;
+    }
+
+    public RecyclerView getRecyclerView() {
+        return recyclerView;
     }
 }

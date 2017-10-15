@@ -3,10 +3,10 @@ package com.example.darwin.umnify.feed.news.data_action_wrapper;
 import android.app.Activity;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
+
 import com.example.darwin.umnify.authentication.AuthenticationAddress;
 import com.example.darwin.umnify.connection.WebServiceConnection;
-import com.example.darwin.umnify.feed.FeedManager;
-import com.example.darwin.umnify.feed.news.News;
+import com.example.darwin.umnify.feed.PostAsyncImageAction;
 import com.example.darwin.umnify.wrapper.WebServiceAction;
 
 import java.io.InputStream;
@@ -14,23 +14,22 @@ import java.io.InputStream;
 public class FetchNewsImageDataActionWrapper implements WebServiceAction {
 
     private InputStream inputStream;
-    private News news;
     private WebServiceConnection connection;
-    private FeedManager manager;
     private Activity activity;
     private Bitmap image;
 
-    public FetchNewsImageDataActionWrapper(News news, Activity activity, FeedManager manager){
+    private PostAsyncImageAction postAsyncImageAction;
 
-        this.manager = manager;
-        this.news = news;
+    public FetchNewsImageDataActionWrapper(Activity activity, PostAsyncImageAction postAsyncImageAction){
+
+        this.postAsyncImageAction = postAsyncImageAction;
         this.activity = activity;
     }
 
     @Override
     public void processRequest() {
 
-        connection = new WebServiceConnection(AuthenticationAddress.NEWS_IMAGE_FOLDER + "/" + news.getImageFile(), activity,
+        connection = new WebServiceConnection(AuthenticationAddress.NEWS_IMAGE_FOLDER + "/preview/" + postAsyncImageAction.getImageFile(), activity,
                 true, true, true);
 
         if(connection != null){
@@ -44,7 +43,6 @@ public class FetchNewsImageDataActionWrapper implements WebServiceAction {
     @Override
     public void processResult() {
 
-        news.setImage(image);
-        manager.notifyItemChanged(news.getIndex());
+        postAsyncImageAction.processResult(image);
     }
 }

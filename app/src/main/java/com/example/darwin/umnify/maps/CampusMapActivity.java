@@ -9,6 +9,9 @@ import android.location.LocationManager;
 import android.support.v4.app.ActivityCompat;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
+import android.view.View;
+import android.widget.ImageButton;
+import android.widget.Spinner;
 
 import com.example.darwin.umnify.R;
 import com.google.android.gms.maps.CameraUpdate;
@@ -28,7 +31,12 @@ import java.util.List;
 public class CampusMapActivity extends AppCompatActivity implements OnMapReadyCallback, LocationListener {
 
     private GoogleMap map;
-    LocationManager locationManager;
+    private LocationManager locationManager;
+    private Spinner locationsSpinner;
+    private HashMap<Marker, CampusLocation> markerLocation;
+    private LocationInfoWindow locationInfoUM;
+
+    private ImageButton toolbarBackButton;
 
     private static final LatLng um = new LatLng(7.066696, 125.596472);
     private static final LatLng umMatinaGate = new LatLng(7.064882, 125.598426);
@@ -43,37 +51,63 @@ public class CampusMapActivity extends AppCompatActivity implements OnMapReadyCa
     private static final LatLng umMatinaProfessionalSchool = new LatLng(7.067951, 125.594936);
     private static final LatLng umMatinaTrackAndField = new LatLng(7.069357, 125.594661);
 
-    private HashMap<String, CampusLocation> umLocations = new HashMap<>();
+    private List<CampusLocation> umLocations;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_campus_map);
 
-        umLocations.put("um", new CampusLocation("University of Mindanao",
-                "University Matina Campus", um, BitmapFactory.decodeResource(getResources(), R.drawable.um_logo_small)));
-        umLocations.put("main_gate", new CampusLocation("Main Gate",
-                "UM Matina Main Gate", umMatinaGate, BitmapFactory.decodeResource(getResources(), R.drawable.gate_fence)));
-        umLocations.put("be_building", new CampusLocation("BE Building",
-                "Business and Education Building", umMatinaBE, BitmapFactory.decodeResource(getResources(), R.drawable.school_building)));
-        umLocations.put("be_foodcourt", new CampusLocation("BE Foodcourt",
-                "Foodcourt located at the back of BE Building", umMatinaBEFoodcourt, BitmapFactory.decodeResource(getResources(), R.drawable.foodcourt)));
-        umLocations.put("cafeteria", new CampusLocation("Cafeteria",
-                "University cafeteria", umMatinaCafeteria, BitmapFactory.decodeResource(getResources(), R.drawable.cafeteria)));
-        umLocations.put("ecar_term_1", new CampusLocation("E-Car Terminal",
-                "E-Car terminal located at the main entrance", umMatinaECarTerminal1, BitmapFactory.decodeResource(getResources(), R.drawable.bus_terminal)));
-        umLocations.put("highschool_department", new CampusLocation("HighSchool Department",
-                "Highschool section of the university", umMatinaHighSchool, BitmapFactory.decodeResource(getResources(), R.drawable.school_building)));
-        umLocations.put("get_building", new CampusLocation("GET Building",
-                "Guillermo E Torres building", umMatinaGET, BitmapFactory.decodeResource(getResources(), R.drawable.school_building)));
-        umLocations.put("dpt_building", new CampusLocation("DPT Building",
-                "Dolores P Torres building", umMatinaDPT, BitmapFactory.decodeResource(getResources(), R.drawable.school_building)));
-        umLocations.put("social_hall", new CampusLocation("Social Hall",
-                "An open hall located beside DPT", umMatinaSocialHall, BitmapFactory.decodeResource(getResources(), R.drawable.social)));
-        umLocations.put("professional_school_building", new CampusLocation("Professional School Building",
-                "Graduate school", umMatinaProfessionalSchool, BitmapFactory.decodeResource(getResources(), R.drawable.school_building)));
-        umLocations.put("track_and_field", new CampusLocation("Track and Field",
-                "Track and Field where atheletes usually practice", umMatinaTrackAndField, BitmapFactory.decodeResource(getResources(), R.drawable.track_and_field)));
+        toolbarBackButton = (ImageButton) findViewById(R.id.back);
+        toolbarBackButton.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                finish();
+            }
+        });
+
+        locationsSpinner = (Spinner) findViewById(R.id.locations);
+        umLocations = new ArrayList<>();
+        markerLocation = new HashMap<>();
+
+        locationInfoUM = new LocationInfoWindow(markerLocation, this);
+
+        umLocations.add(new CampusLocation("University of Mindanao",
+                "University Matina Campus", um, BitmapFactory.decodeResource(getResources(), R.drawable.um_logo_small),
+                BitmapFactory.decodeResource(getResources(), R.drawable.um_be)));
+        umLocations.add(new CampusLocation("Main Gate",
+                "UM Matina Main Gate", umMatinaGate, BitmapFactory.decodeResource(getResources(), R.drawable.gate_fence),
+                BitmapFactory.decodeResource(getResources(), R.drawable.um_be)));
+        umLocations.add(new CampusLocation("BE Building",
+                "Business and Education Building", umMatinaBE, BitmapFactory.decodeResource(getResources(), R.drawable.school_building),
+                BitmapFactory.decodeResource(getResources(), R.drawable.um_be)));
+        umLocations.add( new CampusLocation("BE Foodcourt",
+                "Foodcourt located at the back of BE Building", umMatinaBEFoodcourt, BitmapFactory.decodeResource(getResources(), R.drawable.foodcourt),
+                BitmapFactory.decodeResource(getResources(), R.drawable.um_foodcourt)));
+        umLocations.add(new CampusLocation("Cafeteria",
+                "University cafeteria", umMatinaCafeteria, BitmapFactory.decodeResource(getResources(), R.drawable.cafeteria),
+                BitmapFactory.decodeResource(getResources(), R.drawable.um_cafeteria)));
+        umLocations.add( new CampusLocation("E-Car Terminal",
+                "E-Car terminal located at the main entrance", umMatinaECarTerminal1, BitmapFactory.decodeResource(getResources(), R.drawable.bus_terminal),
+                BitmapFactory.decodeResource(getResources(), R.drawable.um_be)));
+        umLocations.add(new CampusLocation("HighSchool Department",
+                "Highschool section of the university", umMatinaHighSchool, BitmapFactory.decodeResource(getResources(), R.drawable.school_building),
+                BitmapFactory.decodeResource(getResources(), R.drawable.um_highschool)));
+        umLocations.add(new CampusLocation("GET Building",
+                "Guillermo E Torres building", umMatinaGET, BitmapFactory.decodeResource(getResources(), R.drawable.school_building),
+                BitmapFactory.decodeResource(getResources(), R.drawable.um_get)));
+        umLocations.add(new CampusLocation("DPT Building",
+                "Dolores P Torres building", umMatinaDPT, BitmapFactory.decodeResource(getResources(), R.drawable.school_building),
+                BitmapFactory.decodeResource(getResources(), R.drawable.um_dpt)));
+        umLocations.add(new CampusLocation("Social Hall",
+                "An open hall located beside DPT", umMatinaSocialHall, BitmapFactory.decodeResource(getResources(), R.drawable.social),
+                BitmapFactory.decodeResource(getResources(), R.drawable.um_be)));
+        umLocations.add(new CampusLocation("Professional School Building",
+                "Graduate school", umMatinaProfessionalSchool, BitmapFactory.decodeResource(getResources(), R.drawable.school_building),
+                BitmapFactory.decodeResource(getResources(), R.drawable.um_ps)));
+        umLocations.add(new CampusLocation("Track and Field",
+                "Track and Field where atheletes usually practice", umMatinaTrackAndField, BitmapFactory.decodeResource(getResources(), R.drawable.track_and_field),
+                BitmapFactory.decodeResource(getResources(), R.drawable.um_track_field)));
 
         MapFragment mapFragment = (MapFragment) getFragmentManager().findFragmentById(R.id.campus_map);
         mapFragment.getMapAsync(this);
@@ -92,7 +126,6 @@ public class CampusMapActivity extends AppCompatActivity implements OnMapReadyCa
             return;
         }
         locationManager.requestLocationUpdates(LocationManager.NETWORK_PROVIDER, 1, 1, this);
-
     }
 
     @Override
@@ -102,65 +135,19 @@ public class CampusMapActivity extends AppCompatActivity implements OnMapReadyCa
         map.setMapType(GoogleMap.MAP_TYPE_SATELLITE);
         map.setBuildingsEnabled(true);
 
-        //MarkerOptions umMarker= new MarkerOptions().position(um)
-                //.title("University Of Mindanao");
+        map.setInfoWindowAdapter(locationInfoUM);
+        locationsSpinner.setOnItemSelectedListener(new MapLocationListener(umLocations, map));
 
 
-        /*MarkerOptions umMatinaGateMarker = new MarkerOptions().position(umMatinaGate)
-                .title("Main Gate");
-
-        MarkerOptions umMatinaBEMarker = new MarkerOptions().position(umMatinaBE)
-                .title("BE Building");
-
-        MarkerOptions umMatinaBEFoodcourtMarker = new MarkerOptions().position(umMatinaBEFoodcourt)
-                .title("BE Foodcourt");
-
-        MarkerOptions umMatinaCafeteriaMarker = new MarkerOptions().position(umMatinaCafeteria)
-                .title("Cafeteria");
-
-        MarkerOptions umMatinaECarTerminal1Marker = new MarkerOptions().position(umMatinaECarTerminal1)
-                .title("E-Car Terminal");
-
-        MarkerOptions umMatinaHighSchoolMarker = new MarkerOptions().position(umMatinaHighSchool)
-                .title("HighSchool Department");
-
-        MarkerOptions umMatinaGETMarker = new MarkerOptions().position(umMatinaGET)
-                .title("GET Building");
-
-        MarkerOptions umMatinaDPTMarker = new MarkerOptions().position(umMatinaDPT)
-                .title("DPT Building");
-
-        MarkerOptions umMatinaSocialHallMarker = new MarkerOptions().position(umMatinaSocialHall)
-                .title("Social Hall");
-
-        MarkerOptions umMatinaProfessionalSchoolMarker = new MarkerOptions().position(umMatinaProfessionalSchool)
-                .title("Professional School Building");
-
-        MarkerOptions umMatinaTrackAndFieldMarker = new MarkerOptions().position(umMatinaTrackAndField)
-                .title("Track and Field");*/
-
-
-        for(String key : umLocations.keySet()){
-            CampusLocation location = umLocations.get(key);
-            location.addMapMarker(map);
+        for(CampusLocation location: umLocations){
+            Marker marker = location.addMapMarker(map);
+            markerLocation.put(marker, location);
         }
 
-        CampusLocation location = umLocations.get("um");
+        CampusLocation location = umLocations.get(0);
+        location.addMapMarker(map);
         location.showMarker();
 
-        /*Marker umMark = map.addMarker(umMarker);
-        umMark.showInfoWindow();
-        Marker umMatinaGateMark = map.addMarker(umMatinaGateMarker);
-        map.addMarker(umMatinaBEMarker);
-        map.addMarker(umMatinaBEFoodcourtMarker);
-        map.addMarker(umMatinaCafeteriaMarker);
-        map.addMarker(umMatinaECarTerminal1Marker);
-        map.addMarker(umMatinaHighSchoolMarker);
-        map.addMarker(umMatinaGETMarker);
-        map.addMarker(umMatinaDPTMarker);
-        map.addMarker(umMatinaProfessionalSchoolMarker);
-        map.addMarker(umMatinaSocialHallMarker);
-        map.addMarker(umMatinaTrackAndFieldMarker);*/
 
 
         CameraPosition initialPosition = new CameraPosition(um, 18, 60, 0);

@@ -34,7 +34,7 @@ public class FetchBlogTileDataActionWrapper implements WebServiceAction {
     @Override
     public void processRequest() {
 
-        connection = new WebServiceConnection(AuthenticationAddress.FETCH_BLOGS, activity,
+        connection = new WebServiceConnection(AuthenticationAddress.FETCH_BLOG, activity,
                 true, true, true);
 
         if(connection != null){

@@ -1,5 +1,11 @@
 package com.example.darwin.umnify;
 
+import java.text.ParseException;
+import java.text.SimpleDateFormat;
+import java.util.Calendar;
+import java.util.Date;
+import java.util.Locale;
+
 /**
  * Created by darwin on 9/7/17.
  */
@@ -46,6 +52,38 @@ public class DateHelper {
         }
 
         return builder.toString();
+    }
+
+    public static String convertDateToMDY(String date){
+
+        SimpleDateFormat monthDateYearFormat = new SimpleDateFormat("MMM dd yyyy", Locale.ENGLISH);
+        SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd");
+        String monthDateYear = null;
+
+        try{
+
+            Date mdy = sdf.parse(date);
+            monthDateYear = monthDateYearFormat.format(mdy);
+        }catch (ParseException e){
+            e.printStackTrace();
+        }
+
+        return monthDateYear;
+    }
+
+    public static String convert24Hourto12Hour(String time){
+        SimpleDateFormat displayFormat = new SimpleDateFormat("hh:mm a");
+        SimpleDateFormat parseFormat = new SimpleDateFormat("HH:mm:ss");
+        String display = null;
+
+        try{
+            Date dtime = parseFormat.parse(time);
+            display = displayFormat.format(dtime);
+        }catch (ParseException e){
+            e.printStackTrace();
+        }
+
+        return display;
     }
 
 }

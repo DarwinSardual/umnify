@@ -21,39 +21,48 @@
 
         <!-- Place the author here-->
 
-        <LinearLayout
+        <RelativeLayout
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:background="@drawable/bottom_border_newsfeed"
             android:padding="3dp"
             >
 
-            <!--<ImageView
-                    android:layout_width="30dp"
-                    android:layout_height="30dp"
-                    android:id="@+id/author_image"
-                    android:scaleType="fitXY"/> -->
-
             <de.hdodenhof.circleimageview.CircleImageView
                 xmlns:app="http://schemas.android.com/apk/res-auto"
                 android:id="@+id/author_image"
                 android:layout_width="40dp"
                 android:layout_height="40dp"
-                app:civ_border_width="1dp"
                 android:scaleType="centerCrop"
-                app:civ_border_color="#8E8989"/>
+                app:civ_border_width="1dp"
+                android:layout_alignParentLeft="true"
+                android:layout_alignParentTop="true"
+                app:civ_border_color="#000000"/>
 
             <TextView
-                android:layout_width="match_parent"
+                android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:id="@+id/news_author"
-                android:maxLines="3"
                 android:layout_marginStart="10dp"
                 android:textSize="12sp"
                 android:textColor="#000000"
+                android:textStyle="bold"
+                android:layout_toRightOf="@id/author_image"
                 android:layout_gravity="center_vertical"
                 />
-        </LinearLayout>
+
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:id="@+id/news_date"
+                android:layout_marginStart="10dp"
+                android:textSize="9sp"
+                android:textColor="#000000"
+                android:layout_toRightOf="@id/author_image"
+                android:layout_below="@id/news_author"
+                android:layout_gravity="center_vertical"
+                />
+        </RelativeLayout>
 
 
         <!-- Place the content here-->
@@ -61,7 +70,8 @@
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:orientation="vertical"
-            android:padding="3dp">
+            android:padding="3dp"
+            android:layout_marginTop="3dp">
 
             <TextView
                 android:id="@+id/news_content"
@@ -79,6 +89,8 @@
                 android:layout_marginTop="5dp"
                 android:scaleType="centerCrop"
                 />
+
+
 
             <TextView android:layout_width="wrap_content"
                 android:layout_height="wrap_content"

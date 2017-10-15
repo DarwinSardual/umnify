@@ -21,7 +21,7 @@ public class GalleryHelper {
 
     public static ImageWrapper createImageWrapperFromJSON(JSONObject data, int index) throws JSONException{
 
-        String imageFile = data.getString("image");
+        String imageFile = data.isNull("image")? null : data.getString("image");
         ImageWrapper wrapper = new ImageWrapper(imageFile, null, index);
 
         return wrapper;
@@ -42,6 +42,7 @@ public class GalleryHelper {
             e.printStackTrace();
         }finally {
             try{
+                if(outputStream != null)
                 outputStream.close();
             }catch (IOException i){
                 i.printStackTrace();
@@ -67,6 +68,7 @@ public class GalleryHelper {
             return null;
         }finally {
             try{
+                if(inputStream != null)
                 inputStream.close();
             }catch (IOException i){
                 i.printStackTrace();

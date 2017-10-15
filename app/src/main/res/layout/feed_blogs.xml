@@ -2,19 +2,19 @@
 <RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
                 android:layout_width="match_parent"
                 android:layout_height="150dp"
-                android:id="@+id/blog_tile_container"
+                android:id="@+id/container"
                 android:padding="2dp"
 >
     <ImageView
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:scaleType="centerCrop"
-            android:id="@+id/blog_tile_image"/>
+            android:id="@+id/image"/>
 
     <TextView
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:id="@+id/blog_tile_heading"
+            android:id="@+id/heading"
             android:maxLines="1"
             android:gravity="center"
             android:textSize="16sp"

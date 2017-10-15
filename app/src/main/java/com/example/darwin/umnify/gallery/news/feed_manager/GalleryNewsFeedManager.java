@@ -8,16 +8,21 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 
+import com.example.darwin.umnify.DataActionWrapper;
 import com.example.darwin.umnify.PostResultAction;
 import com.example.darwin.umnify.async.WebServiceAsync;
+import com.example.darwin.umnify.authentication.AuthenticationAddress;
 import com.example.darwin.umnify.feed.FeedManager;
+import com.example.darwin.umnify.feed.PostAsyncAction;
 import com.example.darwin.umnify.gallery.GalleryHelper;
 import com.example.darwin.umnify.gallery.ImageWrapper;
 import com.example.darwin.umnify.gallery.ViewImageActivity;
 import com.example.darwin.umnify.gallery.ViewImageListener;
+import com.example.darwin.umnify.gallery.blog.data_action_wrapper.FetchBlogImageFileDataActionWrapper;
 import com.example.darwin.umnify.gallery.news.data_action_wrapper.FetchNewsImageDataActionWrapper;
 import com.example.darwin.umnify.gallery.news.data_action_wrapper.FetchNewsImageFileDataActionWrapper;
 import com.example.darwin.umnify.gallery.view_holder.GalleryViewHolder;
+import com.example.darwin.umnify.wrapper.WebServiceAction;
 
 import org.json.JSONArray;
 import org.json.JSONException;
@@ -29,7 +34,7 @@ import java.util.HashMap;
  * Created by darwin on 9/2/17.
  */
 
-public class GalleryNewsFeedManager<E extends GalleryViewHolder> extends FeedManager<E, ImageWrapper> implements PostResultAction{
+public class GalleryNewsFeedManager<E extends GalleryViewHolder> extends FeedManager<E, ImageWrapper> {
 
     private Class<E> cls;
 
@@ -39,15 +44,8 @@ public class GalleryNewsFeedManager<E extends GalleryViewHolder> extends FeedMan
         super(activity, swipeRefreshLayout);
         this.cls = cls;
 
-        HashMap<String, String> textDataOutput = new HashMap<>();
-        textDataOutput.put("offset", 0 +"");
-        textDataOutput.put("limit", 5 + "");
-        WebServiceAsync async = new WebServiceAsync();
-        FetchNewsImageFileDataActionWrapper fetchNewsImageFileDataActionWrapper =
-                new FetchNewsImageFileDataActionWrapper(textDataOutput, super.getActivity(), this);
 
-        async.execute(fetchNewsImageFileDataActionWrapper);
-
+    updateFeed(-1);
     }
 
     @Override
@@ -58,19 +56,24 @@ public class GalleryNewsFeedManager<E extends GalleryViewHolder> extends FeedMan
         JSONObject imageData = new JSONObject(jsonData);
         ImageWrapper wrapper = GalleryHelper.createImageWrapperFromJSON(imageData, super.getFeedListSize());
 
-        async = new WebServiceAsync();
-        fetchNewsImageDataActionWrapper = new FetchNewsImageDataActionWrapper(wrapper, super.getActivity(),
-                this);
-        super.addToFeedList(super.getFeedListSize(), wrapper);
-        notifyItemInserted(wrapper.getIndex());
-        async.execute(fetchNewsImageDataActionWrapper);
+
+        if(wrapper.getImageFile() != null){
+            async = new WebServiceAsync();
+            fetchNewsImageDataActionWrapper = new FetchNewsImageDataActionWrapper(wrapper, super.getActivity(),
+                    this);
+            super.addToFeedList(super.getFeedListSize() + "", wrapper);
+            notifyItemInserted(wrapper.getIndex());
+            async.execute(fetchNewsImageDataActionWrapper);
+        }
+
     }
 
     @Override
     public void addFeedEntries(String jsonDataArray) throws JSONException {
 
         JSONArray dataList = new JSONArray(jsonDataArray);
-
+        //skip index 0
+        dataList.remove(0);
         for(int i = 0; i < dataList.length(); i++){
 
             addFeedEntry(dataList.getString(i));
@@ -84,6 +87,37 @@ public class GalleryNewsFeedManager<E extends GalleryViewHolder> extends FeedMan
     @Override
     public void updateFeed(int direction) {
 
+        if(super.isFetchingFeedEntry()) return;
+
+        if(direction == 1){
+
+            super.setFetchingFeedEntry(true);
+
+            HashMap<String, String> textDataOutput = new HashMap<>();
+            textDataOutput.put("offset", 0 +"");
+            textDataOutput.put("limit", 30 + "");
+            WebServiceAsync async = new WebServiceAsync();
+            WebServiceAction action =
+                    new DataActionWrapper(textDataOutput, super.getActivity(), AuthenticationAddress.FETCH_NEWS_IMAGE_FILE, new ProcessPostFetchNewsImageFile());
+
+            async.execute(action);
+
+        }else if(direction == -1){
+
+            super.clearFeedList();
+            notifyDataSetChanged();
+            super.setFetchingFeedEntry(true);
+
+            HashMap<String, String> textDataOutput = new HashMap<>();
+            textDataOutput.put("offset", 0 +"");
+            textDataOutput.put("limit", 30 + "");
+
+            WebServiceAsync async = new WebServiceAsync();
+            WebServiceAction action =
+                    new DataActionWrapper(textDataOutput, super.getActivity(), AuthenticationAddress.FETCH_NEWS_IMAGE_FILE, new ProcessPostFetchNewsImageFile());
+
+            async.execute(action);
+        }
     }
 
     @Override
@@ -92,8 +126,13 @@ public class GalleryNewsFeedManager<E extends GalleryViewHolder> extends FeedMan
     }
 
     @Override
-    public void deleteFeedEntry(ImageWrapper item) {
+    public void deleteFeedEntry(String key) {
         // dummy
+    }
+
+    @Override
+    public void updateFeedContent(Intent data) {
+
     }
 
     @Override
@@ -116,25 +155,19 @@ public class GalleryNewsFeedManager<E extends GalleryViewHolder> extends FeedMan
     @Override
     public void onBindViewHolder(final E holder, int position) {
 
-        final ImageWrapper wrapper = super.getEntryFromFeedList(position);
-
+        final ImageWrapper wrapper = super.getEntryFromFeedList(position + "");
 
         if(wrapper != null){
 
             holder.getImageView().setImageBitmap(wrapper.getImage());
 
-            if(wrapper.getImage() != null){
-
-                GalleryHelper.saveImageToInternal(wrapper.getImage(),
-                        wrapper.getImageFile(), GalleryNewsFeedManager.this.getActivity(), "news");
-
-                Bundle bundle = new Bundle();
-                bundle.putString("FOLDER", "news");
-                bundle.putString("IMAGE_FILE", wrapper.getImageFile());
 
 
+            Bundle bundle = new Bundle();
+            bundle.putString("FOLDER", "feed/news");
+            bundle.putString("IMAGE_FILE", wrapper.getImageFile());
+            bundle.putString("ROOT_LOCATION", AuthenticationAddress.NEWS_IMAGE_FOLDER);
                 holder.getImageView().setOnClickListener(new ViewImageListener(bundle, GalleryNewsFeedManager.this.getActivity()));
-            }
         }
     }
 
@@ -143,10 +176,26 @@ public class GalleryNewsFeedManager<E extends GalleryViewHolder> extends FeedMan
         return super.getFeedListSize();
     }
 
-    @Override
-    public void onPostResultAction(String jsonData) throws JSONException{
-        addFeedEntries(jsonData);
-        setFetchingFeedEntry(false);
+    private class ProcessPostFetchNewsImageFile implements PostAsyncAction  {
+
+        @Override
+        public void processResult(String jsonResponse){
+
+            if(jsonResponse != null){
+
+                try{
+                    JSONObject json = new JSONObject(jsonResponse);
+                    String data = json.getString("data");
+                    addFeedEntries(data);
+                    setFetchingFeedEntry(false);
+                    getSwipeRefreshLayout().setRefreshing(false);
+
+                }catch (JSONException e){
+                    e.printStackTrace();
+                }
+            }
+
+        }
     }
 
 

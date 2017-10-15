@@ -12,8 +12,15 @@ import android.view.MenuItem;
 import android.widget.Toast;
 import com.example.darwin.umnify.R;
 import com.example.darwin.umnify.authentication.AuthenticationCodes;
+import com.example.darwin.umnify.feed.announcements.Announcement;
+import com.example.darwin.umnify.feed.announcements.AnnouncementCode;
+import com.example.darwin.umnify.feed.announcements.AnnouncementFeedFragment;
 import com.example.darwin.umnify.feed.blogs.BlogFeedFragment;
+import com.example.darwin.umnify.feed.blogs.BlogCode;
+import com.example.darwin.umnify.feed.news.NewsCode;
 import com.example.darwin.umnify.feed.news.NewsFeedFragment;
+import com.example.darwin.umnify.feed.notifications.Notification;
+import com.example.darwin.umnify.feed.notifications.NotificationsCode;
 import com.example.darwin.umnify.feed.notifications.NotificationsFeedFragment;
 
 import java.io.File;
@@ -25,6 +32,7 @@ public class HomeActivity extends AppCompatActivity {
 
     private NewsFeedFragment newsFragment;
     private BlogFeedFragment blogFragment;
+    private AnnouncementFeedFragment announcementFragment;
     private NotificationsFeedFragment notificationsFragment;
 
     private Bundle userData;
@@ -45,6 +53,7 @@ public class HomeActivity extends AppCompatActivity {
                 setContentView(R.layout.activity_home_guest);
                 HomeActivityControllerGuest homeActivityManagerGuest = new HomeActivityControllerGuest(this);
                 homeActivityManagerGuest.init();
+                drawerLayout = homeActivityManagerGuest.getDrawerLayout();
 
             }else if(USER_TYPE == AuthenticationCodes.NORMAL_USER ||
                     USER_TYPE == AuthenticationCodes.ADMIN_USER ||
@@ -65,6 +74,7 @@ public class HomeActivity extends AppCompatActivity {
 
                     newsFragment = homeActivityControllerAdmin.getNewsFeedFragment();
                     blogFragment = homeActivityControllerAdmin.getBlogFeedFragment();
+                    notificationsFragment = homeActivityControllerAdmin.getNotificationsFeedFragment();
                 }else if(USER_TYPE == AuthenticationCodes.SUPER_ADMIN_USER){
                     setContentView(R.layout.activity_home_super_admin);
                     HomeActivityControllerSuperAdmin homeActivityControllerSuperAdmin = new HomeActivityControllerSuperAdmin(this, userData);
@@ -73,6 +83,8 @@ public class HomeActivity extends AppCompatActivity {
 
                     newsFragment = homeActivityControllerSuperAdmin.getNewsFeedFragment();
                     blogFragment = homeActivityControllerSuperAdmin.getBlogFeedFragment();
+                    notificationsFragment = homeActivityControllerSuperAdmin.getNotificationsFeedFragment();
+                    announcementFragment = homeActivityControllerSuperAdmin.getAnnouncementFeedFragment();
                 }
 
             }else{
@@ -136,29 +148,97 @@ public class HomeActivity extends AppCompatActivity {
     @Override
     protected void onActivityResult(int requestCode, int resultCode, Intent data) {
 
-        if(requestCode == HomeActivity.ADD_NEWS_CODE){
+        if(requestCode == NewsCode.ADD_NEWS){
 
             if(resultCode == RESULT_OK){
-                // add user data
-                // news fragment and trigger news manager to perform adding news
 
                 newsFragment.addNews(data);
             }else{
                 Log.e("There is a error", resultCode + "");
             }
 
-        }else if(requestCode == HomeActivity.ADD_BLOG_CODE){
+        }else if(requestCode == BlogCode.ADD_BLOG){
 
             if(resultCode == RESULT_OK){
-                // add user data
-                // news fragment and trigger news manager to perform adding news
 
                 blogFragment.addBlog(data);
             }else{
                 Log.e("There is a error", resultCode + "");
             }
+        }else if(requestCode == BlogCode.VIEW_BLOG){
+            if (resultCode == RESULT_OK) {
+                if(data != null){
+                    int action = data.getIntExtra("ACTION", -1);
+
+                    if(action == BlogCode.DELETE_BLOG){
+                        blogFragment.deleteBlog(data);
+                    }else if(action == BlogCode.EDIT_BLOG){
+                        blogFragment.updateBlog(data);
+                    }
+                }
+            }
+
+        }else if(requestCode == NewsCode.EDIT_NEWS){
+            if(resultCode == RESULT_OK){
+                if(data != null){
+                    newsFragment.updateNews(data);
+                }
+            }
+        }
+        else if(requestCode == AnnouncementCode.ADD_ANNOUNCEMENT){
+            if(resultCode == RESULT_OK){
+                if(data != null){
+                    announcementFragment.addAnnouncement(data);
+                }
+            }
+        }else if(requestCode == AnnouncementCode.EDIT_ANNOUNCEMENT){
+            if(resultCode == RESULT_OK){
+                if(data != null){
+                    announcementFragment.updateAnnouncement(data);
+                }
+            }
+        }
+        /*else if(requestCode == NewsCode.VIEW_NEWS){
+            if(data != null){
+
+                int action = data.getIntExtra("ACTION", -1);
+
+                if(action == NewsCode.DELETE_NEWS){
+                    newsFragment.deleteNews(data);
+                }else if(action == NewsCode.EDIT_NEWS){
+
+                }
+            }
+        }*/else if(requestCode == NotificationsCode.VIEW_NEWS){
+
+            if(resultCode == RESULT_OK){
+                if(data != null){
+
+                    int action = data.getIntExtra("ACTION", -1);
+                    if(action == NewsCode.DELETE_NEWS){
+                        //Log.e("notification id", data.getIntExtra("NOTIFICATION_ID", -1) + "");
+                        notificationsFragment.deleteNotification(data);
+                    }else if(action == NewsCode.EDIT_NEWS){
+                        data.putExtra("TYPE", "news");
+                        notificationsFragment.updateNewsBlog(data);
+                    }
+                }
+            }
+        }else if(requestCode == NotificationsCode.VIEW_BLOG){
+
+            if(resultCode == RESULT_OK){
+                if(data != null) {
+
+                    int action = data.getIntExtra("ACTION", -1);
+                    if (action == BlogCode.DELETE_BLOG) {
+                        notificationsFragment.deleteNotification(data);
+
+                    } else if (action == BlogCode.EDIT_BLOG) {
+                        data.putExtra("TYPE", "blog");
+                        notificationsFragment.updateNewsBlog(data);
+                    }
+                }
+            }
         }
     }
-
-
 }

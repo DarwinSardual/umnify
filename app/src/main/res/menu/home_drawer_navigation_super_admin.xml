@@ -1,62 +1,159 @@
 <?xml version="1.0" encoding="utf-8"?>
 <menu xmlns:android="http://schemas.android.com/apk/res/android">
 
-    <group android:checkableBehavior="single">
-        <!--<item
-                android:icon="@drawable/groups_icon"
-                android:tint="@color/button_grey"
-                android:id="@+id/navigation_home"
-                android:title="Home" />-->
-        <item
-            android:icon="@drawable/navigation_about"
-            android:tint="@color/button_grey"
-            android:id="@+id/navigation_about"
-            android:title="About">
-        </item>
-        <item
-            android:icon="@drawable/calendar_icon"
-            android:tint="@color/button_grey"
-            android:id="@+id/navigation_calendar"
-            android:title="Calendar" />
-        <item
-            android:icon="@drawable/navigation_gallery"
-            android:tint="@color/button_grey"
-            android:id="@+id/navigation_maps"
-            android:title="Maps" />
-        <item
-            android:icon="@drawable/navigation_gallery"
-            android:tint="@color/button_grey"
-            android:id="@+id/navigation_gallery"
-            android:title="Gallery" />
-        <item
-            android:icon="@drawable/navigation_subjects_enrolled"
-            android:tint="@color/button_grey"
-            android:id="@+id/navigation_subjects_enrolled"
-            android:title="Subjects Enrolled" />
-        <item
-            android:icon="@drawable/navigation_evaluation"
-            android:tint="@color/button_grey"
-            android:id="@+id/navigation_evalution"
-            android:title="Evaluation" />
-        <item
-            android:icon="@drawable/navigation_student_permanent_record"
-            android:tint="@color/button_grey"
-            android:id="@+id/navigation_spr"
-            android:title="Student Permanent Record" />
-        <!--<item
-                android:icon="@drawable/preferences_icon"
-                android:tint="@color/button_grey"
-                android:id="@+id/navigation_preferences"
-                android:title="Preferences" />-->
+    <item android:id="@+id/navigation_about"
+        android:title="About"
+        >
 
-        <item
-            android:icon="@drawable/navigation_pending"
-            android:tint="@color/button_grey"
-            android:id="@+id/navigation_pending"
-            android:title="Pending" />
+        <menu>
+            <group android:checkableBehavior="single">
+                <item
+                    android:icon="@drawable/navigation_idea"
+                    android:id="@+id/navigation_vmg"
+                    android:tint="@color/colorAccent"
+                    android:visible="true"
+                    android:title="Vision, Mission &amp; Values" />
+
+                <item
+                    android:icon="@drawable/navigation_history"
+                    android:id="@+id/navigation_history"
+                    android:tint="@color/colorAccent"
+                    android:visible="true"
+                    android:title="History" />
+
+                <item
+                    android:icon="@drawable/navigation_poseidon"
+                    android:tint="@color/colorAccent"
+                    android:id="@+id/navigation_poseidon"
+                    android:title="Poseidon" />
+
+                <item
+                    android:icon="@drawable/navigation_philosophy"
+                    android:tint="@color/colorAccent"
+                    android:id="@+id/navigation_philosophy"
+                    android:title="Philosophy of Education" />
+
+                <item
+                    android:icon="@drawable/navigation_seal"
+                    android:tint="@color/colorAccent"
+                    android:id="@+id/navigation_seal"
+                    android:title="Seal" />
+
+                <item
+                    android:icon="@drawable/navigation_core_competencies"
+                    android:tint="@color/colorAccent"
+                    android:id="@+id/navigation_core_competencies"
+                    android:title="Core Competencies" />
+
+                <item
+                    android:icon="@drawable/navigation_core_values"
+                    android:tint="@color/colorAccent"
+                    android:id="@+id/navigation_core_values"
+                    android:title="Core Values" />
+
+                <item
+                    android:icon="@drawable/navigation_deans"
+                    android:tint="@color/colorAccent"
+                    android:id="@+id/navigation_deans_directors"
+                    android:title="Deans &amp; Directors" />
+
+                <item
+                    android:icon="@drawable/navigation_qoute"
+                    android:tint="@color/colorAccent"
+                    android:id="@+id/navigation_qoute"
+                    android:title="Qoute of the Day" />
+
+
+                <item
+                    android:icon="@drawable/navigation_trivia"
+                    android:tint="@color/colorAccent"
+                    android:id="@+id/navigation_trivia"
+                    android:title="Trivia" />
+
+                <item
+                    android:icon="@drawable/navigation_quick_fact"
+                    android:tint="@color/colorAccent"
+                    android:id="@+id/navigation_quick_facts"
+                    android:title="Quick fact" />
+
+                <item
+                    android:icon="@drawable/navigation_credits"
+                    android:tint="@color/colorAccent"
+                    android:id="@+id/navigation_credits"
+                    android:title="Credits" />
+
+            </group>
+        </menu>
+    </item>
+
+    <item android:id="@+id/navigation_personal"
+        android:title="Personal">
+
+        <menu>
+            <group android:checkableBehavior="single">
+
+                <item
+                    android:icon="@drawable/navigation_profile"
+                    android:tint="@color/colorAccent"
+                    android:id="@+id/navigation_profile"
+                    android:title="Profile" />
+                <item
+                    android:icon="@drawable/navigation_subjects_enrolled"
+                    android:tint="@color/colorAccent"
+                    android:id="@+id/navigation_subjects_enrolled"
+                    android:title="Subjects Enrolled" />
+
+                <item
+                    android:icon="@drawable/navigation_evaluation"
+                    android:tint="@color/colorAccent"
+                    android:id="@+id/navigation_evalution"
+                    android:title="Evaluation" />
+                <item
+                    android:icon="@drawable/navigation_student_permanent_record"
+                    android:tint="@color/colorAccent"
+                    android:id="@+id/navigation_spr"
+                    android:title="Student Permanent Record" />
+
+            </group>
+        </menu>
+    </item>
+
+    <item android:id="@+id/navigation_others"
+        android:title="Others">
+
+        <menu>
+            <group android:checkableBehavior="single">
+                <item
+                    android:icon="@drawable/navigation_maps"
+                    android:tint="@color/colorAccent"
+                    android:id="@+id/navigation_maps"
+                    android:title="Maps" />
+
+                <item
+                    android:icon="@drawable/navigation_gallery"
+                    android:tint="@color/colorAccent"
+                    android:id="@+id/navigation_gallery"
+                    android:title="Gallery" />
+                <item
+                    android:icon="@drawable/calendar_icon"
+                    android:tint="@color/colorAccent"
+                    android:id="@+id/navigation_calendar"
+                    android:title="Calendar" />
+
+                <item
+                    android:icon="@drawable/navigation_pending"
+                    android:tint="@color/colorAccent"
+                    android:id="@+id/navigation_pending"
+                    android:title="Pending" />
+
+            </group>
+        </menu>
+    </item>
+
+    <group android:checkableBehavior="single">
         <item
             android:icon="@drawable/logout_icon"
-            android:tint="@color/button_grey"
+            android:tint="@color/colorAccent"
             android:id="@+id/navigation_logout"
             android:title="Log out" />
     </group>

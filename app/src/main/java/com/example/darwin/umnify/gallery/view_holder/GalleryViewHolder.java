@@ -31,7 +31,7 @@ public class GalleryViewHolder extends RecyclerView.ViewHolder {
     public GalleryViewHolder(LayoutInflater inflater, ViewGroup parent){
         super(inflater.inflate(R.layout.gallery_image_view_holder, parent, false));
 
-        imageView = (ImageView) itemView.findViewById(R.id.gallery_image);
+        imageView = (ImageView) itemView.findViewById(R.id.image);
         mShortAnimationDuration = itemView.getResources().getInteger(
                 android.R.integer.config_shortAnimTime);
 

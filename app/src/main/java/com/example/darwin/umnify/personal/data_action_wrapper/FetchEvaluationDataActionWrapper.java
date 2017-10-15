@@ -57,17 +57,21 @@ public class FetchEvaluationDataActionWrapper implements WebServiceAction{
     @Override
     public void processResult() {
 
-        EvaluationActivity evaluationActivity = (EvaluationActivity) activity;
+        if(response != null){
+            EvaluationActivity evaluationActivity = (EvaluationActivity) activity;
 
-        try{
+            try{
 
-            JSONObject json = new JSONObject(response);
-            String data = json.getString("data");
+                JSONObject json = new JSONObject(response);
+                String data = json.getString("data");
 
-            evaluationActivity.displayData(data);
+                evaluationActivity.displayData(data);
 
-        }catch (JSONException e){
-            e.printStackTrace();
+            }catch (JSONException e){
+                e.printStackTrace();
+            }
         }
+
+
     }
 }

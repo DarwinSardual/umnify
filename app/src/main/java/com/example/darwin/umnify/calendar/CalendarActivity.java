@@ -8,8 +8,10 @@ import android.support.annotation.NonNull;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.util.Log;
+import android.view.View;
 import android.widget.CalendarView;
 import android.widget.DatePicker;
+import android.widget.ImageButton;
 
 import com.example.darwin.umnify.DateHelper;
 import com.example.darwin.umnify.R;
@@ -29,37 +31,48 @@ public class CalendarActivity extends AppCompatActivity {
     private Bundle userData;
     CalendarManager manager;
     public static int ADD_EVENT_CODE = 1;
+    private ImageButton toolbarBackButton;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
 
+
+
         userData = getIntent().getExtras();
 
         if(userData != null){
 
-            if(userData.getInt("USER_TYPE") == AuthenticationCodes.ADMIN_USER ||
+            if(/*userData.getInt("USER_TYPE") == AuthenticationCodes.ADMIN_USER ||*/
                     userData.getInt("USER_TYPE") == AuthenticationCodes.SUPER_ADMIN_USER){
 
                 setContentView(R.layout.activity_calendar_admin);
-                MaterialCalendarView calendarView = (MaterialCalendarView) findViewById(R.id.calendarView);
+                MaterialCalendarView calendarView = (MaterialCalendarView) findViewById(R.id.calendar);
                 manager = new CalendarManagerAdmin(this, calendarView, userData);
                 manager.init();
 
             }else{
                 setContentView(R.layout.activity_calendar);
-                MaterialCalendarView calendarView = (MaterialCalendarView) findViewById(R.id.calendarView);
+                MaterialCalendarView calendarView = (MaterialCalendarView) findViewById(R.id.calendar);
                 manager = new CalendarManager(this, calendarView);
                 manager.init();
 
             }
         }else{
             setContentView(R.layout.activity_calendar);
-            MaterialCalendarView calendarView = (MaterialCalendarView) findViewById(R.id.calendarView);
+            MaterialCalendarView calendarView = (MaterialCalendarView) findViewById(R.id.calendar);
             manager = new CalendarManager(this, calendarView);
             manager.init();
 
         }
+
+        toolbarBackButton = (ImageButton) findViewById(R.id.back);
+        toolbarBackButton.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                finish();
+            }
+        });
     }
 
     @Override
