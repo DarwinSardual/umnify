@@ -16,6 +16,7 @@ import android.widget.LinearLayout;
 import android.widget.ScrollView;
 import android.widget.TextView;
 
+import com.example.darwin.umnify.DateHelper;
 import com.example.darwin.umnify.R;
 import com.example.darwin.umnify.async.WebServiceAsync;
 import com.example.darwin.umnify.calendar.data_action_wrapper.DeleteEventDataActionWrapper;
@@ -60,21 +61,30 @@ public class ViewEventDialogAdmin extends DialogFragment implements OnDeleteEven
                 TextView idView = new TextView(getActivity());
                 TextView nameView = new TextView(getActivity());
                 TextView descriptionView = new TextView(getActivity());
-                TextView startDateView = new TextView(getActivity());
-                TextView endDateView = new TextView(getActivity());
+                TextView dateView = new TextView(getActivity());
 
                 idView.setText(bundle.getBundle(key).getInt("id")+ "");
                 nameView.setText(bundle.getBundle(key).getString("name"));
                 nameView.setTypeface(null, Typeface.BOLD);
                 descriptionView.setText(bundle.getBundle(key).getString("description"));
-                startDateView.setText(bundle.getBundle(key).getString("start_date"));
-                endDateView.setText(bundle.getBundle(key).getString("end_date"));
 
+                String startDate = bundle.getBundle(key).getString("start_date");
+                String endDate = bundle.getBundle(key).getString("end_date");
+                String dateDisplay = null;
+
+                if(startDate.equalsIgnoreCase(endDate)){
+                    dateDisplay = DateHelper.convertDateToMDY(startDate);
+                }else{
+                    dateDisplay = DateHelper.convertDateToMDY(startDate) + " - " + DateHelper.convertDateToMDY(endDate);
+                }
+
+                dateView.setText(dateDisplay);
+
+                nameView.setTextSize(16);
 
                 eventContainer.addView(nameView);
                 eventContainer.addView(descriptionView);
-                eventContainer.addView(startDateView);
-                eventContainer.addView(endDateView);
+                eventContainer.addView(dateView);
 
                 LinearLayout buttonLayout = new LinearLayout(getActivity());
                 LinearLayout.LayoutParams buttonLayoutParams = new LinearLayout.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT,
@@ -104,7 +114,7 @@ public class ViewEventDialogAdmin extends DialogFragment implements OnDeleteEven
                     }
                 });
 
-                buttonLayout.addView(editButton);
+                //buttonLayout.addView(editButton);
                 buttonLayout.addView(deleteButton);
 
                 eventContainer.addView(buttonLayout);

@@ -6,6 +6,7 @@ import android.util.Log;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.Button;
+import android.widget.ImageButton;
 import android.widget.TableLayout;
 import android.widget.TableRow;
 import android.widget.TextView;
@@ -24,6 +25,7 @@ public class SubjectsEnrolledActivity extends AppCompatActivity {
 
     private Bundle userData;
     private TableLayout table;
+    private ImageButton toolbarBackButton;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -31,7 +33,16 @@ public class SubjectsEnrolledActivity extends AppCompatActivity {
         setContentView(R.layout.activity_subjects_enrolled);
 
         userData = getIntent().getExtras();
-        table = (TableLayout) findViewById(R.id.subjects_enrolled_table);
+        table = (TableLayout) findViewById(R.id.subjects_table);
+
+        toolbarBackButton = (ImageButton) findViewById(R.id.back);
+
+        toolbarBackButton.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                finish();
+            }
+        });
 
         HashMap<String, String> textDataOutput = new HashMap<>();
         textDataOutput.put("id", userData.getInt("USER_ID") + "");
@@ -106,6 +117,7 @@ public class SubjectsEnrolledActivity extends AppCompatActivity {
 
             moreButton = new Button(this);
             moreButton.setText("More");
+            moreButton.setAllCaps(false);
             moreButton.setTextSize(10);
             moreButton.setMinHeight(0);
             moreButton.setMinWidth(0);

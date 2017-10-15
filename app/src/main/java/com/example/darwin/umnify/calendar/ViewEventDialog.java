@@ -16,6 +16,7 @@ import android.widget.LinearLayout;
 import android.widget.ScrollView;
 import android.widget.TextView;
 
+import com.example.darwin.umnify.DateHelper;
 import com.example.darwin.umnify.R;
 
 /**
@@ -49,27 +50,35 @@ public class ViewEventDialog extends DialogFragment{
                 TextView idView = new TextView(getActivity());
                 TextView nameView = new TextView(getActivity());
                 TextView descriptionView = new TextView(getActivity());
-                TextView startDateView = new TextView(getActivity());
-                TextView endDateView = new TextView(getActivity());
+                TextView dateView = new TextView(getActivity());
 
                 idView.setText(bundle.getBundle(key).getInt("id")+ "");
                 nameView.setText(bundle.getBundle(key).getString("name"));
                 nameView.setTypeface(null, Typeface.BOLD);
                 descriptionView.setText(bundle.getBundle(key).getString("description"));
-                startDateView.setText(bundle.getBundle(key).getString("start_date"));
-                endDateView.setText(bundle.getBundle(key).getString("end_date"));
+
+
+                String startDate = bundle.getBundle(key).getString("start_date");
+                String endDate = bundle.getBundle(key).getString("end_date");
+                String dateDisplay = null;
+
+                if(startDate.equalsIgnoreCase(endDate)){
+                    dateDisplay = DateHelper.convertDateToMDY(startDate);
+                }else{
+                    dateDisplay = DateHelper.convertDateToMDY(startDate) + " - " + DateHelper.convertDateToMDY(endDate);
+                }
+
+                dateView.setText(dateDisplay);
+
+                nameView.setTextSize(16);
 
 
                 container.addView(nameView);
                 container.addView(descriptionView);
-                container.addView(startDateView);
-                container.addView(endDateView);
+                container.addView(dateView);
 
             }
-
         }
-
-
 
         return builder.create();
     }

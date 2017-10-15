@@ -2,98 +2,214 @@ package com.example.darwin.umnify.feed.news.feed_manager;
 
 import android.app.Activity;
 import android.content.Intent;
-import android.os.Bundle;
+import android.database.Cursor;
+import android.database.sqlite.SQLiteDatabase;
+import android.graphics.Bitmap;
+import android.graphics.BitmapFactory;
 import android.support.v4.widget.SwipeRefreshLayout;
 import android.support.v7.widget.RecyclerView;
 import android.util.Log;
 import android.view.LayoutInflater;
+import android.view.View;
 import android.view.ViewGroup;
 
+import com.example.darwin.umnify.DataActionWrapper;
+import com.example.darwin.umnify.DataImageActionWrapper;
+import com.example.darwin.umnify.DateHelper;
+import com.example.darwin.umnify.ImageActionWrapper;
 import com.example.darwin.umnify.R;
 import com.example.darwin.umnify.async.WebServiceAsync;
+import com.example.darwin.umnify.authentication.AuthenticationAddress;
+import com.example.darwin.umnify.database.UMnifyContract;
+import com.example.darwin.umnify.database.UMnifyDbHelper;
 import com.example.darwin.umnify.feed.FeedManager;
+import com.example.darwin.umnify.feed.PostAsyncAction;
+import com.example.darwin.umnify.feed.PostAsyncImageAction;
 import com.example.darwin.umnify.feed.news.News;
 import com.example.darwin.umnify.feed.news.NewsHelper;
 import com.example.darwin.umnify.feed.news.data_action_wrapper.FetchAuthorImageDataActionWrapper;
 import com.example.darwin.umnify.feed.news.data_action_wrapper.FetchNewsDataActionWrapper;
 import com.example.darwin.umnify.feed.news.data_action_wrapper.FetchNewsImageDataActionWrapper;
 import com.example.darwin.umnify.feed.news.view_holder.NewsViewHolderGuest;
+import com.example.darwin.umnify.gallery.GalleryHelper;
+import com.example.darwin.umnify.gallery.ViewImageActivity;
+import com.example.darwin.umnify.wrapper.WebServiceAction;
 
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 
+import java.util.ArrayList;
 import java.util.HashMap;
-import java.util.List;
 
 public class NewsFeedManagerGuest<E extends NewsViewHolderGuest> extends FeedManager<E, News>{
 
     private E viewHolder;
     private Class<E> cls;
     private int layoutId;
+    private SQLiteDatabase databaseRead;
+    private UMnifyDbHelper databaseConnection;
+    private boolean hasConnection = true;
+    private RecyclerView recyclerView;
+    private ArrayList<String> index;
+    private ProcessPostFetchData processPostFetchData;
 
 
-    public NewsFeedManagerGuest(Activity activity, SwipeRefreshLayout swipeRefreshLayout,
+    public NewsFeedManagerGuest(Activity activity, SwipeRefreshLayout swipeRefreshLayout, RecyclerView recyclerView,
                                 Class<E> cls, int layoutId){
 
         super(activity, swipeRefreshLayout);
-
         this.cls = cls;
+        this.recyclerView = recyclerView;
         this.layoutId = layoutId;
+        this.index = new ArrayList<>();
 
-        //load from cache first
+        databaseConnection = UMnifyDbHelper.getInstance(super.getActivity());
+        databaseRead = databaseConnection.getReadableDatabase();
+        processPostFetchData = new ProcessPostFetchData();
 
-        HashMap<String, String> fetchNewsDataParams = new HashMap<>();
-        fetchNewsDataParams.put("order", "desc");
-        fetchNewsDataParams.put("offset", super.getFeedListSize() + "");
-        fetchNewsDataParams.put("limit", "10");
-        fetchNewsDataParams.put("id", "-1");
-
-        WebServiceAsync asyncFetchNews = new WebServiceAsync();
-        FetchNewsDataActionWrapper fetchNewsWrapper = new FetchNewsDataActionWrapper(fetchNewsDataParams, activity, this);
-        asyncFetchNews.execute(fetchNewsWrapper);
-
-        fetchNewsWrapper = null;
-        asyncFetchNews = null;
-        fetchNewsDataParams = null;
+        updateFeed(-1);
     }
 
     @Override
     public void addFeedEntry(String jsonData) throws JSONException {
 
-        FetchAuthorImageDataActionWrapper fetchAuthorImageDataActionWrapper;
-        FetchNewsImageDataActionWrapper fetchNewsImageDataActionWrapper;
-        WebServiceAsync asyncFetchAuthorImage;
-        WebServiceAsync asyncFetchNewsImage;
+        //fetch images first on the local cache
 
         JSONObject newsData = new JSONObject(jsonData);
-        News news = NewsHelper.createNewsFromJSON(newsData, super.getFeedListSize());
+        News news = NewsHelper.createNewsFromJSON(newsData, -1);
+        NewsHelper.addNewsToLocalDb(news, super.getActivity());
 
-        fetchAuthorImageDataActionWrapper = new FetchAuthorImageDataActionWrapper( news, super.getActivity(), this);
-        fetchNewsImageDataActionWrapper = new FetchNewsImageDataActionWrapper(news, super.getActivity(), this);
-        super.addToFeedList(super.getFeedListSize(), news);
-        notifyItemInserted(news.getIndex());
+        String key = Integer.toString(news.getId());
+        int position = index.size();
 
-        asyncFetchAuthorImage = new WebServiceAsync();
-        asyncFetchAuthorImage.execute(fetchAuthorImageDataActionWrapper);
-        asyncFetchNewsImage = new WebServiceAsync();
-        asyncFetchNewsImage.execute(fetchNewsImageDataActionWrapper);
+        super.addToFeedList(key, news);
+        index.add(key);
+        notifyItemInserted(position);
+
+        if(news.getAuthorImageFile() != null && !news.getAuthorImageFile().equalsIgnoreCase("null")){
+            Bitmap authorImage = GalleryHelper.loadImageFromInternal(news.getAuthorImageFile(), super.getActivity(), "avatar");
+            if(authorImage != null){
+                news.setAuthorImage(authorImage);
+                notifyItemChanged(position);
+            }else {
+
+                WebServiceAction imageAction;
+                WebServiceAsync async;
+
+                PostAsyncImageAction postProcess =
+                        new ProcessPostFetchAuthorImage(news, position, super.getActivity());
+
+                imageAction = new ImageActionWrapper(super.getActivity(), AuthenticationAddress.AVATAR_IMAGE_FOLDER + "/" + news.getAuthorImageFile(), postProcess);
+                async = new WebServiceAsync();
+                async.execute(imageAction);
+            }
+        }
+
+        if(news.getImageFile() != null && !news.getImageFile().equalsIgnoreCase("null")){
+            Bitmap newsImage = GalleryHelper.loadImageFromInternal(news.getImageFile(), super.getActivity(), "feed/news");
+            if(newsImage != null){
+                //news.setImage(Bitmap.createScaledBitmap(newsImage, 400, 200, false));
+                news.setImage(newsImage);
+                notifyItemChanged(position);
+            }else{
+                WebServiceAction imageAction;
+                WebServiceAsync async;
+
+                PostAsyncImageAction postProcess =
+                        new ProcessPostFetchNewsImage(news, position, super.getActivity());
+
+                imageAction = new ImageActionWrapper(super.getActivity(), AuthenticationAddress.NEWS_IMAGE_FOLDER + "/preview/" + news.getImageFile(), postProcess);
+                async = new WebServiceAsync();
+                async.execute(imageAction);
+            }
+        }
+    }
+
+    public void addFeedEntry(News news){
+
+        Bitmap authorImage = GalleryHelper.loadImageFromInternal(news.getAuthorImageFile(), super.getActivity(), "avatar");
+        if(authorImage != null){
+            news.setAuthorImage(authorImage);
+        }else{
+            news.setAuthorImage(BitmapFactory.decodeResource(super.getActivity().getResources(), R.drawable.missing_avatar));
+        }
+        Bitmap newsImage = GalleryHelper.loadImageFromInternal(news.getImageFile(), super.getActivity(), "feed/news");
+
+        if(newsImage != null){
+            news.setImage(newsImage);
+        }
+
+        String key = Integer.toString(news.getId());
+        int position = index.size();
+
+        super.addToFeedList(key, news);
+        index.add(key);
+        notifyItemInserted(position);
+
     }
 
     @Override
     public void addFeedEntries(String jsonDataArray) throws JSONException {
 
-        JSONArray dataList = new JSONArray(jsonDataArray);
+        if(jsonDataArray != null){
 
-        for(int i = 0; i < dataList.length(); i++){
+            JSONArray dataList = new JSONArray(jsonDataArray);
 
-            addFeedEntry(dataList.getString(i));
+            for(int i = 0; i < dataList.length(); i++){
+
+                addFeedEntry(dataList.getString(i));
+            }
+
+            dataList = null;
+
+        }else{
+            //fetch from local db
+            hasConnection = false;
+            Cursor cursor;
+
+            if(super.getFeedListSize() > 0){
+                String query = "select * from News where published_date < ? and id != ? order by datetime(published_date) desc limit 3";
+                //String query = "select * from News where id < ? order by datetime(published_date) desc limit 3";
+
+                int position = index.size() - 1;
+
+                String key = index.get(position);
+                News news = super.getEntryFromFeedList(key);
+
+                String date = news.getPublishedDate();
+                String idKey = Integer.toString(news.getId());
+
+                String[] selectionArgs = {date, idKey};
+                cursor = databaseRead.rawQuery(query, selectionArgs);
+
+            }else{
+                String query = "select * from News order by datetime(published_date) desc limit 5";
+                cursor = databaseRead.rawQuery(query, null);
+            }
+
+            while(cursor.moveToNext()){
+
+                int id = cursor.getInt(cursor.getColumnIndexOrThrow(UMnifyContract.UMnifyColumns.News.ID.toString()));
+
+                if(index.indexOf(id) > 0) continue;
+
+                String content = cursor.getString(cursor.getColumnIndexOrThrow(UMnifyContract.UMnifyColumns.News.CONTENT.toString()));
+                String imageFile = cursor.getString(cursor.getColumnIndexOrThrow(UMnifyContract.UMnifyColumns.News.IMAGE.toString()));
+                int author = cursor.getInt(cursor.getColumnIndexOrThrow(UMnifyContract.UMnifyColumns.News.AUTHOR.toString()));
+                String publshedDate = cursor.getString(cursor.getColumnIndexOrThrow(UMnifyContract.UMnifyColumns.News.PUBLISHED_DATE.toString()));
+                int signature = cursor.getInt(cursor.getColumnIndexOrThrow(UMnifyContract.UMnifyColumns.News.SIGNATURE.toString()));
+
+                String authorFirstname = cursor.getString(cursor.getColumnIndexOrThrow(UMnifyContract.UMnifyColumns.News.AUTHOR_FIRSTNAME.toString()));
+                String authorLastname = cursor.getString(cursor.getColumnIndexOrThrow(UMnifyContract.UMnifyColumns.News.AUTHOR_LASTNAME.toString()));
+                String authorImageFile = cursor.getString(cursor.getColumnIndexOrThrow(UMnifyContract.UMnifyColumns.News.AUTHOR_IMAGE.toString()));
+
+                News news = new News(id, content, imageFile, author, publshedDate, signature, 0, false,
+                        super.getFeedListSize(), authorFirstname, authorLastname, authorImageFile);
+
+                addFeedEntry(news);
+            }
         }
-
-        dataList = null;
-        super.setFetchingFeedEntry(false);
-        super.getSwipeRefreshLayout().setRefreshing(false);
-
     }
 
     @Override
@@ -102,42 +218,52 @@ public class NewsFeedManagerGuest<E extends NewsViewHolderGuest> extends FeedMan
         if(super.isFetchingFeedEntry()) return;
 
         WebServiceAsync asyncFetchNews = new WebServiceAsync();
-        FetchNewsDataActionWrapper fetchNewsWrapper;
+        WebServiceAction action;
+        HashMap<String, String> params = new HashMap<>();
+        params.put("order", "desc");
+
 
         if(direction == 1){
 
             super.setFetchingFeedEntry(true);
 
-            HashMap<String, String> fetchNewsDataParamsUpdate = new HashMap<>();
-            fetchNewsDataParamsUpdate.put("order", "desc");
-            fetchNewsDataParamsUpdate.put("offset", super.getFeedListSize() + "");
-            fetchNewsDataParamsUpdate.put("limit", "3");
-            fetchNewsDataParamsUpdate.put("id", "-1");
+            if(hasConnection){
 
-            fetchNewsWrapper = new FetchNewsDataActionWrapper(fetchNewsDataParamsUpdate, super.getActivity(), this);
-            asyncFetchNews.execute(fetchNewsWrapper);
+                params.put("offset", super.getFeedListSize() + "");
+                params.put("limit", "3");
+                params.put("id", "-1");
 
-            fetchNewsDataParamsUpdate = null;
+                action = new DataActionWrapper(params, super.getActivity(), AuthenticationAddress.FETCH_NEWS, processPostFetchData);
+                asyncFetchNews.execute(action);
+
+            }else{
+                try{
+                    addFeedEntries(null);
+                    super.setFetchingFeedEntry(false);
+                }catch (JSONException e){
+                    e.printStackTrace();
+                }
+            }
 
         }else if(direction == -1){
-            super.clearFeedList();
-            notifyDataSetChanged();
 
-            super.setFetchingFeedEntry(true);
+                super.clearFeedList();
+                index.clear();
+                notifyDataSetChanged();
+                super.setFetchingFeedEntry(true);
+                hasConnection = true;
 
-            HashMap<String, String> fetchNewsDataParams = new HashMap<>();
-            fetchNewsDataParams.put("order", "desc");
-            fetchNewsDataParams.put("offset", super.getFeedListSize() + "");
-            fetchNewsDataParams.put("limit", "5");
-            fetchNewsDataParams.put("id", "-1");
+                params.put("offset", super.getFeedListSize() + "");
+                params.put("limit", "5");
+                params.put("id", "-1");
 
-            fetchNewsWrapper = new FetchNewsDataActionWrapper(fetchNewsDataParams, super.getActivity(), this);
-            asyncFetchNews.execute(fetchNewsWrapper);
+                action = new DataActionWrapper(params, super.getActivity(), AuthenticationAddress.FETCH_NEWS, processPostFetchData);
+                asyncFetchNews.execute(action);
 
-            fetchNewsDataParams = null;
         }
 
-        fetchNewsWrapper = null;
+        action = null;
+        params = null;
         asyncFetchNews = null;
     }
 
@@ -147,8 +273,13 @@ public class NewsFeedManagerGuest<E extends NewsViewHolderGuest> extends FeedMan
     }
 
     @Override
-    public void deleteFeedEntry(News news) {
+    public void deleteFeedEntry(String key) {
+        // dummy
+    }
 
+    @Override
+    public void updateFeedContent(Intent data) {
+        // dummy
     }
 
     @Override
@@ -171,15 +302,31 @@ public class NewsFeedManagerGuest<E extends NewsViewHolderGuest> extends FeedMan
     @Override
     public void onBindViewHolder(E holder, int position) {
 
+            if(!(position < index.size())) return;
 
-
-            News news = super.getEntryFromFeedList(position);
+            String id = index.get(position);
+            final News news = super.getEntryFromFeedList(id);
 
             if(news != null){
                 holder.getNewsAuthorView().setText(news.getAuthorFirstname() + " " + news.getAuthorLastname());
                 holder.getNewsContentView().setText(news.getContent());
                 holder.getNewsAuthorImageView().setImageBitmap(news.getAuthorImage());
                 holder.getNewsImageView().setImageBitmap(news.getImage());
+
+                String dateSplit[] = news.getPublishedDate().split(" ");
+                holder.getNewsDateView().setText(DateHelper.convertDateToMDY(dateSplit[0]) + " " + DateHelper.convert24Hourto12Hour(dateSplit[1]));
+
+                holder.getNewsImageView().setOnClickListener(new View.OnClickListener() {
+
+                    @Override
+                    public void onClick(View view) {
+                        Intent intent = new Intent(NewsFeedManagerGuest.this.getActivity(), ViewImageActivity.class);
+                        intent.putExtra("ROOT_LOCATION", AuthenticationAddress.NEWS_IMAGE_FOLDER);
+                        intent.putExtra("FOLDER", "feed/news");
+                        intent.putExtra("IMAGE_FILE", news.getImageFile());
+                        NewsFeedManagerGuest.this.getActivity().startActivity(intent);
+                    }
+                });
             }
     }
 
@@ -192,4 +339,110 @@ public class NewsFeedManagerGuest<E extends NewsViewHolderGuest> extends FeedMan
         return viewHolder;
     }
 
+    public void setHasConnection(boolean hasConnection) {
+        this.hasConnection = hasConnection;
+    }
+
+    public boolean isHasConnection() {
+        return hasConnection;
+    }
+
+    private class ProcessPostFetchData implements PostAsyncAction{
+
+        @Override
+        public void processResult(String jsonResponse) {
+            try {
+
+                if(jsonResponse == null){
+
+                    setHasConnection(false);
+                    addFeedEntries(jsonResponse);
+                    setFetchingFeedEntry(false);
+                    getSwipeRefreshLayout().setRefreshing(false);
+                }else{
+                    Log.e("Message", jsonResponse);
+                    JSONObject str = new JSONObject(jsonResponse);
+                    String data = str.getString("data");
+
+                    addFeedEntries(data);
+                    setFetchingFeedEntry(false);
+                    getSwipeRefreshLayout().setRefreshing(false);
+                }
+            }catch (Exception e){
+                e.printStackTrace();
+            }
+        }
+    }
+
+    private class ProcessPostFetchNewsImage implements PostAsyncImageAction {
+
+        private News news;
+        private Activity activity;
+        private int position;
+
+        public ProcessPostFetchNewsImage(News news, int position, Activity activity){
+            this.news = news;
+            this.activity = activity;
+            this.position = position;
+        }
+
+        @Override
+        public String getImageFile() {
+            return news.getImageFile();
+        }
+
+        @Override
+        public void processResult(Bitmap image) {
+            if(image != null){
+                news.setImage(image);
+                GalleryHelper.saveImageToInternal(image,
+                        news.getImageFile(), activity, "feed/news");
+                notifyItemChanged(position);
+            }
+        }
+    }
+
+    private class ProcessPostFetchAuthorImage implements PostAsyncImageAction {
+
+        private News news;
+        private Activity activity;
+        private int position;
+
+        public ProcessPostFetchAuthorImage(News news, int position, Activity activity){
+
+            this.news = news;
+            this.activity = activity;
+            this.position = position;
+        }
+
+        @Override
+        public String getImageFile() {
+           return news.getAuthorImageFile();
+        }
+
+        @Override
+        public void processResult(Bitmap image) {
+            if(image != null){
+                news.setAuthorImage(Bitmap.createScaledBitmap(image, 100, 100, false));
+                GalleryHelper.saveImageToInternal(image,
+                        news.getAuthorImageFile(), activity, "avatar");
+                image = null;
+            }else{
+
+                    news.setAuthorImage(BitmapFactory.decodeResource(activity.getResources(), R.drawable.missing_avatar));
+
+            }
+
+            notifyItemChanged(position);
+        }
+    }
+
+    @Override
+    public RecyclerView getRecyclerView() {
+        return recyclerView;
+    }
+
+    public ArrayList<String> getIndex() {
+        return index;
+    }
 }

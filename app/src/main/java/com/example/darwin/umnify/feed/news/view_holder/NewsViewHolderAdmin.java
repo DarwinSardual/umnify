@@ -9,6 +9,7 @@ import android.widget.Spinner;
 import android.widget.TextView;
 
 import com.example.darwin.umnify.R;
+import com.example.darwin.umnify.SpinnerExtended;
 
 /**
  * Created by darwin on 8/26/17.
@@ -16,16 +17,16 @@ import com.example.darwin.umnify.R;
 
 public class NewsViewHolderAdmin extends NewsViewHolderNormal {
 
-    private Spinner newsOptionView;
+    private SpinnerExtended newsOptionView;
 
     public NewsViewHolderAdmin(LayoutInflater inflater, ViewGroup parent, int layoutId){
         super(inflater, parent, layoutId);
 
-        newsOptionView = (Spinner) itemView.findViewById(R.id.news_spinner);
+        newsOptionView = (SpinnerExtended) itemView.findViewById(R.id.news_spinner);
 
     }
 
-    public Spinner getNewsOptionView() {
+    public SpinnerExtended getNewsOptionView() {
         return newsOptionView;
     }
 

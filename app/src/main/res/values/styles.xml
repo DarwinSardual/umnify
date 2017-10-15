@@ -31,4 +31,9 @@
         <style name="NewsCommentThemeWithCorners" parent="Theme.AppCompat.Light.Dialog">
             <item name="android:windowBackground">@drawable/news_comment_rounded_corner</item>
         </style>
+
+    <style name="CollapsedAppBarTopic" parent="@android:style/TextAppearance.Medium">
+        <item name="android:textSize">20sp</item>
+        <item name="android:textStyle">normal</item>
+    </style>
 </resources>

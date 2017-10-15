@@ -50,21 +50,20 @@ public class NewsFeedFragment extends Fragment{
         recyclerView = (RecyclerView) view.findViewById(R.id.recycler_view);
 
         if(userData == null){
-            manager = new NewsFeedManagerGuest<NewsViewHolderGuest>(this.getActivity(), swipeRefreshLayout,
+            manager = new NewsFeedManagerGuest<NewsViewHolderGuest>(this.getActivity(), swipeRefreshLayout, recyclerView,
                     NewsViewHolderGuest.class, R.layout.feed_news_guest);
         }else{
 
             int type = userData.getInt("USER_TYPE");
 
             if(type == AuthenticationCodes.NORMAL_USER){
-                Log.e("User", "normal");
-                manager = new NewsFeedManagerNormal<NewsViewHolderNormal>(this.getActivity(), swipeRefreshLayout, userData,
+                manager = new NewsFeedManagerNormal<NewsViewHolderNormal>(this.getActivity(), swipeRefreshLayout, recyclerView, userData,
                         NewsViewHolderNormal.class, R.layout.feed_news_normal);
             }else if(type == AuthenticationCodes.ADMIN_USER){
-                manager = new NewsFeedManagerAdmin<NewsViewHolderAdmin>(this.getActivity(), swipeRefreshLayout, userData,
+                manager = new NewsFeedManagerAdmin<NewsViewHolderAdmin>(this.getActivity(), swipeRefreshLayout, recyclerView, userData,
                         NewsViewHolderAdmin.class, R.layout.feed_news_admin);
             }else if(type == AuthenticationCodes.SUPER_ADMIN_USER){
-                manager = new NewsFeedManagerSuperAdmin<NewsViewHolderAdmin>(this.getActivity(), swipeRefreshLayout, userData,
+                manager = new NewsFeedManagerSuperAdmin<NewsViewHolderAdmin>(this.getActivity(), swipeRefreshLayout, recyclerView, userData,
                         NewsViewHolderAdmin.class, R.layout.feed_news_admin);
             }
         }
@@ -101,6 +100,16 @@ public class NewsFeedFragment extends Fragment{
     public void addNews(Intent data){
 
         manager.newFeedEntry(data);
+    }
+
+    public void deleteNews(Intent data){
+
+        String key = Integer.toString(data.getIntExtra("INDEX", -1));
+        manager.deleteFeedEntry(key);
+    }
+
+    public void updateNews(Intent data){
+        manager.updateFeedContent(data);
     }
 
 }

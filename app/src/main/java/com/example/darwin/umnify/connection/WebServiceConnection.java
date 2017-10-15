@@ -24,7 +24,7 @@ public class WebServiceConnection{
 
     private String urlAddress;
     private final int READ_TIMEOUT = 10000;
-    private final int CONNECT_TIMEOUT = 15000;
+    private final int CONNECT_TIMEOUT = 10000;
     private final String REQUEST_METHOD = "POST";
 
     private URL url;

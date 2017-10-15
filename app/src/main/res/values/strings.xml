@@ -14,8 +14,137 @@
     </string>
 
     <string-array name="feed_news_spinner">
-        <item>Actions</item>
         <item>Edit</item>
         <item>Delete</item>
     </string-array>
+
+    <string-array name="feed_announcement_spinner">
+        <item>Edit</item>
+        <item>Delete</item>
+    </string-array>
+
+    <string name="edit_underline"><u>Edit</u></string>
+    <string name="delete_underline"><u>Delete</u></string>
+
+    <string-array name="view_image_download_spinner">
+        <item>Preview Quality</item>
+        <item>Full Quality</item>
+    </string-array>
+
+    <string-array name="campus_map_locations">
+        <item>University Of Mindanao</item>
+        <item>Main entrance</item>
+        <item>BE Building</item>
+        <item>BE Foodcourt</item>
+        <item>Cafeteria</item>
+        <item>E-Car Terminal 1</item>
+        <item>Highschool Department</item>
+        <item>GET Building</item>
+        <item>DPT Building</item>
+        <item>Social Hall</item>
+        <item>Professional School</item>
+
+        <item>Track and Field</item>
+
+    </string-array>
+
+    <string name="poseidon_red_alert">Red Alert</string>
+    <string name="poseidon_red_alert_description">Emergency on; Unbated risks</string>
+    <string name="poseidon_red_alert_action">Safety drill procedures activated; Work and classes to be officially suspended</string>
+
+    <string name="poseidon_blue_alert">Blue Alert</string>
+    <string name="poseidon_blue_alert_description">Imminent danger to life and damage to property; emergency going on</string>
+    <string name="poseidon_blue_alert_action">Safety drill procedures activated; Work and classes to be officially suspended</string>
+
+    <string name="poseidon_yellow_alert">Yellow Alert</string>
+    <string name="poseidon_yellow_alert_description">Heightened escalation; imminent danger to life and damage to property</string>
+    <string name="poseidon_yellow_alert_action">Take a precautionary measures; limited movement; prepare safety drill procedures</string>
+
+    <string name="poseidon_orange_alert">Orange Alert</string>
+    <string name="poseidon_orange_alert_description">Probable emergency in limited escalation inside the campus; potential damage likely</string>
+    <string name="poseidon_orange_alert_action">Take precautionary measures; Always consult wit campus authority</string>
+
+    <string name="poseidon_green_alert">Green Alert</string>
+    <string name="poseidon_green_alert_description">Potential risks and hazards inside the campus or in the immediate vicinty</string>
+    <string name="poseidon_green_alert_action">Take precautionary measures and defensive alertness; utmost vigilance</string>
+
+    <string name="um_history">
+
+        The University of Mindanao (UM), then the Mindanao Colleges (MC), was opened in Davao City to the public in July 1946. It was the first school to offer tertiary education in Southern Mindanao primarily to provide learning opportunities to the indigenous natives and pioneers of Mindanao. It is hoped that their children shall attain college education which was then a luxury that only few elite families could afford.
+        \n
+        \n
+        It was a dream come true for CPA-Lawyer Guillermo E. Torres, Sr. and his friends, Engr. Brigido Valencia, Atty. Pedro Quitain, Atty. Dominador Zuño, Mr. Pedro Lat, Atty. Jesus Occeña, Dr. Manuel Babao, Mr. Nicasio Torres and Dr. Concepcion de Asis.
+        \n
+        \n
+        During its first year of operation, there were only 13 teachers with 381 students and four (4) rented rooms in Borgaily Building used as classrooms.
+
+        \n
+        \n
+
+
+        The programs which originally operated with permits were:
+        \n
+        \n
+
+        <ul>
+
+        <li>Six (6) years complete Elementary Program</li>\n
+        <li>Two (2) years Secondary Program (1st &amp; 2nd year levels)</li>\n
+        <li>Two (2) years Elementary Teacher Certificate</li>\n
+        <li>Two (2) years Associate in Commercial Sciences</li>\n
+        <li>Two (2) years Associate in Arts</li>\n
+
+        </ul>
+
+        \n
+        \n
+
+        The first commencement exercise was held on April 23, 1948 with 30 and 50 graduating students from college and high school, respectively.
+        \n
+        \n
+        The community witnessed the expansion of Mindanao Colleges from 1949 to 1962. Branches were established to give more educational opportunities to many financially deprived students in the neighboring provinces of Davao City. These are MC Digos and MC Sta. Ana in 1949; MC Peñaplata and MC Tagum in 1950; MC Guianga, MC Tibungco and MC Panabo in 1951; MC Cotabato in 1959 and MC Bansalan in 1962.
+        \n
+        \n
+        Enrolment increased right at the main campus at Bolton Street in the heart of Davao City, which remains to be a fitting symbol of the courage and tenacity of purpose of Atty. Guillermo E. Torres, Sr., the founder and the first President of MC.
+        \n
+        \n
+        On December 21, 1966, MC was chartered as the University of Mindanao, Inc., the first private, non-sectarian university in Mindanao. The University Charter was signed by the Honorable Pedro Parcasio, then ActingSecretary of Education.
+        \n
+        \n
+        The University status brought on new and greater responsibilities and a new image which left no space for complacency but only one decision – No turning back. Much has been said and written but more has yet to be done to continue the educational heritage envisioned by the late Guillermo E. Torres, Sr.
+        \n
+        \n
+        Today, UM in Davao City has four (4) campuses – the Main Campus along Bolton and Bonifacio Streets, the Matina-Ma-a Campus and the Technical School Campuses in Sta. Ana avenue and Toril. The bigger Matina-Ma-a campus is turned into a learning center worthy of its vision – with separate buildings for each of the colleges, in the concept of the premier state university. DPT and GET buildings are completed in which the former houses the Colleges of Arts and Sciences, Nursing, Architecture and Fine Arts while the latter, GET Building, is used by the Colleges of Criminal Justice and Education.
+        \n
+        \n
+        A four-storey Business and Engineering Building was constructed to meet the growing population of the University. This building houses the Colleges of Accountancy and Engineering. The science and engineering laboratories are also housed in this building. The entire fourth floor is used as the University Library and a space for the University Museum.
+        \n
+        \n
+        UM continues to improve its facilities. It is committed to construct and develop state-of-the-art facilities and these include the audio-visual rooms, auditorium, libraries, speech laboratories, mini-hotel, engineering and science laboratories, different learning resource centers, computer laboratory centers, e-learning and computerized language centers.
+        \n
+        \n
+        The delivery of quality education is also a commitment. This is manifested by the fact that Computer Science, Information Technology, Business Economics, Financial Management, Human Resource Management, Marketing Management, and Computer Engineering programs have been considered Centers of Development by the Commission on Higher Education. The Bachelor of Elementary Education and the Bachelor in Secondary Education were identified as Centers of Excellence and Center for Teacher Training of DepEd.
+        \n
+        \n
+        On the other hand, the University of Mindanao has been granted the Autonomous Status by the Commission on Higher Education. This recognition is granted to colleges and universities with long tradition of integrity and untarnished reputation, commitment to excellence, and sustainability and viability of operations. UM is one of the two universities in Davao Region to have been granted this recognition.
+
+    </string>
+
+    <string name="um_vision">
+        By 2022, a globally recognized institution providing quality, affordable, and open education.
+    </string>
+
+    <string name="um_mission">
+        Provide a dynamic and supportive academic environment through the highest standard of instruction, research, and extension in a non-sectarian institution committed to democratizing access to education.
+    </string>
+    <string name="um_values">
+        <b>Excellence.</b>We are committed to world-class customer service and quality as we excel for the mutual success of our clients, employees, and partners. Our professionals are customer-driven and continually add value to our services whenever it benefits our clients. We are committed to working toward continual improvement in everything that we do.
+        \n\n
+        <b>Honesty and Integrity.</b>Our business is based on a long-term relationship that requires utmost trust. We are accountable to our customers, owners, suppliers, and fellow employees. We do what we say we’re going to do.
+        \n\n
+        <b>Innovation.</b> We always think outside the box to provide the best solutions for our customers. Our best solutions often evolve from discussions across different divisions and with our many strategic partners.
+        \n\n
+        <b>Teamwork.</b>We realize that every employee is integral to the success of the institution, and we strive to promote teamwork across departments for the benefit of our customers. We also value our relationships with our strategic partners and recognize their importance in delivering solutions to our customers.
+        \n
+    </string>
 </resources>

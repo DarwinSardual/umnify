@@ -36,7 +36,7 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 
-public class NewsFeedManager extends FeedManager<NewsFeedManager.ViewHolder, News> {
+public class NewsFeedManager extends FeedManager<NewsFeedManager.ViewHolder, News>{
 
 
     private List<News> feedList;
@@ -67,12 +67,12 @@ public class NewsFeedManager extends FeedManager<NewsFeedManager.ViewHolder, New
         fetchNewsDataParams.put("limit", "5");
         fetchNewsDataParams.put("id", "-1");
 
-        WebServiceAsync asyncFetchNews = new WebServiceAsync();
-        FetchNewsDataActionWrapper fetchNewsWrapper = new FetchNewsDataActionWrapper(fetchNewsDataParams, activity, this);
-        asyncFetchNews.execute(fetchNewsWrapper);
+        //WebServiceAsync asyncFetchNews = new WebServiceAsync();
+        //FetchNewsDataActionWrapper fetchNewsWrapper = new FetchNewsDataActionWrapper(fetchNewsDataParams, activity, this);
+        //asyncFetchNews.execute(fetchNewsWrapper);
 
-        fetchNewsWrapper = null;
-        asyncFetchNews = null;
+        //fetchNewsWrapper = null;
+        //asyncFetchNews = null;
         fetchNewsDataParams = null;
     }
 
@@ -116,6 +116,11 @@ public class NewsFeedManager extends FeedManager<NewsFeedManager.ViewHolder, New
         }
 
         return t;
+    }
+
+    @Override
+    public void updateFeedContent(Intent data) {
+
     }
 
     @Override
@@ -174,8 +179,8 @@ public class NewsFeedManager extends FeedManager<NewsFeedManager.ViewHolder, New
         JSONObject newsData = new JSONObject(jsonData);
         News news = NewsHelper.createNewsFromJSON(newsData, feedList.size());
 
-        fetchAuthorImageDataActionWrapper = new FetchAuthorImageDataActionWrapper( news, super.getActivity(), this);
-        fetchNewsImageDataActionWrapper = new FetchNewsImageDataActionWrapper(news, super.getActivity(), this);
+        //fetchAuthorImageDataActionWrapper = new FetchAuthorImageDataActionWrapper( news, super.getActivity(), this);
+        //fetchNewsImageDataActionWrapper = new FetchNewsImageDataActionWrapper(news, super.getActivity(), this);
         feedList.add(news);
         notifyItemInserted(news.getIndex());
 
@@ -219,8 +224,8 @@ public class NewsFeedManager extends FeedManager<NewsFeedManager.ViewHolder, New
             fetchNewsDataParamsUpdate.put("limit", "3");
             fetchNewsDataParamsUpdate.put("id", "-1");
 
-            fetchNewsWrapper = new FetchNewsDataActionWrapper(fetchNewsDataParamsUpdate, super.getActivity(), this);
-            asyncFetchNews.execute(fetchNewsWrapper);
+            //fetchNewsWrapper = new FetchNewsDataActionWrapper(fetchNewsDataParamsUpdate, super.getActivity(), this);
+            //asyncFetchNews.execute(fetchNewsWrapper);
 
             fetchNewsDataParamsUpdate = null;
 
@@ -236,8 +241,8 @@ public class NewsFeedManager extends FeedManager<NewsFeedManager.ViewHolder, New
             fetchNewsDataParams.put("limit", "5");
             fetchNewsDataParams.put("id", "-1");
 
-            fetchNewsWrapper = new FetchNewsDataActionWrapper(fetchNewsDataParams, super.getActivity(), this);
-            asyncFetchNews.execute(fetchNewsWrapper);
+            //fetchNewsWrapper = new FetchNewsDataActionWrapper(fetchNewsDataParams, super.getActivity(), this);
+            //asyncFetchNews.execute(fetchNewsWrapper);
 
             fetchNewsDataParams = null;
         }
@@ -290,18 +295,18 @@ public class NewsFeedManager extends FeedManager<NewsFeedManager.ViewHolder, New
             textData.put("user_type", userData.getInt("USER_TYPE") +"");
         }
 
-        AddNewsDataActionWrapper addNewsDataActionWrapper = new AddNewsDataActionWrapper(textData,
-                fileData, super.getActivity());
+        //AddNewsDataActionWrapper addNewsDataActionWrapper = new AddNewsDataActionWrapper(textData,
+                //fileData, super.getActivity());
 
-        WebServiceAsync asyncAddNews = new WebServiceAsync();
-        asyncAddNews.execute(addNewsDataActionWrapper);
+        //WebServiceAsync asyncAddNews = new WebServiceAsync();
+        //asyncAddNews.execute(addNewsDataActionWrapper);
 
     }
 
     public void newFeedEntry(Intent data){}
 
     @Override
-    public void deleteFeedEntry(News news) {
+    public void deleteFeedEntry(String pos) {
 
     }
 
@@ -330,4 +335,9 @@ public class NewsFeedManager extends FeedManager<NewsFeedManager.ViewHolder, New
 
         }
     }
+
+    //@Override
+    //public void postAsyncFetchNews(String response) {
+
+    //}
 }

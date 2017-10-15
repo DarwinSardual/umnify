@@ -14,6 +14,7 @@ public class NewsViewHolderGuest extends RecyclerView.ViewHolder{
     private ImageView newsImageView;
     private TextView newsAuthorView;
     private ImageView newsAuthorImageView;
+    private TextView newsDateView;
 
 
     public NewsViewHolderGuest(LayoutInflater inflater, ViewGroup parent, int layoutId){
@@ -23,6 +24,7 @@ public class NewsViewHolderGuest extends RecyclerView.ViewHolder{
         newsImageView = (ImageView) itemView.findViewById(R.id.news_image);
         newsAuthorView = (TextView) itemView.findViewById(R.id.news_author);
         newsAuthorImageView = (ImageView) itemView.findViewById(R.id.author_image);
+        newsDateView = (TextView) itemView.findViewById(R.id.news_date);
     }
 
     public TextView getNewsContentView() {
@@ -39,5 +41,9 @@ public class NewsViewHolderGuest extends RecyclerView.ViewHolder{
 
     public ImageView getNewsAuthorImageView() {
         return newsAuthorImageView;
+    }
+
+    public TextView getNewsDateView() {
+        return newsDateView;
     }
 }
