@@ -250,7 +250,6 @@ public class StartActivity extends AppCompatActivity {
                         intent.putExtra("USER_IMAGE_FILE", data.getString("image"));
                         intent.putExtra("USER_EMAIL", data.getString("email"));
                         intent.putExtra("USER_COURSE", data.getInt("course"));
-                        Log.e("Message:", "Stored credentials are valid");
                         startActivity(intent);
 
                     }else if(code == AuthenticationCodes.INVALID_USER_ID_PASSWORD){
