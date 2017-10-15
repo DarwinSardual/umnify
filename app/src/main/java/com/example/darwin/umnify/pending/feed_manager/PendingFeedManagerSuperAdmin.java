@@ -9,6 +9,7 @@ import android.os.Bundle;
 import android.provider.MediaStore;
 import android.provider.OpenableColumns;
 import android.support.v4.widget.SwipeRefreshLayout;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -395,6 +396,7 @@ public class PendingFeedManagerSuperAdmin<E extends PendingViewHolderSuperAdmin>
 
             if(json != null){
                 try{
+                    Log.e("Message", "Fetch pending - " + json);
                     JSONObject data = new JSONObject(json);
                     String jsonData = data.getString("data");
 
@@ -459,6 +461,7 @@ public class PendingFeedManagerSuperAdmin<E extends PendingViewHolderSuperAdmin>
         @Override
         public void processResult(String response) {
 
+            Log.e("Message", "Allow pending - " + response);
             int position = index.indexOf(key);
             index.remove(position);
             removeFromFeedList(key);

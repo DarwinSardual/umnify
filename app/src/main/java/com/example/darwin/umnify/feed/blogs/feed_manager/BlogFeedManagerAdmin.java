@@ -9,6 +9,7 @@ import android.os.Bundle;
 import android.provider.MediaStore;
 import android.provider.OpenableColumns;
 import android.support.v4.widget.SwipeRefreshLayout;
+import android.util.Log;
 import android.view.View;
 import android.widget.Toast;
 
@@ -234,7 +235,7 @@ public class BlogFeedManagerAdmin<E extends BlogTileViewHolderGuest> extends Blo
 
         @Override
         public void processResult(String jsonResponse) {
-
+            Log.e("Message", "Edit Blog - " + jsonResponse);
         }
     }
 
@@ -250,6 +251,7 @@ public class BlogFeedManagerAdmin<E extends BlogTileViewHolderGuest> extends Blo
         public void processResult(String jsonResponse) {
 
             if(jsonResponse != null){
+                Log.e("Message", "Delete blog - " + jsonResponse);
                 int position = getIndex().indexOf(key);
                 getIndex().remove(position);
                 removeFromFeedList(key);
@@ -266,7 +268,7 @@ public class BlogFeedManagerAdmin<E extends BlogTileViewHolderGuest> extends Blo
         @Override
         public void processResult(String jsonResponse) {
             if(jsonResponse != null){
-
+                Log.e("Message", "Add Blog - " + jsonResponse);
             }else{
 
             }

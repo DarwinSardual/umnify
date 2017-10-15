@@ -6,6 +6,7 @@ import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
 import android.graphics.Bitmap;
 import android.support.v4.widget.SwipeRefreshLayout;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -310,6 +311,7 @@ public class BlogFeedManagerGuest<E extends BlogTileViewHolderGuest> extends Fee
             try{
 
                 if(jsonResponse != null){
+                    //Log.e("Message", jsonResponse);
                     JSONObject json = new JSONObject(jsonResponse);
                     String data = json.getString("data");
                     addFeedEntries(data);

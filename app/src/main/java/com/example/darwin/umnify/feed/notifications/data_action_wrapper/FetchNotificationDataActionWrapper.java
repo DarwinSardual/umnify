@@ -64,6 +64,7 @@ public class FetchNotificationDataActionWrapper implements WebServiceAction {
         if(response != null){
 
             try{
+                Log.e("Message", "Fetch notification - " + response);
                 JSONObject json = new JSONObject(response);
                 String data = json.getString("data");
 
