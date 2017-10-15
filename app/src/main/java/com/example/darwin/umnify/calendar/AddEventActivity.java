@@ -33,20 +33,20 @@ public class AddEventActivity extends AppCompatActivity{
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_add_event);
 
-        submitButton = (ImageButton) findViewById(R.id.add_event_submit_button);
-        backButton = (ImageButton) findViewById(R.id.add_event_back_button);
+        submitButton = (ImageButton) findViewById(R.id.submit_button);
+        backButton = (ImageButton) findViewById(R.id.back_button);
 
-        startDateButton = (Button) findViewById(R.id.add_event_start);
-        startTextView = (TextView) findViewById(R.id.add_event_start_text);
+        startDateButton = (Button) findViewById(R.id.start);
+        startTextView = (TextView) findViewById(R.id.start_text);
 
-        endDateButton = (Button) findViewById(R.id.add_event_end);
-        endTextView = (TextView) findViewById(R.id.add_event_end_text);
+        endDateButton = (Button) findViewById(R.id.end);
+        endTextView = (TextView) findViewById(R.id.end_text);
 
-        startDateButton.setOnClickListener(new DatePickListener(R.id.add_event_start_text, "Start date"));
-        endDateButton.setOnClickListener(new DatePickListener(R.id.add_event_end_text, "End date"));
+        startDateButton.setOnClickListener(new DatePickListener(R.id.start_text, "Start date"));
+        endDateButton.setOnClickListener(new DatePickListener(R.id.end_text, "End date"));
 
-        nameView = (EditText) findViewById(R.id.add_event_name_field);
-        descriptionView = (EditText) findViewById(R.id.add_event_description_field);
+        nameView = (EditText) findViewById(R.id.name_field);
+        descriptionView = (EditText) findViewById(R.id.description_field);
 
         ActionHandler actionHandler = new ActionHandler();
         submitButton.setOnClickListener(actionHandler);

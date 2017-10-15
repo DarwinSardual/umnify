@@ -1,5 +1,6 @@
 package com.example.darwin.umnify.feed.blogs;
 
+import android.content.Intent;
 import android.net.Uri;
 import android.os.AsyncTask;
 import android.support.design.widget.CollapsingToolbarLayout;
@@ -23,17 +24,7 @@ import java.util.HashMap;
 
 public class BlogActivity extends AppCompatActivity {
 
-    private BlogTile blogTile;
     private Bundle extraData;
-    private Blog blog;
-
-    private int id;
-    private String heading;
-    private String imageFile;
-
-    private ImageView featuredImageView;
-    private CollapsingToolbarLayout toolbarLayout;
-    private TextView contentView;
 
     /* When caching is already on work, always check first on the cache if the data
     * is already cached, if yes and its up to date, just fetch on the cache
@@ -43,15 +34,7 @@ public class BlogActivity extends AppCompatActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
 
-        Log.e("Blog Activity", "called");
-
-
         extraData = getIntent().getExtras();
-
-
-        id = extraData.getInt("BLOG_TILE_ID");
-        heading = extraData.getString("BLOG_TILE_HEADING");
-        imageFile = extraData.getString("BLOG_TILE_IMAGE_FILE");
 
         if(extraData.containsKey("USER_TYPE")){
             int type = extraData.getInt("USER_TYPE");
@@ -62,11 +45,28 @@ public class BlogActivity extends AppCompatActivity {
                 setContentView(R.layout.activity_blog_admin);
                 BlogActivityControllerSuperAdmin blogActivityControllerSuperAdmin = new BlogActivityControllerSuperAdmin(this, extraData);
             }else if(type == AuthenticationCodes.NORMAL_USER){
-
+                setContentView(R.layout.activity_blog_guest);
+                BlogActivityControllerGuest blogActivityControllerGuest = new BlogActivityControllerGuest(this, extraData);
+            }else{
+                setContentView(R.layout.activity_blog_guest);
+                BlogActivityControllerGuest blogActivityControllerGuest = new BlogActivityControllerGuest(this, extraData);
             }
         }else{
             setContentView(R.layout.activity_blog_guest);
             BlogActivityControllerGuest blogActivityControllerGuest = new BlogActivityControllerGuest(this, extraData);
+        }
+
+
+    }
+
+    @Override
+    protected void onActivityResult(int requestCode, int resultCode, Intent data) {
+        if(requestCode == BlogCode.EDIT_BLOG){
+            if(resultCode == RESULT_OK){
+                data.putExtra("ACTION", BlogCode.EDIT_BLOG);
+                setResult(RESULT_OK, data);
+                this.finish();
+            }
         }
     }
 

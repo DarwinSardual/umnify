@@ -9,13 +9,13 @@
     android:orientation="vertical">
 
     <android.support.design.widget.AppBarLayout
-        android:id="@+id/add_event_appbar"
+        android:id="@+id/appbar"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:theme="@style/ThemeOverlay.AppCompat.Dark.ActionBar">
 
         <android.support.v7.widget.Toolbar
-            android:id="@+id/add_event_toolbar"
+            android:id="@+id/toolbar"
             android:layout_width="match_parent"
             android:layout_height="?attr/actionBarSize"
             android:background="?attr/colorPrimary"
@@ -43,7 +43,7 @@
                     android:scaleType="fitXY"
                     android:layout_alignParentLeft="true"
                     android:adjustViewBounds="true"
-                    android:id="@+id/add_event_back_button"/>
+                    android:id="@+id/back_button"/>
 
                 <TextView
                     android:layout_width="wrap_content"
@@ -53,7 +53,7 @@
                     android:textSize="20sp"
                     android:textStyle="bold"
                     android:textColor="#FFFFFF"
-                    android:layout_toRightOf="@id/add_event_back_button"/>
+                    android:layout_toRightOf="@id/back_button"/>
 
                 <ImageButton
                     android:layout_width="40dp"
@@ -63,7 +63,7 @@
                     android:scaleType="fitXY"
                     android:layout_alignParentRight="true"
                     android:adjustViewBounds="true"
-                    android:id="@+id/add_event_submit_button"/>
+                    android:id="@+id/submit_button"/>
 
             </RelativeLayout>
         </android.support.v7.widget.Toolbar>
@@ -79,14 +79,14 @@
 
         <EditText android:layout_width="match_parent"
             android:layout_height="50dp"
-            android:id="@+id/add_event_name_field"
+            android:id="@+id/name_field"
             android:background="@drawable/add_feed_border"
             android:gravity="top"/>
 
         <EditText android:layout_width="match_parent"
             android:layout_height="200dp"
             android:layout_marginTop="10dp"
-            android:id="@+id/add_event_description_field"
+            android:id="@+id/description_field"
             android:background="@drawable/add_feed_border"
             android:gravity="top"/>
 
@@ -96,21 +96,23 @@
 
             <Button android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:id="@+id/add_event_start"
+                android:id="@+id/start"
+                android:textAllCaps="false"
                 android:text="Start date"
                 />
 
             <TextView
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:layout_toRightOf="@id/add_event_start"
-                android:id="@+id/add_event_start_text"
+                android:layout_toRightOf="@id/start"
+                android:id="@+id/start_text"
                 android:text="start date"/>
 
             <Button android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:id="@+id/add_event_end"
-                android:layout_toEndOf="@id/add_event_start_text"
+                android:id="@+id/end"
+                android:layout_toEndOf="@id/start_text"
+                android:textAllCaps="false"
                 android:text="End date"
                 />
 
@@ -118,8 +120,8 @@
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:text="end date"
-                android:id="@+id/add_event_end_text"
-                android:layout_toEndOf="@id/add_event_end" />
+                android:id="@+id/end_text"
+                android:layout_toEndOf="@id/end" />
         </RelativeLayout>
 
     </LinearLayout>

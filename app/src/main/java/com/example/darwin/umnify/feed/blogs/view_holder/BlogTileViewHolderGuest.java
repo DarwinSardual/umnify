@@ -22,9 +22,9 @@ public class BlogTileViewHolderGuest extends RecyclerView.ViewHolder {
     public BlogTileViewHolderGuest(LayoutInflater inflater, ViewGroup parent, int layoutId){
         super(inflater.inflate(layoutId, parent, false));
 
-        blogTileImageView = (ImageView) itemView.findViewById(R.id.blog_tile_image);
-        blogTileHeadingView = (TextView) itemView.findViewById(R.id.blog_tile_heading);
-        container = (RelativeLayout) itemView.findViewById(R.id.blog_tile_container);
+        blogTileImageView = (ImageView) itemView.findViewById(R.id.image);
+        blogTileHeadingView = (TextView) itemView.findViewById(R.id.heading);
+        container = (RelativeLayout) itemView.findViewById(R.id.container);
     }
 
     public ImageView getBlogTileImageView() {

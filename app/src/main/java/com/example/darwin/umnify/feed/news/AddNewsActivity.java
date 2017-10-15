@@ -1,12 +1,17 @@
 package com.example.darwin.umnify.feed.news;
 
 import android.content.Intent;
+import android.database.Cursor;
+import android.net.Uri;
+import android.provider.OpenableColumns;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.view.View;
 import android.widget.Button;
 import android.widget.EditText;
 import android.widget.ImageButton;
+import android.widget.TextView;
+
 import com.example.darwin.umnify.R;
 //import com.example.darwin.umnify.connection.RemoteDbConn;
 
@@ -17,6 +22,7 @@ public class AddNewsActivity extends AppCompatActivity {
 
     private EditText contentField;
     private Button addImageButton;
+    private TextView addImageNameView;
 
     private Intent data = null;
 
@@ -27,19 +33,18 @@ public class AddNewsActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_add_news);
 
-        backButton = (ImageButton) findViewById(R.id.add_news_back_button);
-        submitButton = (ImageButton) findViewById(R.id.add_news_submit_button);
+        backButton = (ImageButton) findViewById(R.id.back_button);
+        submitButton = (ImageButton) findViewById(R.id.submit_button);
 
-        contentField = (EditText) findViewById(R.id.add_news_content_field);
-        addImageButton = (Button) findViewById(R.id.add_news_add_image);
+        contentField = (EditText) findViewById(R.id.content_field);
+        addImageButton = (Button) findViewById(R.id.add_image);
+        addImageNameView = (TextView) findViewById(R.id.image_name);
 
         ClickHandler handler = new ClickHandler();
 
 
         submitButton.setOnClickListener(handler);
-
         backButton.setOnClickListener(handler);
-
         addImageButton.setOnClickListener(handler);
 
     }
@@ -51,6 +56,23 @@ public class AddNewsActivity extends AppCompatActivity {
         if(requestCode == AddNewsActivity.SELECT_IMAGE){
             if(resultCode ==  RESULT_OK){
                 this.data = data;
+                if(data != null){
+
+                    Uri uri = data.getData();
+                    Cursor returnCursor;
+                    returnCursor =
+                            this.getContentResolver()
+                                    .query(uri,
+                                            null, null,
+                                            null, null);
+
+                    int nameIndex = returnCursor.getColumnIndex(OpenableColumns.DISPLAY_NAME);
+                    returnCursor.moveToFirst();
+
+                    String imageFile = returnCursor.getString(nameIndex);
+                    addImageNameView.setText(imageFile);
+                    addImageButton.setText("Remove image");
+                }
 
             }
         }
@@ -95,7 +117,16 @@ public class AddNewsActivity extends AppCompatActivity {
                 //check here if there's any data entered and prompt if the user wants to exit
                 finish();
             }else if(view == addImageButton){
-                showFileChooser();
+
+                if(data == null){
+                    showFileChooser();
+
+                }else{
+                    addImageButton.setText("Add image");
+                    addImageNameView.setText(null);
+                    data = null;
+                }
+
             }
         }
     }
@@ -103,7 +134,7 @@ public class AddNewsActivity extends AppCompatActivity {
     @Override
     public void onBackPressed() {
 
-        //super.onBackPressed();
+
         finish();
     }
 }

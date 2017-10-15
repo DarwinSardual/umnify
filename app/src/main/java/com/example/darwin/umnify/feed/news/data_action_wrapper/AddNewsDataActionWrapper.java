@@ -2,8 +2,11 @@ package com.example.darwin.umnify.feed.news.data_action_wrapper;
 
 import android.app.Activity;
 import android.util.Log;
+import android.widget.Toast;
+
 import com.example.darwin.umnify.authentication.AuthenticationAddress;
 import com.example.darwin.umnify.connection.WebServiceConnection;
+import com.example.darwin.umnify.feed.PostAsyncAction;
 import com.example.darwin.umnify.wrapper.DataHelper;
 import com.example.darwin.umnify.wrapper.WebServiceAction;
 
@@ -20,12 +23,15 @@ public class AddNewsDataActionWrapper implements WebServiceAction {
     private Activity activity;
     private String response;
 
+    private PostAsyncAction postAsyncAction;
+
     public AddNewsDataActionWrapper(HashMap<String, String> textDataOutput, HashMap<String, byte[]> fileDataOutput,
-                                    Activity activity){
+                                    Activity activity, PostAsyncAction postAsyncAction){
 
         this.textDataOutput = textDataOutput;
         this.fileDataOutput = fileDataOutput;
         this.activity = activity;
+        this.postAsyncAction = postAsyncAction;
     }
 
     @Override
@@ -49,8 +55,6 @@ public class AddNewsDataActionWrapper implements WebServiceAction {
     @Override
     public void processResult() {
 
-
-            Log.e("AddNewsData", response);
-
+        postAsyncAction.processResult(response);
     }
 }

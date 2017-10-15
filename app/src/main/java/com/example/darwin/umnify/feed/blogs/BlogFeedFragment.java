@@ -94,4 +94,16 @@ public class BlogFeedFragment extends Fragment{
 
         manager.newFeedEntry(data);
     }
+
+    public void deleteBlog(Intent data){
+
+        String key = Integer.toString(data.getIntExtra("BLOG_ID", -1));
+        manager.deleteFeedEntry(key);
+
+    }
+
+    public void updateBlog(Intent data){
+        manager.updateFeedContent(data);
+    }
+
 }

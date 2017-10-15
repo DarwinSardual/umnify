@@ -4,6 +4,7 @@ import android.app.Activity;
 import android.util.Log;
 import com.example.darwin.umnify.authentication.AuthenticationAddress;
 import com.example.darwin.umnify.connection.WebServiceConnection;
+import com.example.darwin.umnify.feed.PostAsyncAction;
 import com.example.darwin.umnify.wrapper.DataHelper;
 import com.example.darwin.umnify.wrapper.WebServiceAction;
 
@@ -19,14 +20,16 @@ public class AddBlogDataActionWrapper implements WebServiceAction{
     private InputStream inputStream;
     private WebServiceConnection connection = null;
     String response;
+    private PostAsyncAction postAsyncAction;
 
     public AddBlogDataActionWrapper(HashMap<String, String> textDataOutput,
                                     HashMap<String, byte[]> fileDataOutput,
-                                    Activity activity){
+                                    Activity activity, PostAsyncAction postAsyncAction){
 
         this.textDataOutput = textDataOutput;
         this.fileDataOutput = fileDataOutput;
         this.activity = activity;
+        this.postAsyncAction = postAsyncAction;
 
     }
 
@@ -55,11 +58,6 @@ public class AddBlogDataActionWrapper implements WebServiceAction{
     @Override
     public void processResult() {
 
-        try{
-
-            Log.e("Add blog", response);
-        }catch (Exception e){
-            e.printStackTrace();
-        }
+        postAsyncAction.processResult(response);
     }
 }

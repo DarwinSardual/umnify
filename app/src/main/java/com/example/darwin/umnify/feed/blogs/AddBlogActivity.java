@@ -1,12 +1,17 @@
 package com.example.darwin.umnify.feed.blogs;
 
 import android.content.Intent;
+import android.database.Cursor;
+import android.net.Uri;
+import android.provider.OpenableColumns;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.view.View;
 import android.widget.Button;
 import android.widget.EditText;
 import android.widget.ImageButton;
+import android.widget.TextView;
+
 import com.example.darwin.umnify.R;
 import com.example.darwin.umnify.feed.news.AddNewsActivity;
 
@@ -19,6 +24,7 @@ public class AddBlogActivity extends AppCompatActivity {
     private EditText contentField;
 
     private Button addImageButton;
+    private TextView addImageNameView;
 
     private static final int SELECT_IMAGE = 6;
 
@@ -32,15 +38,16 @@ public class AddBlogActivity extends AppCompatActivity {
         ClickHandler handler = new ClickHandler();
 
 
-        backButton = (ImageButton) findViewById(R.id.add_blog_back_button);
+        backButton = (ImageButton) findViewById(R.id.back_button);
         backButton.setOnClickListener(handler);
-        submitButton = (ImageButton) findViewById(R.id.add_blog_submit_button);
+        submitButton = (ImageButton) findViewById(R.id.submit_button);
         submitButton.setOnClickListener(handler);
 
-        headingField = (EditText) findViewById(R.id.add_blog_heading);
-        contentField = (EditText) findViewById(R.id.add_blog_content);
+        headingField = (EditText) findViewById(R.id.heading);
+        contentField = (EditText) findViewById(R.id.content);
 
-        addImageButton = (Button) findViewById(R.id.add_blog_add_image);
+        addImageButton = (Button) findViewById(R.id.add_image);
+        addImageNameView = (TextView) findViewById(R.id.add_blog_image_name);
         addImageButton.setOnClickListener(handler);
     }
 
@@ -50,6 +57,23 @@ public class AddBlogActivity extends AppCompatActivity {
         if (requestCode == AddBlogActivity.SELECT_IMAGE) {
             if (resultCode == RESULT_OK) {
                 this.data = data;
+                if(data != null){
+
+                    Uri uri = data.getData();
+                    Cursor returnCursor;
+                    returnCursor =
+                            this.getContentResolver()
+                                    .query(uri,
+                                            null, null,
+                                            null, null);
+
+                    int nameIndex = returnCursor.getColumnIndex(OpenableColumns.DISPLAY_NAME);
+                    returnCursor.moveToFirst();
+
+                    String imageFile = returnCursor.getString(nameIndex);
+                    addImageNameView.setText(imageFile);
+                    addImageButton.setText("Remove image");
+                }
 
             }else{
 

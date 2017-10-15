@@ -6,10 +6,9 @@ import android.os.Bundle;
 import android.support.v4.widget.SwipeRefreshLayout;
 import android.view.View;
 
+import com.example.darwin.umnify.feed.blogs.Blog;
 import com.example.darwin.umnify.feed.blogs.BlogActivity;
-import com.example.darwin.umnify.feed.blogs.BlogFeedManager;
-import com.example.darwin.umnify.feed.blogs.BlogTile;
-import com.example.darwin.umnify.feed.blogs.DeleteBlogDialogFragment;
+import com.example.darwin.umnify.feed.blogs.BlogCode;
 import com.example.darwin.umnify.feed.blogs.view_holder.BlogTileViewHolderGuest;
 
 /**
@@ -18,36 +17,51 @@ import com.example.darwin.umnify.feed.blogs.view_holder.BlogTileViewHolderGuest;
 
 public class BlogFeedManagerSuperAdmin<E extends BlogTileViewHolderGuest>extends BlogFeedManagerAdmin<E> {
 
+    private Bundle userData;
+
     public BlogFeedManagerSuperAdmin(Activity activity, SwipeRefreshLayout swipeRefreshLayout,
                                      Class<E> cls, int layoutId, Bundle userData) {
         super(activity, swipeRefreshLayout, cls, layoutId, userData);
-
+        this.userData = userData;
 
     }
 
     @Override
     public void onBindViewHolder(E holder, int position) {
 
-        final BlogTile blogTile = super.getEntryFromFeedList(position);
-        if (blogTile != null) {
-            holder.getBlogTileImageView().setImageBitmap(blogTile.getImage());
-            holder.getBlogTileHeadingView().setText(blogTile.getHeading());
+        if(!(position < super.getIndex().size())) return;
+
+        String key = getIndex().get(position);
+        final Blog blog = super.getEntryFromFeedList(key);
+        if(blog != null){
+            holder.getBlogTileImageView().setImageBitmap(blog.getImage());
+            holder.getBlogTileHeadingView().setText(blog.getHeading());
 
             holder.getContainer().setOnClickListener(new View.OnClickListener() {
                 @Override
                 public void onClick(View view) {
                     Intent intent = new Intent(view.getContext(), BlogActivity.class);
-                    intent.putExtra("BLOG_TILE_ID", blogTile.getId());
-                    intent.putExtra("BLOG_TILE_HEADING", blogTile.getHeading());
-                    intent.putExtra("BLOG_TILE_IMAGE_FILE", blogTile.getImageFile());
-                    intent.putExtra("BLOG_TILE_INDEX", blogTile.getIndex());
-                    intent.putExtra("BLOG_TILE_AUTHOR", blogTile.getAuthor());
-                    intent.putExtra("USER_ID", BlogFeedManagerSuperAdmin.super.getUserData().getInt("USER_ID"));
-                    intent.putExtra("USER_TYPE", BlogFeedManagerSuperAdmin.super.getUserData().getInt("USER_TYPE"));
+                    intent.putExtra("STATUS", 1);
+                    intent.putExtra("BLOG_ID", blog.getId());
+                    intent.putExtra("BLOG_HEADING", blog.getHeading());
+                    intent.putExtra("BLOG_CONTENT", blog.getContent());
+                    intent.putExtra("BLOG_IMAGE",blog.getImageFile());
+                    intent.putExtra("BLOG_AUTHOR",blog.getAuthor());
+                    intent.putExtra("BLOG_PUBLISHED_DATE",blog.getPublishedDate());
+                    intent.putExtra("BLOG_SIGNATURE",blog.getSignature());
 
-                    view.getContext().startActivity(intent);
+                    intent.putExtra("BLOG_AUTHOR_FIRSTNAME",blog.getAuthorFirstname());
+                    intent.putExtra("BLOG_AUTHOR_LASTNAME",blog.getAuthorLastname());
+                    intent.putExtra("BLOG_AUTHOR_IMAGE",blog.getAuthorImage());
+
+                    intent.putExtra("BLOG_INDEX", blog.getIndex());
+                    intent.putExtra("USER_ID", userData.getInt("USER_ID"));
+                    intent.putExtra("USER_TYPE", userData.getInt("USER_TYPE"));
+
+                    BlogFeedManagerSuperAdmin.super.getActivity().startActivityForResult(intent, BlogCode.VIEW_BLOG);
                 }
             });
+
 
             /*holder.getContainer().setOnLongClickListener(new View.OnLongClickListener() {
                 @Override

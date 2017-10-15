@@ -2,88 +2,176 @@ package com.example.darwin.umnify.feed.blogs.feed_manager;
 
 import android.app.Activity;
 import android.content.Intent;
+import android.database.Cursor;
+import android.database.sqlite.SQLiteDatabase;
+import android.graphics.Bitmap;
 import android.support.v4.widget.SwipeRefreshLayout;
-import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
-import android.widget.Toast;
 
+import com.example.darwin.umnify.DataActionWrapper;
+import com.example.darwin.umnify.ImageActionWrapper;
 import com.example.darwin.umnify.async.WebServiceAsync;
+import com.example.darwin.umnify.authentication.AuthenticationAddress;
+import com.example.darwin.umnify.database.UMnifyContract;
+import com.example.darwin.umnify.database.UMnifyDbHelper;
 import com.example.darwin.umnify.feed.FeedManager;
+import com.example.darwin.umnify.feed.PostAsyncAction;
+import com.example.darwin.umnify.feed.PostAsyncImageAction;
+import com.example.darwin.umnify.feed.blogs.Blog;
 import com.example.darwin.umnify.feed.blogs.BlogActivity;
 import com.example.darwin.umnify.feed.blogs.BlogHelper;
-import com.example.darwin.umnify.feed.blogs.BlogTile;
+import com.example.darwin.umnify.feed.blogs.BlogCode;
+import com.example.darwin.umnify.feed.blogs.data_action_wrapper.FetchBlogDataActionWrapper;
 import com.example.darwin.umnify.feed.blogs.data_action_wrapper.FetchBlogImageDataActionWrapper;
-import com.example.darwin.umnify.feed.blogs.data_action_wrapper.FetchBlogTileDataActionWrapper;
 import com.example.darwin.umnify.feed.blogs.view_holder.BlogTileViewHolderGuest;
+import com.example.darwin.umnify.gallery.GalleryHelper;
+import com.example.darwin.umnify.wrapper.WebServiceAction;
 
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 
+import java.util.ArrayList;
 import java.util.HashMap;
 
 /**
  * Created by darwin on 8/26/17.
  */
 
-public class BlogFeedManagerGuest<E extends BlogTileViewHolderGuest> extends FeedManager<E, BlogTile>{
+public class BlogFeedManagerGuest<E extends BlogTileViewHolderGuest> extends FeedManager<E, Blog>{
 
     private Class<E> cls;
     private int layoutId;
+    private SQLiteDatabase databaseRead;
+    private UMnifyDbHelper databaseConnection;
+    private boolean hasConnection = true;
+    private ArrayList<String> index;
+
+    public final static int VIEW_BLOG_CODE = 3;
 
     public BlogFeedManagerGuest(Activity activity, SwipeRefreshLayout swipeRefreshLayout,
                                 Class<E> cls, int layoutId){
         super(activity, swipeRefreshLayout);
         this.layoutId = layoutId;
         this.cls = cls;
+        this.index = new ArrayList<>();
+        databaseConnection = UMnifyDbHelper.getInstance(super.getActivity());
+        databaseRead = databaseConnection.getReadableDatabase();
 
-        HashMap<String, String> fetchBlogTextData = new HashMap<>();
-        fetchBlogTextData.put("type", "tile");
-        fetchBlogTextData.put("order", "desc");
-        fetchBlogTextData.put("offset", super.getFeedListSize() +"");
-        fetchBlogTextData.put("limit", "8");
-
-        WebServiceAsync asyncFetchBlog = new WebServiceAsync();
-        FetchBlogTileDataActionWrapper fetchBlogTileDataActionWrapper = new FetchBlogTileDataActionWrapper(fetchBlogTextData,
-                activity, this);
-
-        asyncFetchBlog.execute(fetchBlogTileDataActionWrapper);
+        updateFeed(-1);
     }
 
     @Override
     public void addFeedEntry(String jsonData) throws JSONException {
 
-        FetchBlogImageDataActionWrapper fetchBlogImageDataActionWrapper;
-        WebServiceAsync asyncFetchBlogImage;
-
         JSONObject blogData = new JSONObject(jsonData);
-        BlogTile blogTile = BlogHelper.createBlogTileFromJSON(blogData, super.getFeedListSize());
-        fetchBlogImageDataActionWrapper = new FetchBlogImageDataActionWrapper(blogTile,
-                super.getActivity(), this);
+        Blog blog = BlogHelper.createBlogFromJSON(blogData, -1);
+        BlogHelper.addBlogToLocalDb(blog, super.getActivity());
 
-        super.addToFeedList(super.getFeedListSize(), blogTile);
-        notifyItemInserted(blogTile.getIndex());
+        int position = index.size();
+        String key = Integer.toString(blog.getId());
 
-        asyncFetchBlogImage = new WebServiceAsync();
-        asyncFetchBlogImage.execute(fetchBlogImageDataActionWrapper);
+        super.addToFeedList(key, blog);
+        index.add(key);
+        notifyItemInserted(position);
+
+        Bitmap image = GalleryHelper.loadImageFromInternal(blog.getImageFile(), super.getActivity(), "feed/blog");
+        if(image != null){
+            Bitmap resizeImage = Bitmap.createScaledBitmap(image, 592, 333, true);
+            blog.setImage(resizeImage);
+            notifyItemChanged(position);
+        }else{
+            WebServiceAction imageAction;
+            WebServiceAsync async;
+
+            PostAsyncImageAction postProcess =
+                    new ProcessPostFetchImage(blog, position, super.getActivity());
+
+            imageAction = new ImageActionWrapper(super.getActivity(), AuthenticationAddress.BLOG_IMAGE_FOLDER + "/preview/" + blog.getImageFile(), postProcess);
+            async = new WebServiceAsync();
+            async.execute(imageAction);
+        }
+    }
+
+    public void addFeedEntry(Blog blog){
+
+        Bitmap image = GalleryHelper.loadImageFromInternal(blog.getImageFile() , super.getActivity(), "feed/blog");
+        if(image != null){
+
+            blog.setImage(image);
+        }
+
+        int position = index.size();
+        String key = Integer.toString(blog.getId());
+
+        super.addToFeedList(key, blog);
+        index.add(key);
+        notifyItemInserted(position);
     }
 
     @Override
     public void addFeedEntries(String jsonDataArray) throws JSONException {
 
-        JSONArray dataList = new JSONArray(jsonDataArray);
-        for(int i = 0; i < dataList.length(); i++){
+        if(jsonDataArray != null){
+            JSONArray dataList = new JSONArray(jsonDataArray);
+            for(int i = 0; i < dataList.length(); i++){
 
-            addFeedEntry(dataList.getString(i));
+                addFeedEntry(dataList.getString(i));
+            }
+            dataList = null;
+        }else{
 
+            hasConnection = false;
+            Cursor cursor;
+
+            if(super.getFeedListSize() > 0){
+                String query = "select * from Blog where  published_date < ? and id != ? order by datetime(published_date) desc limit 3";
+                //String query = "select * from Blog where id < ? order by datetime(published_date) desc limit 3";
+                String id = index.get(index.size() - 1);
+                Blog blog = super.getEntryFromFeedList(id);
+
+                String date = blog.getPublishedDate();
+                String idKey = Integer.toString(blog.getId());
+
+                String[] selectionArgs = {date, idKey};
+                cursor = databaseRead.rawQuery(query, selectionArgs);
+
+            }else{
+                String query = "select * from Blog order by datetime(published_date) desc limit 8";
+                cursor = databaseRead.rawQuery(query, null);
+            }
+
+
+            while(cursor.moveToNext()){
+
+                int id = cursor.getInt(cursor.getColumnIndexOrThrow(UMnifyContract.UMnifyColumns.Blog.ID.toString()));
+
+                if(index.indexOf(id) > 0) continue;
+
+                String heading = cursor.getString(cursor.getColumnIndexOrThrow(UMnifyContract.UMnifyColumns.Blog.HEADING.toString()));
+                String content = cursor.getString(cursor.getColumnIndexOrThrow(UMnifyContract.UMnifyColumns.Blog.CONTENT.toString()));
+                String imageFile = cursor.getString(cursor.getColumnIndexOrThrow(UMnifyContract.UMnifyColumns.Blog.IMAGE.toString()));
+                int author = cursor.getInt(cursor.getColumnIndexOrThrow(UMnifyContract.UMnifyColumns.Blog.AUTHOR.toString()));
+                String publshedDate = cursor.getString(cursor.getColumnIndexOrThrow(UMnifyContract.UMnifyColumns.Blog.PUBLISHED_DATE.toString()));
+                int signature = cursor.getInt(cursor.getColumnIndexOrThrow(UMnifyContract.UMnifyColumns.Blog.SIGNATURE.toString()));
+
+                String authorFirstname = cursor.getString(cursor.getColumnIndexOrThrow(UMnifyContract.UMnifyColumns.News.AUTHOR_FIRSTNAME.toString()));
+                String authorLastname = cursor.getString(cursor.getColumnIndexOrThrow(UMnifyContract.UMnifyColumns.News.AUTHOR_LASTNAME.toString()));
+                String authorImageFile = cursor.getString(cursor.getColumnIndexOrThrow(UMnifyContract.UMnifyColumns.News.AUTHOR_IMAGE.toString()));
+
+                Blog blog = new Blog(id, heading, content, author, publshedDate, imageFile, null, signature,
+                        super.getFeedListSize(), authorFirstname, authorLastname, authorImageFile);
+
+                addFeedEntry(blog);
+
+            }
         }
+
 
         super.setFetchingFeedEntry(false);
         super.getSwipeRefreshLayout().setRefreshing(false);
-        dataList = null;
-
     }
 
     @Override
@@ -91,8 +179,8 @@ public class BlogFeedManagerGuest<E extends BlogTileViewHolderGuest> extends Fee
 
         if(super.isFetchingFeedEntry()) return;
 
-        WebServiceAsync asyncFetchBlog = new WebServiceAsync();
-        FetchBlogTileDataActionWrapper fetchBlogTileDataActionWrapper;
+        WebServiceAsync async = new WebServiceAsync();
+        WebServiceAction action;
         HashMap<String, String> fetchBlogTextData = new HashMap<>();
 
         fetchBlogTextData.put("type", "tile");
@@ -102,33 +190,44 @@ public class BlogFeedManagerGuest<E extends BlogTileViewHolderGuest> extends Fee
 
             super.setFetchingFeedEntry(true);
 
-            fetchBlogTextData.put("offset", super.getFeedListSize() + "");
-            String oddEven = super.getFeedListSize()/2 ==0? "2":"3";
-            fetchBlogTextData.put("limit", oddEven);
-            fetchBlogTileDataActionWrapper = new FetchBlogTileDataActionWrapper(fetchBlogTextData,
-                    super.getActivity(), this);
+            if(hasConnection){
 
-            asyncFetchBlog.execute(fetchBlogTileDataActionWrapper);
+                fetchBlogTextData.put("offset", super.getFeedListSize() + "");
+                String oddEven = super.getFeedListSize()/2 ==0? "2":"3";
+                fetchBlogTextData.put("limit", oddEven);
 
+                action = new DataActionWrapper(fetchBlogTextData,
+                        super.getActivity(), AuthenticationAddress.FETCH_BLOG, new ProcessPostFetchData());
+                async.execute(action);
+
+            }else{
+                try{
+                    addFeedEntries(null);
+                }catch (JSONException e){
+                    e.printStackTrace();
+                }
+            }
         }else if(direction == -1){
 
-            super.setFetchingFeedEntry(true);
+
+            index.clear();
             super.clearFeedList();
             notifyDataSetChanged();
+            super.setFetchingFeedEntry(true);
 
             fetchBlogTextData.put("offset", super.getFeedListSize() + "");
             fetchBlogTextData.put("limit", "8");
 
-            fetchBlogTileDataActionWrapper = new FetchBlogTileDataActionWrapper(fetchBlogTextData,
-                    super.getActivity(), this);
+            action = new DataActionWrapper(fetchBlogTextData,
+                    super.getActivity(), AuthenticationAddress.FETCH_BLOG, new ProcessPostFetchData());
 
-            asyncFetchBlog.execute(fetchBlogTileDataActionWrapper);
+            async.execute(action);
 
         }
 
         fetchBlogTextData = null;
-        fetchBlogTileDataActionWrapper = null;
-        asyncFetchBlog = null;
+        action = null;
+        async = null;
     }
 
     @Override
@@ -149,22 +248,36 @@ public class BlogFeedManagerGuest<E extends BlogTileViewHolderGuest> extends Fee
     @Override
     public void onBindViewHolder(E holder, int position) {
 
-        final BlogTile blogTile = super.getEntryFromFeedList(position);
-        if(blogTile != null){
-            holder.getBlogTileImageView().setImageBitmap(blogTile.getImage());
-            holder.getBlogTileHeadingView().setText(blogTile.getHeading());
+        if(!(position < index.size())) return;
+
+        String key = index.get(position);
+        final Blog blog = super.getEntryFromFeedList(key);
+
+        if(blog != null){
+            holder.getBlogTileImageView().setImageBitmap(blog.getImage());
+            holder.getBlogTileHeadingView().setText(blog.getHeading());
 
             holder.getContainer().setOnClickListener(new View.OnClickListener() {
                 @Override
                 public void onClick(View view) {
-                    Intent intent = new Intent(view.getContext(), BlogActivity.class);
-                    intent.putExtra("BLOG_TILE_ID", blogTile.getId());
-                    intent.putExtra("BLOG_TILE_HEADING", blogTile.getHeading());
-                    intent.putExtra("BLOG_TILE_IMAGE_FILE",blogTile.getImageFile());
-                    intent.putExtra("BLOG_TILE_INDEX",blogTile.getIndex());
-                    intent.putExtra("BLOG_TILE_AUTHOR",blogTile.getAuthor());
 
-                    view.getContext().startActivity(intent);
+                    Intent intent = new Intent(view.getContext(), BlogActivity.class);
+                    intent.putExtra("STATUS", 1);
+                    intent.putExtra("BLOG_ID", blog.getId());
+                    intent.putExtra("BLOG_HEADING", blog.getHeading());
+                    intent.putExtra("BLOG_CONTENT", blog.getContent());
+                    intent.putExtra("BLOG_IMAGE",blog.getImageFile());
+                    intent.putExtra("BLOG_AUTHOR",blog.getAuthor());
+                    intent.putExtra("BLOG_PUBLISHED_DATE",blog.getPublishedDate());
+                    intent.putExtra("BLOG_SIGNATURE",blog.getSignature());
+
+                    intent.putExtra("BLOG_AUTHOR_FIRSTNAME",blog.getAuthorFirstname());
+                    intent.putExtra("BLOG_AUTHOR_LASTNAME",blog.getAuthorLastname());
+                    intent.putExtra("BLOG_AUTHOR_IMAGE",blog.getAuthorImage());
+
+                    intent.putExtra("BLOG_INDEX",blog.getIndex());
+
+                    BlogFeedManagerGuest.super.getActivity().startActivityForResult(intent, BlogCode.VIEW_BLOG);
                 }
             });
 
@@ -177,12 +290,69 @@ public class BlogFeedManagerGuest<E extends BlogTileViewHolderGuest> extends Fee
     }
 
     @Override
-    public void deleteFeedEntry(BlogTile tile) {
+    public void deleteFeedEntry(String key) {
+        // dummy
+    }
 
+    @Override
+    public void updateFeedContent(Intent data) {
+        // dummy
     }
 
     @Override
     public int getItemCount() {
         return super.getFeedListSize();
+    }
+
+    private class ProcessPostFetchData implements PostAsyncAction{
+        @Override
+        public void processResult(String jsonResponse) {
+            try{
+
+                if(jsonResponse != null){
+                    JSONObject json = new JSONObject(jsonResponse);
+                    String data = json.getString("data");
+                    addFeedEntries(data);
+                }else{
+                    addFeedEntries(null);
+                }
+            }catch (JSONException e){
+                e.printStackTrace();
+            }
+        }
+    }
+
+    private class ProcessPostFetchImage implements PostAsyncImageAction {
+
+        private Blog blog;
+        private Activity activity;
+        private int position;
+
+        public ProcessPostFetchImage(Blog blog, int position, Activity activity){
+            this.blog = blog;
+            this.activity = activity;
+            this.position = position;
+        }
+
+        @Override
+        public String getImageFile() {
+            return blog.getImageFile();
+        }
+
+        @Override
+        public void processResult(Bitmap image) {
+
+            if(image != null){
+                GalleryHelper.saveImageToInternal(image, blog.getImageFile(), activity, "feed/blog");
+                Bitmap resizeImage = Bitmap.createScaledBitmap(image, 592, 333, true);
+                image = null;
+                blog.setImage(resizeImage);
+                BlogFeedManagerGuest.this.notifyItemChanged(position);
+            }
+        }
+    }
+
+    public ArrayList<String> getIndex() {
+        return index;
     }
 }

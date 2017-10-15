@@ -48,7 +48,5 @@ public class AddEventDataActionWrapper implements WebServiceAction{
     @Override
     public void processResult() {
 
-
-
     }
 }

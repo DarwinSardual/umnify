@@ -68,9 +68,9 @@ public class BlogFeedManager extends FeedManager<BlogFeedManager.ViewHolder, Blo
         private ViewHolder(LayoutInflater inflater, ViewGroup parent){
             super(inflater.inflate(R.layout.feed_blogs, parent, false));
 
-            container = (RelativeLayout) itemView.findViewById(R.id.blog_tile_container);
-            blogTileHeadingView = (TextView) itemView.findViewById(R.id.blog_tile_heading);
-            blogTileImageView = (ImageView) itemView.findViewById(R.id.blog_tile_image);
+            container = (RelativeLayout) itemView.findViewById(R.id.container);
+            blogTileHeadingView = (TextView) itemView.findViewById(R.id.heading);
+            blogTileImageView = (ImageView) itemView.findViewById(R.id.image);
 
         }
     }
@@ -79,6 +79,11 @@ public class BlogFeedManager extends FeedManager<BlogFeedManager.ViewHolder, Blo
     public ViewHolder onCreateViewHolder(ViewGroup parent, int viewType) {
 
         return new ViewHolder(LayoutInflater.from(parent.getContext()), parent);
+    }
+
+    @Override
+    public void updateFeedContent(Intent data) {
+
     }
 
     @Override
@@ -114,7 +119,7 @@ public class BlogFeedManager extends FeedManager<BlogFeedManager.ViewHolder, Blo
     @Override
     public void addFeedEntry(String jsonData)throws JSONException{
 
-        FetchBlogImageDataActionWrapper fetchBlogImageDataActionWrapper;
+        /*FetchBlogImageDataActionWrapper fetchBlogImageDataActionWrapper;
         WebServiceAsync asyncFetchBlogImage;
 
         JSONObject blogData = new JSONObject(jsonData);
@@ -126,7 +131,7 @@ public class BlogFeedManager extends FeedManager<BlogFeedManager.ViewHolder, Blo
         notifyItemInserted(blogTile.getIndex());
 
         asyncFetchBlogImage = new WebServiceAsync();
-        asyncFetchBlogImage.execute(fetchBlogImageDataActionWrapper);
+        asyncFetchBlogImage.execute(fetchBlogImageDataActionWrapper);*/
 
     }
 
@@ -240,11 +245,11 @@ public class BlogFeedManager extends FeedManager<BlogFeedManager.ViewHolder, Blo
             textData.put("author", userData.getInt("USER_ID") + "");
         }
 
-        AddBlogDataActionWrapper addBlogDataActionWrapper = new AddBlogDataActionWrapper(textData,
-                fileData, super.getActivity());
+        ///AddBlogDataActionWrapper addBlogDataActionWrapper = new AddBlogDataActionWrapper(textData,
+                //fileData, super.getActivity());
 
-        WebServiceAsync asyncAddBlog = new WebServiceAsync();
-        asyncAddBlog.execute(addBlogDataActionWrapper);
+        //WebServiceAsync asyncAddBlog = new WebServiceAsync();
+        //asyncAddBlog.execute(addBlogDataActionWrapper);
     }
 
     @Override
@@ -253,7 +258,9 @@ public class BlogFeedManager extends FeedManager<BlogFeedManager.ViewHolder, Blo
     }
 
     @Override
-    public void deleteFeedEntry(BlogTile tile) {
+    public void deleteFeedEntry(String key) {
 
     }
+
+
 }

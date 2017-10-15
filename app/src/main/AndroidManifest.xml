@@ -83,7 +83,22 @@
             android:value="AIzaSyDzjdHhuyaG3B2apsRLTeWg6m1G2cl67Vk" />
 
         <activity android:name=".maps.CampusMapActivity" />
-        <activity android:name=".calendar.AddEventActivity"></activity>
+        <activity android:name=".calendar.AddEventActivity" />
+        <activity android:name=".personal.ProfileActivity" />
+        <activity android:name=".about.VisionMissionGoalsActivity" />
+        <activity android:name=".about.HistoryActivity" />
+        <activity android:name=".pending.PendingActivity" />
+        <activity android:name=".feed.news.EditNewsActivity" />
+        <activity android:name=".feed.blogs.EditBlogActivity" />
+        <activity android:name=".feed.announcements.AddAnnouncementActivity" />
+        <activity android:name=".feed.announcements.EditAnnouncementActivity" />
+        <activity android:name=".about.qoute_of_the_day.QouteOfTheDayActivity" />
+        <activity android:name=".about.trivia.TriviaActivity" />
+        <activity android:name=".about.qoute_of_the_day.AddQouteOfTheDayActivity" />
+        <activity android:name=".about.trivia.AddTrivia" />
+        <activity android:name=".about.quick_fact.QuickFactActivity" />
+        <activity android:name=".about.quick_fact.AddQuickFactActivity" />
+        <activity android:name=".feed.announcements.AnnouncementActivity"></activity>
     </application>
 
 </manifest>
