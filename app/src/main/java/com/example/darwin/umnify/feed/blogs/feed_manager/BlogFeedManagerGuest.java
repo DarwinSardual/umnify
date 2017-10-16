@@ -13,6 +13,7 @@ import android.view.ViewGroup;
 
 import com.example.darwin.umnify.DataActionWrapper;
 import com.example.darwin.umnify.ImageActionWrapper;
+import com.example.darwin.umnify.LeastRecentlyUsedCache;
 import com.example.darwin.umnify.async.WebServiceAsync;
 import com.example.darwin.umnify.authentication.AuthenticationAddress;
 import com.example.darwin.umnify.database.UMnifyContract;
@@ -27,6 +28,7 @@ import com.example.darwin.umnify.feed.blogs.BlogCode;
 import com.example.darwin.umnify.feed.blogs.data_action_wrapper.FetchBlogDataActionWrapper;
 import com.example.darwin.umnify.feed.blogs.data_action_wrapper.FetchBlogImageDataActionWrapper;
 import com.example.darwin.umnify.feed.blogs.view_holder.BlogTileViewHolderGuest;
+import com.example.darwin.umnify.feed.news.feed_manager.NewsFeedManagerGuest;
 import com.example.darwin.umnify.gallery.GalleryHelper;
 import com.example.darwin.umnify.wrapper.WebServiceAction;
 
@@ -49,17 +51,20 @@ public class BlogFeedManagerGuest<E extends BlogTileViewHolderGuest> extends Fee
     private UMnifyDbHelper databaseConnection;
     private boolean hasConnection = true;
     private ArrayList<String> index;
+    private int offset;
 
     public final static int VIEW_BLOG_CODE = 3;
 
     public BlogFeedManagerGuest(Activity activity, SwipeRefreshLayout swipeRefreshLayout,
                                 Class<E> cls, int layoutId){
-        super(activity, swipeRefreshLayout);
+        super(activity, swipeRefreshLayout, 30);
+        super.setOnRemoveFromCache(new RemoveFromCache());
         this.layoutId = layoutId;
         this.cls = cls;
         this.index = new ArrayList<>();
         databaseConnection = UMnifyDbHelper.getInstance(super.getActivity());
         databaseRead = databaseConnection.getReadableDatabase();
+        offset = 0;
 
         updateFeed(-1);
     }
@@ -76,6 +81,7 @@ public class BlogFeedManagerGuest<E extends BlogTileViewHolderGuest> extends Fee
 
         super.addToFeedList(key, blog);
         index.add(key);
+        offset++;
         notifyItemInserted(position);
 
         Bitmap image = GalleryHelper.loadImageFromInternal(blog.getImageFile(), super.getActivity(), "feed/blog");
@@ -109,6 +115,7 @@ public class BlogFeedManagerGuest<E extends BlogTileViewHolderGuest> extends Fee
 
         super.addToFeedList(key, blog);
         index.add(key);
+        offset++;
         notifyItemInserted(position);
     }
 
@@ -193,7 +200,7 @@ public class BlogFeedManagerGuest<E extends BlogTileViewHolderGuest> extends Fee
 
             if(hasConnection){
 
-                fetchBlogTextData.put("offset", super.getFeedListSize() + "");
+                fetchBlogTextData.put("offset", offset + "");
                 String oddEven = super.getFeedListSize()/2 ==0? "2":"3";
                 fetchBlogTextData.put("limit", oddEven);
 
@@ -213,10 +220,11 @@ public class BlogFeedManagerGuest<E extends BlogTileViewHolderGuest> extends Fee
 
             index.clear();
             super.clearFeedList();
+            offset = 0;
             notifyDataSetChanged();
             super.setFetchingFeedEntry(true);
 
-            fetchBlogTextData.put("offset", super.getFeedListSize() + "");
+            fetchBlogTextData.put("offset", offset + "");
             fetchBlogTextData.put("limit", "8");
 
             action = new DataActionWrapper(fetchBlogTextData,
@@ -351,6 +359,17 @@ public class BlogFeedManagerGuest<E extends BlogTileViewHolderGuest> extends Fee
                 blog.setImage(resizeImage);
                 BlogFeedManagerGuest.this.notifyItemChanged(position);
             }
+        }
+    }
+
+    private class RemoveFromCache implements LeastRecentlyUsedCache.OnRemoveFromCache{
+
+        @Override
+        public void onRemove(Object key) {
+            String k = (String) key;
+            int position = getIndex().indexOf(k);
+            getIndex().remove(position);
+            notifyItemRemoved(position);
         }
     }
 

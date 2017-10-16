@@ -68,8 +68,6 @@ public class DataHelper {
 
         Bitmap scaledImage = null;
 
-        //Log.e("Dimensions", "Original width: " + originalWidth, " Orignal ")
-
         if(orientation == 0){ //landscape
             float ratio = originalHeight / originalWidth;
             int newWidthHeight = (int) (ratio * maxWidthHeight);

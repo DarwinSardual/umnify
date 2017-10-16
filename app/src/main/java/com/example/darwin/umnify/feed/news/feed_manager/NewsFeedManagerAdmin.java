@@ -240,10 +240,11 @@ public class NewsFeedManagerAdmin<E extends NewsViewHolderAdmin> extends NewsFee
 
             if(response != null){
                 Log.e("Message", "Delete News - " + response);
-                int position = getIndex().indexOf(key);
+                /*int position = getIndex().indexOf(key);
                 getIndex().remove(position);
                 removeFromFeedList(key);
-                notifyItemRemoved(position);
+                notifyItemRemoved(position);*/
+                removeFromFeedList(key);
             }else{
                 Toast.makeText(getActivity(), "Failed to delete.", Toast.LENGTH_SHORT).show();
             }

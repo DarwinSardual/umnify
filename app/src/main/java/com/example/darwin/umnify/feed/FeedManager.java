@@ -7,6 +7,7 @@ import android.support.v7.widget.RecyclerView;
 import android.util.LruCache;
 import android.view.ViewGroup;
 
+import com.example.darwin.umnify.LeastRecentlyUsedCache;
 import com.example.darwin.umnify.feed.news.News;
 
 import org.json.JSONException;
@@ -19,17 +20,17 @@ public abstract class FeedManager<E extends RecyclerView.ViewHolder, T> extends 
     private Activity activity;
     private SwipeRefreshLayout swipeRefreshLayout;
     //private List<T> feedList;
-    private LruCache<String, T> feedList;
+    //private LruCache<String, T> feedList;
+    private LeastRecentlyUsedCache<String, T> feedCache;
     private boolean isFetchingFeedEntry = false;
     private RecyclerView recyclerView;
 
-
-    public FeedManager(Activity activity, SwipeRefreshLayout swipeRefreshLayout){
+    public FeedManager(Activity activity, SwipeRefreshLayout swipeRefreshLayout, int feedSize){
 
         this.activity = activity;
         this.swipeRefreshLayout = swipeRefreshLayout;
-        //this.feedList = new ArrayList<>();
-        this.feedList = new LruCache<>(50);
+        this.feedCache = new LeastRecentlyUsedCache<>(feedSize);
+        //this.feedList = new LruCache<>(50);
     }
 
     @Override
@@ -37,6 +38,10 @@ public abstract class FeedManager<E extends RecyclerView.ViewHolder, T> extends 
         super.onAttachedToRecyclerView(recyclerView);
 
         this.recyclerView = recyclerView;
+    }
+
+    public void setOnRemoveFromCache(LeastRecentlyUsedCache.OnRemoveFromCache<String> onRemoveFromCache){
+        feedCache.setOnRemoveFromCache(onRemoveFromCache);
     }
 
     public abstract void updateFeed(int direction);
@@ -49,7 +54,7 @@ public abstract class FeedManager<E extends RecyclerView.ViewHolder, T> extends 
     }
 
     public void removeFromFeedList(String key){
-        feedList.remove(key);
+        feedCache.remove(key);
     }
 
     public Activity getActivity() {
@@ -63,20 +68,24 @@ public abstract class FeedManager<E extends RecyclerView.ViewHolder, T> extends 
     public void addToFeedList(String pos, T feed){
 
         //feedList.add(feed);
-        feedList.put(pos,feed);
+        feedCache.put(pos,feed);
     }
 
     public void clearFeedList(){
-        feedList.evictAll();
+        feedCache.evictAll();
     }
 
-    public int getFeedListSize(){
+    /*public int getFeedListSize(){
         return feedList.size();
+    }*/
+
+    public int getFeedListSize(){
+        return feedCache.getSize();
     }
 
     public T getEntryFromFeedList(String id){
 
-        T t = feedList.get(id);
+        T t = feedCache.get(id);
 
         return t;
     }

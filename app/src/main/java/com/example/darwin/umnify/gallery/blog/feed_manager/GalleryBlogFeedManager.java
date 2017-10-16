@@ -39,7 +39,7 @@ public class GalleryBlogFeedManager<E extends GalleryViewHolder> extends FeedMan
     public GalleryBlogFeedManager(Activity activity, SwipeRefreshLayout swipeRefreshLayout,
                                   Class<E> cls){
 
-        super(activity, swipeRefreshLayout);
+        super(activity, swipeRefreshLayout, 100);
         this.cls = cls;
 
         updateFeed(-1);

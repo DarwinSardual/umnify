@@ -191,7 +191,7 @@ public class QuickFactActivity extends AppCompatActivity {
 
                 if(quickFact.getImageFile() != null){
                     WebServiceAsync async = new WebServiceAsync();
-                    ImageActionWrapper fetchImage = new ImageActionWrapper(QuickFactActivity.this, AuthenticationAddress.QUICK_FACT_IMAGE_FOLDER, new ProcessPostFetchImage(quickFact.getImageFile()));
+                    ImageActionWrapper fetchImage = new ImageActionWrapper(QuickFactActivity.this, AuthenticationAddress.QUICK_FACT_IMAGE_FOLDER + "/" + quickFact.getImageFile(), new ProcessPostFetchImage(quickFact.getImageFile()));
                     async.execute(fetchImage);
 
                 }

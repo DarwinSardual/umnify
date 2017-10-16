@@ -3,8 +3,8 @@ package com.example.darwin.umnify.authentication;
 public final class AuthenticationAddress {
 
     //public static final String DOMAIN_NAME = "http://174.138.20.165";
-    public static final String DOMAIN_NAME = "http://192.168.122.1/~darwin";
-    //public static final String DOMAIN_NAME = "http://192.168.0.100/~darwin";
+    //public static final String DOMAIN_NAME = "http://192.168.122.1/~darwin";
+    public static final String DOMAIN_NAME = "http://10.42.0.1/~darwin";
     public static final String ROOT_FOLDER = "/UMnifyMobileScripts";
 
     public static final String ROOT_LOGIN = "/login";

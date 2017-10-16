@@ -8,10 +8,7 @@ import android.support.v4.widget.SwipeRefreshLayout;
 import android.view.LayoutInflater;
 import android.view.ViewGroup;
 
-import com.example.darwin.umnify.DataActionWrapper;
-import com.example.darwin.umnify.DataImageActionWrapper;
-import com.example.darwin.umnify.ImageActionWrapper;
-import com.example.darwin.umnify.R;
+import com.example.darwin.umnify.*;
 import com.example.darwin.umnify.async.WebServiceAsync;
 import com.example.darwin.umnify.authentication.AuthenticationAddress;
 import com.example.darwin.umnify.feed.FeedManager;
@@ -43,13 +40,16 @@ public class AnnouncementFeedManager <E extends AnnouncementViewHolder> extends 
     private Class<E> cls;
     private List<String> index;
     private boolean hasConnection = true;
+    private int offset;
 
     public AnnouncementFeedManager(Activity activity, SwipeRefreshLayout swipeRefreshLayout,
                                 Class<E> cls, int layoutId){
-        super(activity, swipeRefreshLayout);
+        super(activity, swipeRefreshLayout, 30);
+        super.setOnRemoveFromCache(new RemoveFromCache());
         this.layoutId = layoutId;
         this.cls = cls;
         this.index = new ArrayList<>();
+        offset = 0;
         //databaseConnection = UMnifyDbHelper.getInstance(super.getActivity());
         //databaseRead = databaseConnection.getReadableDatabase();
 
@@ -106,7 +106,7 @@ public class AnnouncementFeedManager <E extends AnnouncementViewHolder> extends 
 
             if(hasConnection){
 
-                textDataOutput.put("offset", super.getFeedListSize() + "");
+                textDataOutput.put("offset", offset + "");
                 textDataOutput.put("limit", "3");
 
                 action = new DataActionWrapper(textDataOutput, super.getActivity(), AuthenticationAddress.FETCH_ANNOUNCEMENT ,processFetchAnnouncement);
@@ -127,11 +127,12 @@ public class AnnouncementFeedManager <E extends AnnouncementViewHolder> extends 
 
             super.clearFeedList();
             index.clear();
+            offset = 0;
             notifyDataSetChanged();
             super.setFetchingFeedEntry(true);
             hasConnection = true;
 
-            textDataOutput.put("offset", super.getFeedListSize() + "");
+            textDataOutput.put("offset", offset + "");
             textDataOutput.put("limit", "5");
 
             action = new DataActionWrapper(textDataOutput, super.getActivity(), AuthenticationAddress.FETCH_ANNOUNCEMENT ,processFetchAnnouncement);
@@ -165,6 +166,7 @@ public class AnnouncementFeedManager <E extends AnnouncementViewHolder> extends 
 
         super.addToFeedList(key, announcement);
         index.add(key);
+        offset++;
         notifyItemInserted(position);
 
         WebServiceAction imageAction;
@@ -215,7 +217,6 @@ public class AnnouncementFeedManager <E extends AnnouncementViewHolder> extends 
                     setHasConnection(false);
                     addFeedEntries(jsonResponse);
                     setFetchingFeedEntry(false);
-                    //from the containing class
                     getSwipeRefreshLayout().setRefreshing(false);
                 }else{
                     JSONObject str = new JSONObject(jsonResponse);
@@ -223,7 +224,6 @@ public class AnnouncementFeedManager <E extends AnnouncementViewHolder> extends 
 
                     addFeedEntries(data);
                     setFetchingFeedEntry(false);
-                    //containing class
                     getSwipeRefreshLayout().setRefreshing(false);
 
                 }
@@ -268,6 +268,17 @@ public class AnnouncementFeedManager <E extends AnnouncementViewHolder> extends 
             }
         }
 
+    }
+
+    private class RemoveFromCache implements LeastRecentlyUsedCache.OnRemoveFromCache{
+
+        @Override
+        public void onRemove(Object key) {
+            String k = (String) key;
+            int position = getIndex().indexOf(k);
+            getIndex().remove(position);
+            notifyItemRemoved(position);
+        }
     }
 
     public List<String> getIndex() {

@@ -42,7 +42,7 @@
             -->
         </activity>
         <activity android:name=".home.HomeActivity" />
-        <activity android:name=".groups.GroupsActivity" />
+        <!--<activity android:name=".groups.GroupsActivity" />-->
         <activity android:name=".preferences.PreferencesActivity" />
         <activity android:name=".calendar.CalendarActivity" />
         <activity android:name=".feed.blogs.BlogActivity" />

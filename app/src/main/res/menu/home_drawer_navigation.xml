@@ -27,35 +27,35 @@
                     android:id="@+id/navigation_poseidon"
                     android:title="Poseidon" />
 
-                <item
+                <!--<item
                     android:icon="@drawable/navigation_philosophy"
                     android:tint="@color/button_grey"
                     android:id="@+id/navigation_philosophy"
-                    android:title="Philosophy of Education" />
+                    android:title="Philosophy of Education" />-->
 
-                <item
+                <!--<item
                     android:icon="@drawable/navigation_seal"
                     android:tint="@color/button_grey"
                     android:id="@+id/navigation_seal"
-                    android:title="Seal" />
+                    android:title="Seal" /> -->
 
-                <item
+                <!-- <item
                     android:icon="@drawable/navigation_core_competencies"
                     android:tint="@color/button_grey"
                     android:id="@+id/navigation_core_competencies"
-                    android:title="Core Competencies" />
+                    android:title="Core Competencies" />-->
 
-                <item
+                <!--<item
                     android:icon="@drawable/navigation_core_values"
                     android:tint="@color/button_grey"
                     android:id="@+id/navigation_core_values"
-                    android:title="Core Values" />
+                    android:title="Core Values" />-->
 
-                <item
+                <!--<item
                     android:icon="@drawable/navigation_deans"
                     android:tint="@color/button_grey"
                     android:id="@+id/navigation_deans_directors"
-                    android:title="Deans &amp; Directors" />
+                    android:title="Deans &amp; Directors" />-->
 
 
                 <item

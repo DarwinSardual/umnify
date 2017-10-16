@@ -102,7 +102,7 @@ public class HomeActivityControllerGuest {
 
         adapter.addFragment(newsFeedFragment, "News");
         adapter.addFragment(blogFeedFragment, "Blog");
-        adapter.addFragment(announcementFeedFragment, "Announce");
+        adapter.addFragment(announcementFeedFragment, "Announcement");
     }
 
     public void bindViewPagerToAdapter(){

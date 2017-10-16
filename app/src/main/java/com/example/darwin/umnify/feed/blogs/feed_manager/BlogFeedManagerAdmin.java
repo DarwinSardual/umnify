@@ -252,10 +252,10 @@ public class BlogFeedManagerAdmin<E extends BlogTileViewHolderGuest> extends Blo
 
             if(jsonResponse != null){
                 Log.e("Message", "Delete blog - " + jsonResponse);
-                int position = getIndex().indexOf(key);
-                getIndex().remove(position);
+                //int position = getIndex().indexOf(key);
+                //getIndex().remove(position);
                 removeFromFeedList(key);
-                notifyItemRemoved(position);
+                //notifyItemRemoved(position);
             }else{
                 Toast.makeText(getActivity(), "Failed to delete.", Toast.LENGTH_SHORT).show();
             }

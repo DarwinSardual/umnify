@@ -51,7 +51,8 @@ public class NewsFeedManager extends FeedManager<NewsFeedManager.ViewHolder, New
 
     public NewsFeedManager(Activity activity, SwipeRefreshLayout swipeRefreshLayout, Bundle userData) {
 
-        super(activity, swipeRefreshLayout);
+        super(activity, swipeRefreshLayout, 50);
+
 
         this.userData = userData;
         newsViewHolderMap = new HashMap<>();

@@ -253,10 +253,10 @@ public class AnnouncementFeedManagerSuperAdmin<E extends AnnouncementViewHolderS
         public void processResult(String jsonResponse) {
 
             if(jsonResponse != null){
-                int position = getIndex().indexOf(key);
-                getIndex().remove(position);
+                //int position = getIndex().indexOf(key);
+                //getIndex().remove(position);
                 removeFromFeedList(key);
-                notifyItemRemoved(position);
+                //notifyItemRemoved(position);
             }else{
                 Toast.makeText(getActivity(), "Failed to delete.", Toast.LENGTH_SHORT).show();
             }

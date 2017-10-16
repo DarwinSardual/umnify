@@ -191,7 +191,8 @@ public class TriviaActivity extends AppCompatActivity {
 
                     if(trivia.getImageFile() != null){
                         WebServiceAsync async = new WebServiceAsync();
-                        ImageActionWrapper fetchImage = new ImageActionWrapper(TriviaActivity.this, AuthenticationAddress.TRIVIA_IMAGE_FOLDER, new ProcessPostFetchImage(trivia.getImageFile()));
+                        //ImageActionWrapper fetchImage = new ImageActionWrapper(TriviaActivity.this, AuthenticationAddress.TRIVIA_IMAGE_FOLDER, new ProcessPostFetchImage(trivia.getImageFile()));
+                        ImageActionWrapper fetchImage = new ImageActionWrapper(TriviaActivity.this, AuthenticationAddress.TRIVIA_IMAGE_FOLDER + "/" + trivia.getImageFile(), new ProcessPostFetchImage(trivia.getImageFile()));
                         async.execute(fetchImage);
 
                     }
@@ -220,7 +221,10 @@ public class TriviaActivity extends AppCompatActivity {
         public void processResult(Bitmap image) {
 
             if(image != null){
+                Log.e("Trivia image", "not null");
                 imageView.setImageBitmap(image);
+            }else{
+                Log.e("Trivia image", "null");
             }
         }
     }

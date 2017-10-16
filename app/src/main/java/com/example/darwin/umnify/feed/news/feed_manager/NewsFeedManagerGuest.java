@@ -13,11 +13,7 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 
-import com.example.darwin.umnify.DataActionWrapper;
-import com.example.darwin.umnify.DataImageActionWrapper;
-import com.example.darwin.umnify.DateHelper;
-import com.example.darwin.umnify.ImageActionWrapper;
-import com.example.darwin.umnify.R;
+import com.example.darwin.umnify.*;
 import com.example.darwin.umnify.async.WebServiceAsync;
 import com.example.darwin.umnify.authentication.AuthenticationAddress;
 import com.example.darwin.umnify.database.UMnifyContract;
@@ -53,16 +49,19 @@ public class NewsFeedManagerGuest<E extends NewsViewHolderGuest> extends FeedMan
     private RecyclerView recyclerView;
     private ArrayList<String> index;
     private ProcessPostFetchData processPostFetchData;
+    private int offset;
 
 
     public NewsFeedManagerGuest(Activity activity, SwipeRefreshLayout swipeRefreshLayout, RecyclerView recyclerView,
                                 Class<E> cls, int layoutId){
 
-        super(activity, swipeRefreshLayout);
+        super(activity, swipeRefreshLayout, 6);
+        super.setOnRemoveFromCache(new RemoveFromCache());
         this.cls = cls;
         this.recyclerView = recyclerView;
         this.layoutId = layoutId;
         this.index = new ArrayList<>();
+        offset = 0;
 
         databaseConnection = UMnifyDbHelper.getInstance(super.getActivity());
         databaseRead = databaseConnection.getReadableDatabase();
@@ -74,8 +73,6 @@ public class NewsFeedManagerGuest<E extends NewsViewHolderGuest> extends FeedMan
     @Override
     public void addFeedEntry(String jsonData) throws JSONException {
 
-        //fetch images first on the local cache
-
         JSONObject newsData = new JSONObject(jsonData);
         News news = NewsHelper.createNewsFromJSON(newsData, -1);
         NewsHelper.addNewsToLocalDb(news, super.getActivity());
@@ -85,6 +82,7 @@ public class NewsFeedManagerGuest<E extends NewsViewHolderGuest> extends FeedMan
 
         super.addToFeedList(key, news);
         index.add(key);
+        offset++;
         notifyItemInserted(position);
 
         if(news.getAuthorImageFile() != null && !news.getAuthorImageFile().equalsIgnoreCase("null")){
@@ -145,6 +143,7 @@ public class NewsFeedManagerGuest<E extends NewsViewHolderGuest> extends FeedMan
 
         super.addToFeedList(key, news);
         index.add(key);
+        offset++;
         notifyItemInserted(position);
 
     }
@@ -229,7 +228,8 @@ public class NewsFeedManagerGuest<E extends NewsViewHolderGuest> extends FeedMan
 
             if(hasConnection){
 
-                params.put("offset", super.getFeedListSize() + "");
+                params.put("offset", offset + "");
+                //params.put("offset", super.getFeedListSize() + "");
                 params.put("limit", "3");
                 params.put("id", "-1");
 
@@ -249,11 +249,12 @@ public class NewsFeedManagerGuest<E extends NewsViewHolderGuest> extends FeedMan
 
                 super.clearFeedList();
                 index.clear();
+                offset = 0;
                 notifyDataSetChanged();
                 super.setFetchingFeedEntry(true);
                 hasConnection = true;
 
-                params.put("offset", super.getFeedListSize() + "");
+                params.put("offset", offset + "");
                 params.put("limit", "5");
                 params.put("id", "-1");
 
@@ -305,6 +306,7 @@ public class NewsFeedManagerGuest<E extends NewsViewHolderGuest> extends FeedMan
             if(!(position < index.size())) return;
 
             String id = index.get(position);
+            Log.e("id", id + "");
             final News news = super.getEntryFromFeedList(id);
 
             if(news != null){
@@ -356,7 +358,7 @@ public class NewsFeedManagerGuest<E extends NewsViewHolderGuest> extends FeedMan
                 if(jsonResponse == null){
 
                     setHasConnection(false);
-                    addFeedEntries(jsonResponse);
+                    addFeedEntries(null);
                     setFetchingFeedEntry(false);
                     getSwipeRefreshLayout().setRefreshing(false);
                 }else{
@@ -434,6 +436,17 @@ public class NewsFeedManagerGuest<E extends NewsViewHolderGuest> extends FeedMan
             }
 
             notifyItemChanged(position);
+        }
+    }
+
+    private class RemoveFromCache implements LeastRecentlyUsedCache.OnRemoveFromCache{
+
+        @Override
+        public void onRemove(Object key) {
+            String k = (String) key;
+            int position = getIndex().indexOf(k);
+            getIndex().remove(position);
+            notifyItemRemoved(position);
         }
     }
 

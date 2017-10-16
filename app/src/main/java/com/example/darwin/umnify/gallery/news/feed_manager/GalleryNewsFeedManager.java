@@ -9,6 +9,7 @@ import android.view.View;
 import android.view.ViewGroup;
 
 import com.example.darwin.umnify.DataActionWrapper;
+import com.example.darwin.umnify.LeastRecentlyUsedCache;
 import com.example.darwin.umnify.PostResultAction;
 import com.example.darwin.umnify.async.WebServiceAsync;
 import com.example.darwin.umnify.authentication.AuthenticationAddress;
@@ -28,6 +29,7 @@ import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 
+import java.util.ArrayList;
 import java.util.HashMap;
 
 /**
@@ -37,11 +39,15 @@ import java.util.HashMap;
 public class GalleryNewsFeedManager<E extends GalleryViewHolder> extends FeedManager<E, ImageWrapper> {
 
     private Class<E> cls;
+    private ArrayList<String> index;
+    private int offset;
 
     public GalleryNewsFeedManager(Activity activity, SwipeRefreshLayout swipeRefreshLayout,
                                   Class<E> cls){
-
-        super(activity, swipeRefreshLayout);
+        super(activity, swipeRefreshLayout, 100);
+        super.setOnRemoveFromCache(new RemoveFromCache());
+        offset = 0;
+        this.index = new ArrayList<>();
         this.cls = cls;
 
 
@@ -61,8 +67,11 @@ public class GalleryNewsFeedManager<E extends GalleryViewHolder> extends FeedMan
             async = new WebServiceAsync();
             fetchNewsImageDataActionWrapper = new FetchNewsImageDataActionWrapper(wrapper, super.getActivity(),
                     this);
-            super.addToFeedList(super.getFeedListSize() + "", wrapper);
-            notifyItemInserted(wrapper.getIndex());
+            int position = index.size();
+            String key = position + "";
+            super.addToFeedList(key, wrapper);
+            index.add(key);
+            notifyItemInserted(position);
             async.execute(fetchNewsImageDataActionWrapper);
         }
 
@@ -94,7 +103,7 @@ public class GalleryNewsFeedManager<E extends GalleryViewHolder> extends FeedMan
             super.setFetchingFeedEntry(true);
 
             HashMap<String, String> textDataOutput = new HashMap<>();
-            textDataOutput.put("offset", 0 +"");
+            textDataOutput.put("offset", offset +"");
             textDataOutput.put("limit", 30 + "");
             WebServiceAsync async = new WebServiceAsync();
             WebServiceAction action =
@@ -106,10 +115,11 @@ public class GalleryNewsFeedManager<E extends GalleryViewHolder> extends FeedMan
 
             super.clearFeedList();
             notifyDataSetChanged();
+            offset = 0;
             super.setFetchingFeedEntry(true);
 
             HashMap<String, String> textDataOutput = new HashMap<>();
-            textDataOutput.put("offset", 0 +"");
+            textDataOutput.put("offset", offset +"");
             textDataOutput.put("limit", 30 + "");
 
             WebServiceAsync async = new WebServiceAsync();
@@ -154,8 +164,10 @@ public class GalleryNewsFeedManager<E extends GalleryViewHolder> extends FeedMan
 
     @Override
     public void onBindViewHolder(final E holder, int position) {
+        if(!(position < index.size())) return;
 
-        final ImageWrapper wrapper = super.getEntryFromFeedList(position + "");
+        String key = index.get(position);
+        final ImageWrapper wrapper = super.getEntryFromFeedList(key);
 
         if(wrapper != null){
 
@@ -198,5 +210,14 @@ public class GalleryNewsFeedManager<E extends GalleryViewHolder> extends FeedMan
         }
     }
 
+    private class RemoveFromCache implements LeastRecentlyUsedCache.OnRemoveFromCache{
 
+        @Override
+        public void onRemove(Object key) {
+            String k = (String) key;
+            int position = index.indexOf(k);
+            index.remove(position);
+            notifyItemRemoved(position);
+        }
+    }
 }

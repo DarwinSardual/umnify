@@ -10,6 +10,7 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 
+import com.example.darwin.umnify.LeastRecentlyUsedCache;
 import com.example.darwin.umnify.R;
 import com.example.darwin.umnify.async.WebServiceAsync;
 import com.example.darwin.umnify.feed.FeedManager;
@@ -42,14 +43,17 @@ public class NotificationFeedManager<E extends NotificationViewHolder> extends F
     private Bundle userData;
     private boolean hasConnection = true;
     private ArrayList<String> index;
+    private int offset = 0;
 
     public NotificationFeedManager(Activity activity, SwipeRefreshLayout swipeRefreshLayout,
                                    Class<E> cls, Bundle userData, int layoutId) {
-        super(activity, swipeRefreshLayout);
+        super(activity, swipeRefreshLayout, 50);
+        super.setOnRemoveFromCache(new RemoveFromCache());
         this.cls = cls;
         this.layoutId = layoutId;
         this.userData = userData;
         this.index = new ArrayList<>();
+        offset = 0;
 
         updateFeed(-1);
     }
@@ -158,7 +162,7 @@ public class NotificationFeedManager<E extends NotificationViewHolder> extends F
 
             if(hasConnection){
 
-                textDataOutput.put("offset", super.getFeedListSize() + "");
+                textDataOutput.put("offset", offset + "");
                 textDataOutput.put("limit", "3");
 
                 WebServiceAsync asyncFetchNotification = new WebServiceAsync();
@@ -178,7 +182,7 @@ public class NotificationFeedManager<E extends NotificationViewHolder> extends F
 
             super.setFetchingFeedEntry(true);
 
-            textDataOutput.put("offset", super.getFeedListSize() + "");
+            textDataOutput.put("offset", offset + "");
             textDataOutput.put("limit", "6");
 
             WebServiceAsync asyncFetchNotification = new WebServiceAsync();
@@ -219,6 +223,7 @@ public class NotificationFeedManager<E extends NotificationViewHolder> extends F
 
         super.addToFeedList(key, notification);
         index.add(key);
+        offset++;
         notifyItemInserted(position);
 
         WebServiceAsync async = new WebServiceAsync();
@@ -281,6 +286,17 @@ public class NotificationFeedManager<E extends NotificationViewHolder> extends F
             }
 
             notifyItemChanged(position);
+        }
+    }
+
+    private class RemoveFromCache implements LeastRecentlyUsedCache.OnRemoveFromCache{
+
+        @Override
+        public void onRemove(Object key) {
+            String k = (String) key;
+            int position = getIndex().indexOf(k);
+            getIndex().remove(position);
+            notifyItemRemoved(position);
         }
     }
 

@@ -17,6 +17,7 @@ import android.view.ViewGroup;
 import com.example.darwin.umnify.DataActionWrapper;
 import com.example.darwin.umnify.DataImageActionWrapper;
 import com.example.darwin.umnify.DateHelper;
+import com.example.darwin.umnify.LeastRecentlyUsedCache;
 import com.example.darwin.umnify.async.WebServiceAsync;
 import com.example.darwin.umnify.authentication.AuthenticationAddress;
 import com.example.darwin.umnify.feed.FeedManager;
@@ -48,13 +49,13 @@ public class PendingFeedManagerSuperAdmin<E extends PendingViewHolderSuperAdmin>
     private int layoutId;
     private Bundle userData;
     private ArrayList<String> index;
-    private boolean isFeedPopulated = false;
+    private int offset = 0;
 
     public PendingFeedManagerSuperAdmin(Activity activity, SwipeRefreshLayout swipeRefreshLayout, Bundle userData,
                                 Class<E> cls, int layoutId){
 
-        super(activity, swipeRefreshLayout);
-
+        super(activity, swipeRefreshLayout, 50);
+        super.setOnRemoveFromCache(new RemoveFromCache());
         this.cls = cls;
         this.index = new ArrayList<>();
         this.layoutId = layoutId;
@@ -167,7 +168,7 @@ public class PendingFeedManagerSuperAdmin<E extends PendingViewHolderSuperAdmin>
             super.setFetchingFeedEntry(true);
 
             HashMap<String, String> textDataOutput = new HashMap<>();
-            textDataOutput.put("offset", super.getFeedListSize()+ "");
+            textDataOutput.put("offset", offset + "");
             textDataOutput.put("limit", "3");
 
             WebServiceAction action =
@@ -181,13 +182,14 @@ public class PendingFeedManagerSuperAdmin<E extends PendingViewHolderSuperAdmin>
             if(super.getFeedListSize() > 0){
                 super.clearFeedList();
                 index.clear();
+                offset = 0;
                 notifyDataSetChanged();
                 super.setFetchingFeedEntry(true);
 
             }
 
             HashMap<String, String> textDataOutput = new HashMap<>();
-            textDataOutput.put("offset", super.getFeedListSize()+ "");
+            textDataOutput.put("offset", offset + "");
             textDataOutput.put("limit", "7");
 
             WebServiceAction action =
@@ -490,6 +492,17 @@ public class PendingFeedManagerSuperAdmin<E extends PendingViewHolderSuperAdmin>
             }else{
 
             }
+        }
+    }
+
+    private class RemoveFromCache implements LeastRecentlyUsedCache.OnRemoveFromCache{
+
+        @Override
+        public void onRemove(Object key) {
+            String k = (String) key;
+            int position = index.indexOf(k);
+            index.remove(position);
+            notifyItemRemoved(position);
         }
     }
 }

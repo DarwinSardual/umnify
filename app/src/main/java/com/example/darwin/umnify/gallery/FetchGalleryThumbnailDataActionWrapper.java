@@ -24,6 +24,7 @@ public class FetchGalleryThumbnailDataActionWrapper implements WebServiceAction 
     private String urlLocation;
 
     private Bitmap image;
+    private Bitmap anotherImage;
 
     public FetchGalleryThumbnailDataActionWrapper(ImageView imageView, String urlLocation, Activity activity){
 
