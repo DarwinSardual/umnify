@@ -55,7 +55,7 @@ public class NewsFeedManagerGuest<E extends NewsViewHolderGuest> extends FeedMan
     public NewsFeedManagerGuest(Activity activity, SwipeRefreshLayout swipeRefreshLayout, RecyclerView recyclerView,
                                 Class<E> cls, int layoutId){
 
-        super(activity, swipeRefreshLayout, 6);
+        super(activity, swipeRefreshLayout, 50);
         super.setOnRemoveFromCache(new RemoveFromCache());
         this.cls = cls;
         this.recyclerView = recyclerView;

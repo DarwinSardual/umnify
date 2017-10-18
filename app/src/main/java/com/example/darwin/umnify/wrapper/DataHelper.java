@@ -61,7 +61,7 @@ public class DataHelper {
 
     }
 
-    public static Bitmap resizeImageAspectRatio(Bitmap image, int maxWidthHeight, int orientation){
+    /*public static Bitmap resizeImageAspectRatio(Bitmap image, int maxWidthHeight, int orientation){
 
         float originalWidth = image.getWidth();
         float originalHeight = image.getHeight();
@@ -76,6 +76,57 @@ public class DataHelper {
             float ratio = originalWidth / originalHeight;
             int newWidthHeight = (int) (ratio * maxWidthHeight);
             scaledImage = Bitmap.createScaledBitmap(image, newWidthHeight, maxWidthHeight, true);
+        }
+
+        return scaledImage;
+    }*/
+
+    public static Bitmap resizeImageAspectRatio(Bitmap image, int maxWidth, int maxHeight){
+
+        float originalWidth = image.getWidth();
+        float originalHeight = image.getHeight();
+        float newWidth;
+        float newHeight;
+        float ratio;
+
+        Bitmap scaledImage = null;
+
+        if(originalWidth < maxWidth && originalHeight < maxHeight){
+
+            scaledImage = image;
+        }else{
+            if(originalWidth > originalHeight){
+                ratio = originalHeight / originalWidth;
+                newWidth = (int) maxWidth;
+                newHeight = (int) (ratio * maxWidth);
+
+                if(newHeight > maxHeight){
+                    ratio = newWidth / newHeight;
+                    newHeight = (int) maxHeight;
+                    newWidth = (int) (ratio * maxHeight);
+                }
+
+                scaledImage = Bitmap.createScaledBitmap(image, (int )newWidth, (int)newHeight, true);
+
+            }else if(originalHeight > originalWidth){
+                ratio = originalWidth / originalHeight;
+                newHeight = (int) maxHeight;
+                newWidth = (int) (ratio * maxHeight);
+
+                if(newWidth > maxWidth){
+                    ratio = newHeight / newWidth;
+                    newWidth = (int) maxWidth;
+                    newHeight = (int) (ratio * maxWidth);
+                }
+
+                scaledImage = Bitmap.createScaledBitmap(image, (int)newWidth, (int)newHeight, true);
+            }else{
+                ratio = originalWidth / originalHeight;
+                newHeight = (int) maxHeight;
+                newWidth = (int) (ratio * maxWidth);
+
+                scaledImage = Bitmap.createScaledBitmap(image, (int)newWidth, (int)newHeight, true);
+            }
         }
 
         return scaledImage;

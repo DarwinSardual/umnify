@@ -294,14 +294,16 @@ public class PendingFeedManagerSuperAdmin<E extends PendingViewHolderSuperAdmin>
             String imageFile = returnCursor.getString(nameIndex);
             Bitmap image = null;
             byte[] byteArray = null;
+            Bitmap rescaledImage = null;
 
             try{
                 image = MediaStore.Images.Media.getBitmap(super.getActivity().getContentResolver(), uri);
+                rescaledImage = DataHelper.resizeImageAspectRatio(image, 1920, 1080);
             }catch (IOException e){
                 e.printStackTrace();
             }
 
-            byteArray = DataHelper.bitmapToByteArray(image, mimeType);
+            byteArray = DataHelper.bitmapToByteArray(rescaledImage, mimeType);
 
             textData.put("id", data.getIntExtra("NEWS_ID", -1) +"");
             textData.put("content", data.getStringExtra("EDIT_NEWS_CONTENT"));
@@ -355,11 +357,12 @@ public class PendingFeedManagerSuperAdmin<E extends PendingViewHolderSuperAdmin>
 
             try{
                 image = MediaStore.Images.Media.getBitmap(super.getActivity().getContentResolver(), uri);
+                rescaledImage = DataHelper.resizeImageAspectRatio(image, 1920, 1080);
             }catch (IOException e){
                 e.printStackTrace();
             }
 
-            byteArray = DataHelper.bitmapToByteArray(image, mimeType);
+            byteArray = DataHelper.bitmapToByteArray(rescaledImage, mimeType);
 
 
             textData.put("id", data.getIntExtra("BLOG_ID", -1) +"");

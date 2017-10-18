@@ -108,15 +108,16 @@ public class NewsFeedManagerAdmin<E extends NewsViewHolderAdmin> extends NewsFee
             String imageFile = returnCursor.getString(nameIndex);
             Bitmap image = null;
             byte[] byteArray = null;
-            int orientation = 0;
             Bitmap rescaledImage = null;
             try{
                 image = MediaStore.Images.Media.getBitmap(super.getActivity().getContentResolver(), uri);
+                rescaledImage = DataHelper.resizeImageAspectRatio(image, 1920, 1080);
+                byteArray = DataHelper.bitmapToByteArray(rescaledImage, mimeType);
             }catch (IOException e){
                 e.printStackTrace();
             }
 
-            byteArray = DataHelper.bitmapToByteArray(image, mimeType);
+            //byteArray = DataHelper.bitmapToByteArray(image, mimeType);
             textData.put("content", data.getStringExtra("ADD_NEWS_CONTENT"));
             textData.put("author", userData.getInt("USER_ID") +"");
             textData.put("image_file", imageFile);
@@ -163,15 +164,16 @@ public class NewsFeedManagerAdmin<E extends NewsViewHolderAdmin> extends NewsFee
             String imageFile = returnCursor.getString(nameIndex);
             Bitmap image = null;
             byte[] byteArray = null;
+            Bitmap rescaledImage = null;
 
             try{
                 image = MediaStore.Images.Media.getBitmap(super.getActivity().getContentResolver(), uri);
+                rescaledImage = DataHelper.resizeImageAspectRatio(image, 1920, 1080);
             }catch (IOException e){
                 e.printStackTrace();
             }
 
-            byteArray = DataHelper.bitmapToByteArray(image, mimeType);
-
+            byteArray = DataHelper.bitmapToByteArray(rescaledImage, mimeType);
             textData.put("id", data.getIntExtra("NEWS_ID", -1) +"");
             textData.put("content", data.getStringExtra("EDIT_NEWS_CONTENT"));
             textData.put("remove", data.getIntExtra("EDIT_NEWS_IMAGE_REMOVE", 0) + "");

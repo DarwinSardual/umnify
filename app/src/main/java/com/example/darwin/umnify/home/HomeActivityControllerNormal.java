@@ -81,7 +81,7 @@ public class HomeActivityControllerNormal extends HomeActivityControllerGuest {
 
         notificationsFeedFragment = new NotificationsFeedFragment();
         notificationsFeedFragment.setArguments(userData);
-        super.getAdapter().addFragment(notificationsFeedFragment, "Update");
+        super.getAdapter().addFragment(notificationsFeedFragment, "Notifications");
     }
 
     @Override

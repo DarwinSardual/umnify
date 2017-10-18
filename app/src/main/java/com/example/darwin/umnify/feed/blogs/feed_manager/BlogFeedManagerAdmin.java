@@ -117,11 +117,12 @@ public class BlogFeedManagerAdmin<E extends BlogTileViewHolderGuest> extends Blo
 
             try{
                 image = MediaStore.Images.Media.getBitmap(super.getActivity().getContentResolver(), uri);
+                rescaledImage = DataHelper.resizeImageAspectRatio(image, 1920, 1080);
             }catch (IOException e){
                 e.printStackTrace();
             }
 
-            byteArray = DataHelper.bitmapToByteArray(image, mimeType);
+            byteArray = DataHelper.bitmapToByteArray(rescaledImage, mimeType);
 
             textData.put("heading", data.getStringExtra("ADD_BLOG_HEADING"));
             textData.put("content", data.getStringExtra("ADD_BLOG_CONTENT"));
@@ -191,11 +192,12 @@ public class BlogFeedManagerAdmin<E extends BlogTileViewHolderGuest> extends Blo
 
             try{
                 image = MediaStore.Images.Media.getBitmap(super.getActivity().getContentResolver(), uri);
+                rescaledImage = DataHelper.resizeImageAspectRatio(image, 1920, 1080);
             }catch (IOException e){
                 e.printStackTrace();
             }
 
-            byteArray = DataHelper.bitmapToByteArray(image, mimeType);
+            byteArray = DataHelper.bitmapToByteArray(rescaledImage, mimeType);
 
 
             textData.put("id", data.getIntExtra("BLOG_ID", -1) +"");

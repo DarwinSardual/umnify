@@ -17,7 +17,10 @@ import java.security.cert.Certificate;
 import java.security.cert.CertificateException;
 import java.security.cert.CertificateFactory;
 
+import javax.net.ssl.HostnameVerifier;
+import javax.net.ssl.HttpsURLConnection;
 import javax.net.ssl.SSLContext;
+import javax.net.ssl.SSLSession;
 import javax.net.ssl.TrustManagerFactory;
 
 public class WebServiceConnection{
@@ -28,7 +31,8 @@ public class WebServiceConnection{
     private final String REQUEST_METHOD = "POST";
 
     private URL url;
-    private HttpURLConnection urlConnection;
+    private HttpsURLConnection urlConnection;
+    //private HttpURLConnection urlConnection;
     private Uri.Builder builder;
 
     private String crlf = "\r\n";
@@ -56,7 +60,19 @@ public class WebServiceConnection{
         try{
 
             url = new URL(urlAddress);
-            urlConnection = (HttpURLConnection) url.openConnection();
+
+            urlConnection = (HttpsURLConnection) url.openConnection();
+            trustCertificate();
+            urlConnection.setSSLSocketFactory(context.getSocketFactory());
+            urlConnection.setHostnameVerifier(new HostnameVerifier()
+            {
+                public boolean verify(String hostname, SSLSession session)
+                {
+                    return true;
+                }
+            });
+
+
             urlConnection.setRequestProperty("Connection", "Keep-Alive");
             urlConnection.setRequestProperty("Cache-Control", "no-cache");
             urlConnection.setRequestProperty("Content-Type", "multipart/form-data;boundary=" + boundary);
@@ -67,6 +83,8 @@ public class WebServiceConnection{
             urlConnection.setDoInput(doInput);
             urlConnection.setDoOutput(doOuput);
             urlConnection.setUseCaches(useCaches);
+
+
 
             outputStream = urlConnection.getOutputStream();
             dataOutputStream = null;
@@ -84,6 +102,7 @@ public class WebServiceConnection{
             CertificateFactory cf = CertificateFactory.getInstance("X.509");
             AssetManager am = activity.getAssets();
             InputStream caInput = am.open("ssl.crt");
+
 
             Certificate ca;
             try{
@@ -134,6 +153,8 @@ public class WebServiceConnection{
             }
         });*/
 
+
+
     }
 
     protected final void setRequest(String query){
@@ -159,7 +180,6 @@ public class WebServiceConnection{
         try{
 
             if(outputStream == null){
-                Log.e("addFileUpload", "output stream is null");
                 return;
             }
 
@@ -185,7 +205,6 @@ public class WebServiceConnection{
         try{
 
             if(outputStream == null){
-                Log.e("addTextUpload", "output stream is null");
                 return;
             }
 
@@ -217,7 +236,6 @@ public class WebServiceConnection{
     public void flushOutputStream(){
 
         if(dataOutputStream == null){
-            Log.e("flushOuputStream", "output stream is null");
             return;
         }
 
