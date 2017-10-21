@@ -1,5 +1,6 @@
 package com.example.darwin.umnify.feed.blogs;
 
+import android.graphics.Bitmap;
 import android.graphics.drawable.Drawable;
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -11,53 +12,43 @@ public class Blog {
     private String content;
     private String publishedDate;
     private int signature;
-    private Drawable image;
+    private Bitmap image;
+    private String imageFile;
 
-    private int authorId;
+    private int author;
     private String authorFirstname;
     private String authorLastname;
     private String authorImage;
 
+    private int index;
 
-    public Blog(int id, String heading, String content, int authorId, String publishedDate, Drawable image, int signaure){
+
+    public Blog(int id, String heading, String content, int author, String publishedDate, String imageFile, Bitmap image, int signature,
+                int index, String authorFirstname, String authorLastname, String authorImage){
 
         this.id = id;
         this.content = content;
         this.heading = heading;
-        this.authorId = authorId;
+        this.author = author;
         this.publishedDate = publishedDate;
         this.image = image;
         this.signature = signature;
+        this.imageFile = imageFile;
+
+        this.authorFirstname = authorFirstname;
+        this.authorLastname = authorLastname;
+        this.authorImage = authorImage;
+        this.index = index;
 
     }
 
-    public Blog(JSONObject data)throws JSONException{
-
-        id = data.getInt("id");
-        heading = data.getString("heading");
-        content = data.getString("content");
-        authorId = data.getInt("author");
-        publishedDate = data.getString("published_date");
-        this.image = null;
-        this.signature = data.getInt("signature");
-
+    public void setImage(Bitmap image) {
+        this.image = image;
     }
 
-    public Blog(BlogTile blogTile, JSONObject restOfData) throws JSONException{
 
-        this.id = blogTile.getId();
-        this.heading = blogTile.getHeading();
-        this.image = blogTile.getImage();
-
-        content = restOfData.getString("content");
-        authorId = restOfData.getInt("author");
-        publishedDate = restOfData.getString("published_date");
-        this.signature = restOfData.getInt("signature");
-
-        authorFirstname = restOfData.getString("firstname");
-        authorLastname = restOfData.getString("lastname");
-        authorImage = restOfData.getString("author_image");
-
+    public String getImageFile() {
+        return imageFile;
     }
 
     public int getId(){ return id;}
@@ -70,11 +61,11 @@ public class Blog {
         return heading;
     }
 
-    public int getAuthorId(){return authorId;}
+    public int getAuthor(){return author;}
 
     public String getPublishedDate(){ return publishedDate; }
 
-    public Drawable getImage(){
+    public Bitmap getImage(){
         return image;
     }
 
@@ -90,5 +81,9 @@ public class Blog {
 
     public String getAuthorImage() {
         return authorImage;
+    }
+
+    public int getIndex() {
+        return index;
     }
 }

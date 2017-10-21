@@ -1,0 +1,19 @@
+/*try{
+                image = MediaStore.Images.Media.getBitmap(super.getActivity().getContentResolver(), uri);
+
+                if(image.getWidth() < 896 && image.getHeight() < 504){
+                    rescaledImage = image;
+                }else{
+
+                    if(image.getWidth() > image.getHeight()){
+                        orientation = 0;
+                        rescaledImage = DataHelper.resizeImageAspectRatio(image, 896, orientation);
+                    }else{
+                        orientation = 1;
+                        rescaledImage = DataHelper.resizeImageAspectRatio(image, 504, orientation);
+                    }
+                }
+                byteArray = DataHelper.bitmapToByteArray(image, mimeType);
+            }catch (IOException e){
+                e.printStackTrace();
+            }*/

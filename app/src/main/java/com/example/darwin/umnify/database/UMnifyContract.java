@@ -20,7 +20,8 @@ public final class UMnifyContract {
             GENDER("gender"),
             ADDRESS("address"),
             CONTACT("contact"),
-            IMAGE("image");
+            IMAGE("image"),
+            EMAIL("email");
 
             private String str;
 
@@ -39,6 +40,62 @@ public final class UMnifyContract {
             private String str;
 
             User(String str){ this.str = str; }
+
+            public String toString(){ return str;}
+        }
+
+        public enum AcademePerson{
+
+            TABLE_NAME("AcademePerson"),
+            ID("id"),
+            COURSE("course"),
+            YEAR("year"),
+            TYPE("type");
+
+            private String str;
+
+            AcademePerson(String str){ this.str = str; }
+
+            public String toString(){ return str;}
+        }
+
+        public enum News{
+
+            TABLE_NAME("News"),
+            ID("id"),
+            CONTENT("course"),
+            IMAGE("year"),
+            AUTHOR("type"),
+            PUBLISHED_DATE("published_date"),
+            SIGNATURE("signature"),
+            AUTHOR_FIRSTNAME("author_firstname"),
+            AUTHOR_LASTNAME("author_lastname"),
+            AUTHOR_IMAGE("author_image");
+
+            private String str;
+
+            News(String str){ this.str = str; }
+
+            public String toString(){ return str;}
+        }
+
+        public enum Blog{
+
+            TABLE_NAME("Blog"),
+            ID("id"),
+            HEADING("course"),
+            CONTENT("content"),
+            IMAGE("year"),
+            AUTHOR("type"),
+            PUBLISHED_DATE("published_date"),
+            SIGNATURE("signature"),
+            AUTHOR_FIRSTNAME("author_firstname"),
+            AUTHOR_LASTNAME("author_lastname"),
+            AUTHOR_IMAGE("author_image");
+
+            private String str;
+
+            Blog(String str){ this.str = str; }
 
             public String toString(){ return str;}
         }

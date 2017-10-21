@@ -1,67 +1,118 @@
 package com.example.darwin.umnify.start;
 
-import android.content.ContentValues;
+import android.app.Activity;
+import android.content.Context;
 import android.content.Intent;
 import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
-import android.net.Uri;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.util.Log;
-import android.widget.Toast;
+import android.view.View;
+import android.widget.Button;
+import android.widget.TextView;
+
+import com.example.darwin.umnify.DataActionWrapper;
 import com.example.darwin.umnify.R;
-import com.example.darwin.umnify.async.RemoteDbConn;
+import com.example.darwin.umnify.about.qoute_of_the_day.QouteOfTheDay;
+import com.example.darwin.umnify.async.WebServiceAsync;
 import com.example.darwin.umnify.authentication.AuthenticationAddress;
+import com.example.darwin.umnify.authentication.AuthenticationCodes;
 import com.example.darwin.umnify.authentication.AuthenticationKeys;
+import com.example.darwin.umnify.connection.WebServiceConnection;
 import com.example.darwin.umnify.database.UMnifyContract;
 import com.example.darwin.umnify.database.UMnifyDbHelper;
+import com.example.darwin.umnify.feed.PostAsyncAction;
+import com.example.darwin.umnify.home.HomeActivity;
 import com.example.darwin.umnify.login.LoginActivity;
-import com.example.darwin.umnify.scratch.SampleConnActivity;
+import com.example.darwin.umnify.wrapper.DataHelper;
+import com.example.darwin.umnify.wrapper.WebServiceAction;
 
-import java.io.IOException;
+import org.json.JSONArray;
+import org.json.JSONException;
+import org.json.JSONObject;
+
+import java.io.File;
+import java.io.InputStream;
+import java.util.HashMap;
 
 public class StartActivity extends AppCompatActivity {
 
     private UMnifyDbHelper databaseConnection;
-    private SQLiteDatabase databaseConnectionRead;
-    private SQLiteDatabase databaseConnectionWrite;
+    SQLiteDatabase databaseConnectionRead;
+
+    private Button proceedButton;
+    private QouteOfTheDay qouteOfTheDay;
+    private TextView contentView;
+    private TextView qouteTitleView;
+    private Bundle extraData = null;
+
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_start);
 
+        //initialize needed directory
+        File directory = this.getDir("umnify", Context.MODE_PRIVATE);
+        if(!directory.exists())
+            directory.mkdirs();
+
+        File avatarImageDirectory = new File(directory.getAbsolutePath() + "/images/gallery/avatar");
+        if(!avatarImageDirectory.exists())
+            avatarImageDirectory.mkdirs();
+
+        File galleryNewsImageDirectory = new File(directory.getAbsolutePath() + "/images/gallery/feed/news");
+        if(!galleryNewsImageDirectory.exists())
+            galleryNewsImageDirectory.mkdirs();
+
+        File galleryBlogImageDirectory = new File(directory.getAbsolutePath() + "/images/gallery/feed/blog");
+        if(!galleryBlogImageDirectory.exists())
+            galleryBlogImageDirectory.mkdirs();
+
+        File galleryAnnouncementImageDirectory = new File(directory.getAbsolutePath() + "/images/gallery/feed/announcement");
+        if(!galleryAnnouncementImageDirectory.exists())
+            galleryAnnouncementImageDirectory.mkdirs();
+
         databaseConnection = UMnifyDbHelper.getInstance(this);
-        //databaseConnectionRead = databaseConnection.getReadableDatabase();
-        //databaseConnectionWrite = databaseConnection.getWritableDatabase();
+        databaseConnectionRead = databaseConnection.getReadableDatabase();
 
-        Intent loginIntent = new Intent(this, LoginActivity.class);
-        startActivity(loginIntent);
+        extraData = getIntent().getExtras();
 
-        //SQLiteDatabase dbWrite = databaseConnection.getWritableDatabase();
+        //if(extraData != null){
+            //Log.e("not null", "sadasdsadsadsadasdsaadsd");
+            //handleUserCheck();
+        //}else{
 
+            proceedButton = (Button) findViewById(R.id.proceed);
+            qouteTitleView = (TextView) findViewById(R.id.qoute_text);
+            contentView = (TextView) findViewById(R.id.content);
 
-        /*ContentValues values = new ContentValues();
-        values.put(UMnifyContract.UMnifyColumns.User.ID.toString(), 383221);
-        values.put(UMnifyContract.UMnifyColumns.User.TYPE.toString(), 1);
-        values.put(UMnifyContract.UMnifyColumns.User.PASSWORD.toString(), "darwinsardual");
+            proceedButton.setVisibility(View.VISIBLE);
+            qouteTitleView.setVisibility(View.VISIBLE);
+            contentView.setVisibility(View.VISIBLE);
 
-        long id = dbWrite.insert(UMnifyContract.UMnifyColumns.User.TABLE_NAME.toString(), null, values);
-        Log.e("ID", id +"");*/
+            WebServiceAsync async = new WebServiceAsync();
+            HashMap<String, String> textDataOutput = new HashMap<>();
+            textDataOutput.put("limit", "1");
+            textDataOutput.put("order", "desc");
 
-        //Log.e("Calling", "User checker");
-        //startService(new Intent(this, UserChecker.class));
-        //startActivity(new Intent(this, SampleConnActivity.class));
+            DataActionWrapper fetchQoute = new DataActionWrapper(textDataOutput, this, AuthenticationAddress.FETCH_QOUTEOFTHEDAY, new ProcessPostFetchQoute());
+            async.execute(fetchQoute);
 
-        //finish();
-
-
-
+            proceedButton.setOnClickListener(new View.OnClickListener() {
+                @Override
+                public void onClick(View view) {
+                    Button button = (Button) view;
+                    button.setText("Checking for user...");
+                    button.setEnabled(false);
+                    handleUserCheck();
+                }
+            });
+        //}
     }
 
     private void handleUserCheck(){
-
-        CheckUserAsync checkUserAsync;
 
         String[] projection = {
 
@@ -72,63 +123,161 @@ public class StartActivity extends AppCompatActivity {
 
         Cursor cursor = databaseConnectionRead.query(
                 UMnifyContract.UMnifyColumns.User.TABLE_NAME.toString(),
-                projection,
-                null,
-                null,
-                null,
-                null,
-                null);
+                projection, null, null, null, null, null);
 
         if(cursor.getCount() == 1){
 
-            //check if the stored credentials is valid
-            String urlAddress = AuthenticationAddress.CHECK_USER;
-            checkUserAsync = new CheckUserAsync(urlAddress);
-            //checkUserAsync.execute()
+            int id = 0;
+            int type = 0;
+            String password = null;
+
+            while(cursor.moveToNext()){
+                id = cursor.getInt(cursor.getColumnIndexOrThrow(UMnifyContract.UMnifyColumns.User.ID.toString()));
+                type = cursor.getInt(cursor.getColumnIndexOrThrow(UMnifyContract.UMnifyColumns.User.TYPE.toString()));
+                password = cursor.getString(cursor.getColumnIndexOrThrow(UMnifyContract.UMnifyColumns.User.PASSWORD.toString()));
+            }
+
+            StartDataActionWrapper wrapper;
+            WebServiceConnection connection;
+            HashMap<String, String> textData = new HashMap<>();
+            textData.put(AuthenticationKeys.USER_ID_KEY, id + "");
+            textData.put("type", type + "");
+            textData.put(AuthenticationKeys.USER_PASSWORD_KEY, password);
+
+
+                wrapper = new StartDataActionWrapper(textData, this);
+                WebServiceAsync async = new WebServiceAsync();
+                async.execute(wrapper);
 
         }else{
 
             Intent loginIntent = new Intent(this, LoginActivity.class);
             startActivity(loginIntent);
+            finish();
         }
     }
 
-    private class CheckUserAsync extends RemoteDbConn <String, Void, String>{
+    private class StartDataActionWrapper implements WebServiceAction{
 
-        private String urlAddress;
+        private HashMap<String, String> textDataOutput;
+        private WebServiceConnection connection;
+        private Activity activity;
 
-        public CheckUserAsync(String urlAddress){
-            super(urlAddress);
-            this.urlAddress = urlAddress;
+        /* Dependent data */
+
+        private InputStream inputStream;
+        String response;
+
+        public StartDataActionWrapper(HashMap<String, String> textDataOutput, Activity activity){
+
+            this.textDataOutput = textDataOutput;
+            this.activity = activity;
         }
 
         @Override
-        protected String doInBackground(String... strings) {
+        public void processRequest() {
 
-            try{
 
-                setUpConnection();
-                Uri.Builder queryBuilder = super.getQueryBuilder();
-                queryBuilder.appendQueryParameter(AuthenticationKeys.USER_ID_KEY, strings[0])
-                        .appendQueryParameter(AuthenticationKeys.USER_PASSWORD_KEY, strings[1]);
+            connection = new WebServiceConnection(AuthenticationAddress.CHECK_USER,
+                    activity, true, true, true);
 
-                super.setRequest(queryBuilder.build().getEncodedQuery());
-                super.getUrlConnection().connect();
+                connection.addAuthentication();
+                DataHelper.writeTextUpload(textDataOutput, connection);
+                connection.flushOutputStream();
 
-                String response = super.getRequest();
+                inputStream = connection.getInputStream();
+                response = DataHelper.parseStringFromStream(inputStream);
 
-                return response;
+        }
 
-            }catch (IOException e){
+        @Override
+        public void processResult() {
 
+            Intent intent;
+            intent = new Intent(StartActivity.this, HomeActivity.class);
+
+            if(response == null){
+                //fetch from local db
+                String query = "select * from Person left join AcademePerson on Person.id = AcademePerson.id where Person.id = ?";
+                String[] selectionArgs = {textDataOutput.get(AuthenticationKeys.USER_ID_KEY)};
+                Cursor cursor = databaseConnectionRead.rawQuery(query, selectionArgs);
+
+                while(cursor.moveToNext()){
+
+                    intent.putExtra("USER_ID", Integer.parseInt(textDataOutput.get(AuthenticationKeys.USER_ID_KEY)));
+                    intent.putExtra("USER_TYPE", Integer.parseInt(textDataOutput.get("type")));
+                    intent.putExtra("USER_PASSWORD", textDataOutput.get(AuthenticationKeys.USER_PASSWORD_KEY));
+                    intent.putExtra("USER_FIRSTNAME", cursor.getString(cursor.getColumnIndexOrThrow(UMnifyContract.UMnifyColumns.Person.FIRSTNAME.toString())));
+                    intent.putExtra("USER_LASTNAME", cursor.getString(cursor.getColumnIndexOrThrow(UMnifyContract.UMnifyColumns.Person.LASTNAME.toString())));
+                    intent.putExtra("USER_IMAGE_FILE", cursor.getString(cursor.getColumnIndexOrThrow(UMnifyContract.UMnifyColumns.Person.IMAGE.toString())));
+                    intent.putExtra("USER_EMAIL", cursor.getString(cursor.getColumnIndexOrThrow(UMnifyContract.UMnifyColumns.Person.EMAIL.toString())));
+                    intent.putExtra("USER_COURSE", cursor.getString(cursor.getColumnIndexOrThrow(UMnifyContract.UMnifyColumns.AcademePerson.COURSE.toString())));
+
+                }
+
+                startActivity(intent);
+            }else{
+                try{
+
+
+                    JSONObject json = new JSONObject(response);
+                    int code = json.getInt("code");
+
+                    if(code == AuthenticationCodes.USER_AUTHENTICATED){
+
+                        JSONObject data = new JSONObject(json.getString("user"));
+                        intent.putExtra("USER_ID", Integer.parseInt(textDataOutput.get(AuthenticationKeys.USER_ID_KEY)));
+                        intent.putExtra("USER_TYPE", Integer.parseInt(textDataOutput.get("type")));
+                        intent.putExtra("USER_PASSWORD", textDataOutput.get(AuthenticationKeys.USER_PASSWORD_KEY));
+                        intent.putExtra("USER_FIRSTNAME", data.getString("firstname"));
+                        intent.putExtra("USER_LASTNAME", data.getString("lastname"));
+                        intent.putExtra("USER_IMAGE_FILE", data.getString("image"));
+                        intent.putExtra("USER_EMAIL", data.getString("email"));
+                        intent.putExtra("USER_COURSE", data.getInt("course"));
+                        startActivity(intent);
+
+                    }else if(code == AuthenticationCodes.INVALID_USER_ID_PASSWORD){
+
+                        SQLiteDatabase databaseConnectionWrite = StartActivity.this.databaseConnection.getWritableDatabase();
+                        databaseConnectionWrite.delete(UMnifyContract.UMnifyColumns.User.TABLE_NAME.toString(), null, null);
+
+                        String selection = UMnifyContract.UMnifyColumns.Person.ID.toString() + " = ?";
+                        String[] selectionArgs = {textDataOutput.get("id")};
+                        databaseConnectionWrite.delete(UMnifyContract.UMnifyColumns.Person.TABLE_NAME.toString(), selection, selectionArgs);
+
+                        intent = new Intent(StartActivity.this, LoginActivity.class);
+                        startActivity(intent);
+                    }
+                }catch (JSONException e){
+
+                }
             }
+            finish();
 
-            return null;
         }
+    }
+
+    private class ProcessPostFetchQoute implements PostAsyncAction {
 
         @Override
-        protected void onPostExecute(String s) {
-            super.onPostExecute(s);
+        public void processResult(String jsonResponse) {
+            if(jsonResponse != null){
+
+                try{
+                    JSONObject response = new JSONObject(jsonResponse);
+                    JSONArray dataList = new JSONArray(response.getString("data"));
+
+                    for(int counter = 0; counter < dataList.length(); counter++){
+                        JSONObject data = new JSONObject(dataList.getString(counter));
+                        qouteOfTheDay = new QouteOfTheDay(data.getInt("id"), data.getString("content"),data.getInt("author_id"),
+                                data.getString("published_date"), data.getString("author_firstname"), data.getString("author_lastname"));
+                    }
+
+                    contentView.setText("\"" + qouteOfTheDay.getContent() + "\"");
+                }catch (JSONException e){
+                    e.printStackTrace();
+                }
+            }
         }
     }
 }

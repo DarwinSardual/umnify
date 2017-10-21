@@ -65,9 +65,9 @@
                 <EditText
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
-                        android:hint="Username"
+                        android:hint="ID Number"
                         android:id="@+id/login_username_field"
-                        android:inputType="text"
+                        android:inputType="number"
                         android:drawableLeft="@drawable/login_user_icon"
                 />
             </android.support.design.widget.TextInputLayout>
@@ -88,25 +88,41 @@
             </android.support.design.widget.TextInputLayout>
 
 
-            <TextView
+            <!--<TextView
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:layout_gravity="right"
                     android:text="Forgot Password?">
 
 
-            </TextView>
+            </TextView>-->
 
             <Button
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
                     android:text="Login"
-                    android:layout_margin="22dp"
+                    android:layout_marginTop="22dp"
+                    android:layout_marginLeft="22dp"
+                    android:layout_marginRight="22dp"
                     android:elevation="2dp"
                     android:textSize="16sp"
                     style="@style/Widget.AppCompat.Button.Colored"
                     android:stateListAnimator="@null"
                     android:id="@+id/login"
+            />
+
+            <Button
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:text="Guest login"
+                    android:layout_marginLeft="22dp"
+                    android:layout_marginRight="22dp"
+                    android:layout_marginBottom="22dp"
+                    android:elevation="2dp"
+                    android:textSize="16sp"
+                    style="@style/Widget.AppCompat.Button.Colored"
+                    android:stateListAnimator="@null"
+                    android:id="@+id/guest"
             />
 
         </LinearLayout>
