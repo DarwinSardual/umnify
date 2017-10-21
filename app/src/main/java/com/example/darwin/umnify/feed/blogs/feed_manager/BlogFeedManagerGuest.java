@@ -30,6 +30,7 @@ import com.example.darwin.umnify.feed.blogs.data_action_wrapper.FetchBlogImageDa
 import com.example.darwin.umnify.feed.blogs.view_holder.BlogTileViewHolderGuest;
 import com.example.darwin.umnify.feed.news.feed_manager.NewsFeedManagerGuest;
 import com.example.darwin.umnify.gallery.GalleryHelper;
+import com.example.darwin.umnify.wrapper.DataHelper;
 import com.example.darwin.umnify.wrapper.WebServiceAction;
 
 import org.json.JSONArray;
@@ -86,7 +87,7 @@ public class BlogFeedManagerGuest<E extends BlogTileViewHolderGuest> extends Fee
 
         Bitmap image = GalleryHelper.loadImageFromInternal(blog.getImageFile(), super.getActivity(), "feed/blog");
         if(image != null){
-            Bitmap resizeImage = Bitmap.createScaledBitmap(image, 592, 333, true);
+            Bitmap resizeImage = DataHelper.resizeImageAspectRatio(image, 512, 288);
             blog.setImage(resizeImage);
             notifyItemChanged(position);
         }else{
@@ -354,7 +355,7 @@ public class BlogFeedManagerGuest<E extends BlogTileViewHolderGuest> extends Fee
 
             if(image != null){
                 GalleryHelper.saveImageToInternal(image, blog.getImageFile(), activity, "feed/blog");
-                Bitmap resizeImage = Bitmap.createScaledBitmap(image, 592, 333, true);
+                Bitmap resizeImage = DataHelper.resizeImageAspectRatio(image, 512, 288);
                 image = null;
                 blog.setImage(resizeImage);
                 BlogFeedManagerGuest.this.notifyItemChanged(position);

@@ -2,6 +2,7 @@ package com.example.darwin.umnify.gallery.blog.feed_manager;
 
 import android.app.Activity;
 import android.content.Intent;
+import android.graphics.Bitmap;
 import android.os.Bundle;
 import android.support.v4.widget.SwipeRefreshLayout;
 import android.view.LayoutInflater;
@@ -55,6 +56,7 @@ public class GalleryBlogFeedManager<E extends GalleryViewHolder> extends FeedMan
         ImageWrapper wrapper = GalleryHelper.createImageWrapperFromJSON(imageData, super.getFeedListSize());
 
         if(wrapper.getImageFile() != null){
+
             async = new WebServiceAsync();
             fetchBlogImageDataActionWrapper = new FetchBlogImageDataActionWrapper(wrapper, super.getActivity(),
                     this);

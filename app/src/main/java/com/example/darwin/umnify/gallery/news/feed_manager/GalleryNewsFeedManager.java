@@ -2,19 +2,24 @@ package com.example.darwin.umnify.gallery.news.feed_manager;
 
 import android.app.Activity;
 import android.content.Intent;
+import android.graphics.Bitmap;
+import android.graphics.BitmapFactory;
 import android.os.Bundle;
 import android.support.v4.widget.SwipeRefreshLayout;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 
 import com.example.darwin.umnify.DataActionWrapper;
+import com.example.darwin.umnify.ImageActionWrapper;
 import com.example.darwin.umnify.LeastRecentlyUsedCache;
 import com.example.darwin.umnify.PostResultAction;
 import com.example.darwin.umnify.async.WebServiceAsync;
 import com.example.darwin.umnify.authentication.AuthenticationAddress;
 import com.example.darwin.umnify.feed.FeedManager;
 import com.example.darwin.umnify.feed.PostAsyncAction;
+import com.example.darwin.umnify.feed.PostAsyncImageAction;
 import com.example.darwin.umnify.gallery.GalleryHelper;
 import com.example.darwin.umnify.gallery.ImageWrapper;
 import com.example.darwin.umnify.gallery.ViewImageActivity;
@@ -23,6 +28,7 @@ import com.example.darwin.umnify.gallery.blog.data_action_wrapper.FetchBlogImage
 import com.example.darwin.umnify.gallery.news.data_action_wrapper.FetchNewsImageDataActionWrapper;
 import com.example.darwin.umnify.gallery.news.data_action_wrapper.FetchNewsImageFileDataActionWrapper;
 import com.example.darwin.umnify.gallery.view_holder.GalleryViewHolder;
+import com.example.darwin.umnify.wrapper.DataHelper;
 import com.example.darwin.umnify.wrapper.WebServiceAction;
 
 import org.json.JSONArray;
@@ -41,12 +47,15 @@ public class GalleryNewsFeedManager<E extends GalleryViewHolder> extends FeedMan
     private Class<E> cls;
     private ArrayList<String> index;
     private int offset;
+    private BitmapFactory.Options options;
 
     public GalleryNewsFeedManager(Activity activity, SwipeRefreshLayout swipeRefreshLayout,
                                   Class<E> cls){
         super(activity, swipeRefreshLayout, 100);
         super.setOnRemoveFromCache(new RemoveFromCache());
         offset = 0;
+        options = new BitmapFactory.Options();
+        options.inSampleSize = 6;
         this.index = new ArrayList<>();
         this.cls = cls;
 
@@ -56,23 +65,34 @@ public class GalleryNewsFeedManager<E extends GalleryViewHolder> extends FeedMan
 
     @Override
     public void addFeedEntry(String jsonData) throws JSONException {
-        FetchNewsImageDataActionWrapper fetchNewsImageDataActionWrapper;
-        WebServiceAsync async;
-
         JSONObject imageData = new JSONObject(jsonData);
         ImageWrapper wrapper = GalleryHelper.createImageWrapperFromJSON(imageData, super.getFeedListSize());
 
 
         if(wrapper.getImageFile() != null){
-            async = new WebServiceAsync();
-            fetchNewsImageDataActionWrapper = new FetchNewsImageDataActionWrapper(wrapper, super.getActivity(),
-                    this);
             int position = index.size();
             String key = position + "";
             super.addToFeedList(key, wrapper);
             index.add(key);
+            offset++;
+
+            Bitmap image = GalleryHelper.loadImageFromInternal(wrapper.getImageFile(), super.getActivity(), "feed/news", options);
+            if(image != null){
+                wrapper.setImage(image);
+            }else{
+                WebServiceAction imageAction;
+                WebServiceAsync async;
+
+                PostAsyncImageAction postProcess =
+                        new ProcessPostFetchImage(wrapper, position, super.getActivity());
+
+                imageAction = new ImageActionWrapper(super.getActivity(), AuthenticationAddress.NEWS_IMAGE_FOLDER + "/preview/" + wrapper.getImageFile(), postProcess);
+                async = new WebServiceAsync();
+                async.execute(imageAction);
+            }
+
             notifyItemInserted(position);
-            async.execute(fetchNewsImageDataActionWrapper);
+
         }
 
     }
@@ -113,6 +133,7 @@ public class GalleryNewsFeedManager<E extends GalleryViewHolder> extends FeedMan
 
         }else if(direction == -1){
 
+            index.clear();
             super.clearFeedList();
             notifyDataSetChanged();
             offset = 0;
@@ -178,7 +199,7 @@ public class GalleryNewsFeedManager<E extends GalleryViewHolder> extends FeedMan
             Bundle bundle = new Bundle();
             bundle.putString("FOLDER", "feed/news");
             bundle.putString("IMAGE_FILE", wrapper.getImageFile());
-            bundle.putString("ROOT_LOCATION", AuthenticationAddress.NEWS_IMAGE_FOLDER);
+            bundle.putString("ROOT_LOCATION", AuthenticationAddress.NEWS_IMAGE_FOLDER_NON);
                 holder.getImageView().setOnClickListener(new ViewImageListener(bundle, GalleryNewsFeedManager.this.getActivity()));
         }
     }
@@ -207,6 +228,36 @@ public class GalleryNewsFeedManager<E extends GalleryViewHolder> extends FeedMan
                 }
             }
 
+        }
+    }
+
+    private class ProcessPostFetchImage implements PostAsyncImageAction {
+
+        private ImageWrapper wrapper;
+        private Activity activity;
+        private int position;
+
+        public ProcessPostFetchImage(ImageWrapper wrapper, int position, Activity activity){
+            this.wrapper = wrapper;
+            this.activity = activity;
+            this.position = position;
+        }
+
+        @Override
+        public String getImageFile() {
+            return wrapper.getImageFile();
+        }
+
+        @Override
+        public void processResult(Bitmap image) {
+
+            if(image != null){
+                GalleryHelper.saveImageToInternal(image, wrapper.getImageFile(), activity, "feed/news");
+                Bitmap resizeImage = DataHelper.resizeImageAspectRatio(image, image.getWidth() / 4, image.getHeight() / 8);
+                image = null;
+                wrapper.setImage(resizeImage);
+                notifyItemChanged(position);
+            }
         }
     }
 

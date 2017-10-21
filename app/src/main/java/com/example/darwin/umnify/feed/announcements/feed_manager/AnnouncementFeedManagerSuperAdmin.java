@@ -238,7 +238,7 @@ public class AnnouncementFeedManagerSuperAdmin<E extends AnnouncementViewHolderS
 
         @Override
         public void processResult(String jsonResponse) {
-            Log.e("response", jsonResponse);
+
         }
     }
 

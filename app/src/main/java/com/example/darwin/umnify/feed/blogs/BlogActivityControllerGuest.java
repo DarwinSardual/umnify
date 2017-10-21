@@ -152,7 +152,7 @@ public class BlogActivityControllerGuest{
             @Override
             public void onClick(View view) {
                 Intent intent = new Intent(BlogActivityControllerGuest.this.activity, ViewImageActivity.class);
-                intent.putExtra("ROOT_LOCATION", AuthenticationAddress.BLOG_IMAGE_FOLDER);
+                intent.putExtra("ROOT_LOCATION", AuthenticationAddress.BLOG_IMAGE_FOLDER_NON);
                 intent.putExtra("FOLDER", "feed/blog");
                 intent.putExtra("IMAGE_FILE", imageFile);
                 BlogActivityControllerGuest.this.activity.startActivity(intent);

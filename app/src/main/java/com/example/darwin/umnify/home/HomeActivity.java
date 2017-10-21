@@ -154,7 +154,7 @@ public class HomeActivity extends AppCompatActivity {
 
                 newsFragment.addNews(data);
             }else{
-                Log.e("There is a error", resultCode + "");
+
             }
 
         }else if(requestCode == BlogCode.ADD_BLOG){
@@ -163,7 +163,7 @@ public class HomeActivity extends AppCompatActivity {
 
                 blogFragment.addBlog(data);
             }else{
-                Log.e("There is a error", resultCode + "");
+
             }
         }else if(requestCode == BlogCode.VIEW_BLOG){
             if (resultCode == RESULT_OK) {

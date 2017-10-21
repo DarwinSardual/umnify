@@ -134,7 +134,7 @@ public class GalleryActivity extends AppCompatActivity implements PostResultActi
     private void addThumbnail(String jsonData, ImageView view, String urlLocation) throws JSONException{
         JSONObject imageData = new JSONObject(jsonData);
         String imageFile = imageData.getString("image");
-        urlLocation = urlLocation + "/" +imageFile;
+        urlLocation = urlLocation + "/preview/" +imageFile;
 
         WebServiceAsync async = new WebServiceAsync();
         FetchGalleryThumbnailDataActionWrapper fetchGalleryThumbnailDataActionWrapper =
