@@ -58,15 +58,6 @@ public class StartActivity extends AppCompatActivity {
         if(!directory.exists())
             directory.mkdirs();
 
-        //File newsImageDirectory = this.getDir("umnify/images/feed/news/", Context.MODE_PRIVATE);
-        /*File newsImageDirectory = new File(directory.getAbsolutePath() + "/images/feed/news");
-        if(!newsImageDirectory.exists())
-            newsImageDirectory.mkdirs();
-
-        File blogImageDirectory = new File(directory.getAbsolutePath() + "/images/feed/blog");
-        if(!blogImageDirectory.exists())
-            blogImageDirectory.mkdirs();*/
-
         File avatarImageDirectory = new File(directory.getAbsolutePath() + "/images/gallery/avatar");
         if(!avatarImageDirectory.exists())
             avatarImageDirectory.mkdirs();
@@ -83,10 +74,8 @@ public class StartActivity extends AppCompatActivity {
         if(!galleryAnnouncementImageDirectory.exists())
             galleryAnnouncementImageDirectory.mkdirs();
 
-        //handle start
         databaseConnection = UMnifyDbHelper.getInstance(this);
         databaseConnectionRead = databaseConnection.getReadableDatabase();
-        //handleUserCheck();
 
         extraData = getIntent().getExtras();
 
@@ -125,9 +114,6 @@ public class StartActivity extends AppCompatActivity {
 
     private void handleUserCheck(){
 
-        //CheckUserAsync checkUserAsync;
-
-
         String[] projection = {
 
                 UMnifyContract.UMnifyColumns.User.ID.toString(),
@@ -140,8 +126,6 @@ public class StartActivity extends AppCompatActivity {
                 projection, null, null, null, null, null);
 
         if(cursor.getCount() == 1){
-            //check if the stored credentials is valid
-            //get user credentials
 
             int id = 0;
             int type = 0;
@@ -265,7 +249,7 @@ public class StartActivity extends AppCompatActivity {
                         startActivity(intent);
                     }
                 }catch (JSONException e){
-                    Log.e("JSONException", "StartActivity - Can't parse response json");
+
                 }
             }
             finish();

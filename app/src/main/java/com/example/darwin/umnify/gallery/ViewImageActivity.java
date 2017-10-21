@@ -123,8 +123,10 @@ public class ViewImageActivity extends AppCompatActivity {
 
             if(i == 0){
                     url = rootLocation + "/preview/" + imageFile;
+                Log.e("clicked", url);
             }else if(i == 1){
                 url = rootLocation + "/" + imageFile;
+                Log.e("clicked", url);
             }
 
             request = new DownloadManager.Request(Uri.parse(url));
@@ -139,31 +141,4 @@ public class ViewImageActivity extends AppCompatActivity {
         }
     }
 
-    private class ProcessPostFetchImage implements PostAsyncImageAction {
-
-        private ImageView view;
-        private Activity activity;
-        private String imageFile;
-
-        public ProcessPostFetchImage(ImageView view, String imageFile, Activity activity){
-            this.activity = activity;
-            this.view = view;
-            this.imageFile = imageFile;
-        }
-
-        @Override
-        public String getImageFile() {
-            return imageFile;
-        }
-
-        @Override
-        public void processResult(Bitmap image) {
-            if(image != null){
-                view.setImageBitmap(image);
-                GalleryHelper.saveImageToInternal(image,
-                        imageFile, activity, "feed/news");
-
-            }
-        }
-    }
 }

@@ -229,10 +229,10 @@ public class NotificationFeedManagerAdmin<E extends NotificationViewHolder> exte
         @Override
         public void processResult(String response) {
 
-            int position = getIndex().indexOf(notificationKey);
-            getIndex().remove(position);
+            //int position = getIndex().indexOf(notificationKey);
+            //getIndex().remove(position);
             removeFromFeedList(notificationKey);
-            notifyItemRemoved(position);
+            //notifyItemRemoved(position);
         }
     }
 
@@ -255,10 +255,14 @@ public class NotificationFeedManagerAdmin<E extends NotificationViewHolder> exte
         @Override
         public void processResult(String jsonResponse) {
 
-            int position = getIndex().indexOf(notificationKey);
-            getIndex().remove(position);
-            removeFromFeedList(notificationKey);
-            notifyItemRemoved(position);
+            if(jsonResponse != null){
+                //int position = getIndex().indexOf(notificationKey);
+                //getIndex().remove(position);
+                removeFromFeedList(notificationKey);
+                //notifyItemRemoved(position);
+            }
+
+
         }
     }
 

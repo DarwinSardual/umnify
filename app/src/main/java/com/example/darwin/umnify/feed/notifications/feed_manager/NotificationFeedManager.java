@@ -24,6 +24,7 @@ import com.example.darwin.umnify.feed.notifications.NotificationsCode;
 import com.example.darwin.umnify.feed.notifications.data_action_wrapper.FetchNotificationDataActionWrapper;
 import com.example.darwin.umnify.feed.notifications.view_holder.NotificationViewHolder;
 import com.example.darwin.umnify.gallery.GalleryHelper;
+import com.example.darwin.umnify.wrapper.DataHelper;
 
 import org.json.JSONArray;
 import org.json.JSONException;
@@ -278,7 +279,7 @@ public class NotificationFeedManager<E extends NotificationViewHolder> extends F
         @Override
         public void processResult(Bitmap image) {
             if(image != null){
-                notification.setAuthorImage(Bitmap.createScaledBitmap(image, 100, 100, false));
+                notification.setAuthorImage(DataHelper.resizeImageAspectRatio(image, image.getWidth()/2, image.getHeight()/2));
                 GalleryHelper.saveImageToInternal(image,
                         notification.getAuthorImageFile(), activity, "avatar");
             }else{

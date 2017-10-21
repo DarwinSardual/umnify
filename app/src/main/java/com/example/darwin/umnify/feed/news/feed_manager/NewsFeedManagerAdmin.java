@@ -223,7 +223,7 @@ public class NewsFeedManagerAdmin<E extends NewsViewHolderAdmin> extends NewsFee
         public void processResult(String jsonResponse) {
 
             if(jsonResponse != null){
-                Log.e("Message", jsonResponse);
+
             }
 
         }
@@ -241,7 +241,7 @@ public class NewsFeedManagerAdmin<E extends NewsViewHolderAdmin> extends NewsFee
         public void processResult(String response) {
 
             if(response != null){
-                Log.e("Message", "Delete News - " + response);
+
                 /*int position = getIndex().indexOf(key);
                 getIndex().remove(position);
                 removeFromFeedList(key);
@@ -259,7 +259,7 @@ public class NewsFeedManagerAdmin<E extends NewsViewHolderAdmin> extends NewsFee
         @Override
         public void processResult(String jsonResponse) {
             if(jsonResponse != null){
-                Log.e("Message", "Update News - " + jsonResponse);
+
             }else{
 
             }

@@ -29,6 +29,7 @@ import com.example.darwin.umnify.feed.news.data_action_wrapper.FetchNewsImageDat
 import com.example.darwin.umnify.feed.news.view_holder.NewsViewHolderGuest;
 import com.example.darwin.umnify.gallery.GalleryHelper;
 import com.example.darwin.umnify.gallery.ViewImageActivity;
+import com.example.darwin.umnify.wrapper.DataHelper;
 import com.example.darwin.umnify.wrapper.WebServiceAction;
 
 import org.json.JSONArray;
@@ -40,7 +41,6 @@ import java.util.HashMap;
 
 public class NewsFeedManagerGuest<E extends NewsViewHolderGuest> extends FeedManager<E, News>{
 
-    private E viewHolder;
     private Class<E> cls;
     private int layoutId;
     private SQLiteDatabase databaseRead;
@@ -50,7 +50,7 @@ public class NewsFeedManagerGuest<E extends NewsViewHolderGuest> extends FeedMan
     private ArrayList<String> index;
     private ProcessPostFetchData processPostFetchData;
     private int offset;
-
+    private BitmapFactory.Options options;
 
     public NewsFeedManagerGuest(Activity activity, SwipeRefreshLayout swipeRefreshLayout, RecyclerView recyclerView,
                                 Class<E> cls, int layoutId){
@@ -62,6 +62,8 @@ public class NewsFeedManagerGuest<E extends NewsViewHolderGuest> extends FeedMan
         this.layoutId = layoutId;
         this.index = new ArrayList<>();
         offset = 0;
+        options = new BitmapFactory.Options();
+        options.inSampleSize = 4;
 
         databaseConnection = UMnifyDbHelper.getInstance(super.getActivity());
         databaseRead = databaseConnection.getReadableDatabase();
@@ -85,10 +87,10 @@ public class NewsFeedManagerGuest<E extends NewsViewHolderGuest> extends FeedMan
         offset++;
         notifyItemInserted(position);
 
-        if(news.getAuthorImageFile() != null && !news.getAuthorImageFile().equalsIgnoreCase("null")){
-            Bitmap authorImage = GalleryHelper.loadImageFromInternal(news.getAuthorImageFile(), super.getActivity(), "avatar");
+        if(news.getAuthorImageFile() != null){
+            Bitmap authorImage = GalleryHelper.loadImageFromInternal(news.getAuthorImageFile(), super.getActivity(), "avatar", options);
             if(authorImage != null){
-                news.setAuthorImage(authorImage);
+                news.setAuthorImage(DataHelper.resizeImageAspectRatio(authorImage, authorImage.getWidth(), authorImage.getHeight()));
                 notifyItemChanged(position);
             }else {
 
@@ -107,8 +109,8 @@ public class NewsFeedManagerGuest<E extends NewsViewHolderGuest> extends FeedMan
         if(news.getImageFile() != null && !news.getImageFile().equalsIgnoreCase("null")){
             Bitmap newsImage = GalleryHelper.loadImageFromInternal(news.getImageFile(), super.getActivity(), "feed/news");
             if(newsImage != null){
-                //news.setImage(Bitmap.createScaledBitmap(newsImage, 400, 200, false));
-                news.setImage(newsImage);
+                news.setImage(DataHelper.resizeImageAspectRatio(newsImage, 640, 360));
+                //news.setImage(newsImage);
                 notifyItemChanged(position);
             }else{
                 WebServiceAction imageAction;
@@ -135,7 +137,7 @@ public class NewsFeedManagerGuest<E extends NewsViewHolderGuest> extends FeedMan
         Bitmap newsImage = GalleryHelper.loadImageFromInternal(news.getImageFile(), super.getActivity(), "feed/news");
 
         if(newsImage != null){
-            news.setImage(newsImage);
+            news.setImage(DataHelper.resizeImageAspectRatio(newsImage, 640, 360));
         }
 
         String key = Integer.toString(news.getId());
@@ -323,7 +325,7 @@ public class NewsFeedManagerGuest<E extends NewsViewHolderGuest> extends FeedMan
                     @Override
                     public void onClick(View view) {
                         Intent intent = new Intent(NewsFeedManagerGuest.this.getActivity(), ViewImageActivity.class);
-                        intent.putExtra("ROOT_LOCATION", AuthenticationAddress.NEWS_IMAGE_FOLDER);
+                        intent.putExtra("ROOT_LOCATION", AuthenticationAddress.NEWS_IMAGE_FOLDER_NON);
                         intent.putExtra("FOLDER", "feed/news");
                         intent.putExtra("IMAGE_FILE", news.getImageFile());
                         NewsFeedManagerGuest.this.getActivity().startActivity(intent);
@@ -337,16 +339,8 @@ public class NewsFeedManagerGuest<E extends NewsViewHolderGuest> extends FeedMan
         return super.getFeedListSize();
     }
 
-    public E getViewHolder() {
-        return viewHolder;
-    }
-
     public void setHasConnection(boolean hasConnection) {
         this.hasConnection = hasConnection;
-    }
-
-    public boolean isHasConnection() {
-        return hasConnection;
     }
 
     private class ProcessPostFetchData implements PostAsyncAction{
@@ -362,7 +356,7 @@ public class NewsFeedManagerGuest<E extends NewsViewHolderGuest> extends FeedMan
                     setFetchingFeedEntry(false);
                     getSwipeRefreshLayout().setRefreshing(false);
                 }else{
-                    Log.e("Message", jsonResponse);
+
                     JSONObject str = new JSONObject(jsonResponse);
                     String data = str.getString("data");
 
@@ -396,11 +390,13 @@ public class NewsFeedManagerGuest<E extends NewsViewHolderGuest> extends FeedMan
         @Override
         public void processResult(Bitmap image) {
             if(image != null){
-                news.setImage(image);
+                news.setImage(DataHelper.resizeImageAspectRatio(image, 640, 360));
                 GalleryHelper.saveImageToInternal(image,
                         news.getImageFile(), activity, "feed/news");
                 notifyItemChanged(position);
             }
+
+            image = null;
         }
     }
 
@@ -425,7 +421,7 @@ public class NewsFeedManagerGuest<E extends NewsViewHolderGuest> extends FeedMan
         @Override
         public void processResult(Bitmap image) {
             if(image != null){
-                news.setAuthorImage(Bitmap.createScaledBitmap(image, 100, 100, false));
+                news.setAuthorImage(DataHelper.resizeImageAspectRatio(image, image.getWidth()/2, image.getHeight()/2));
                 GalleryHelper.saveImageToInternal(image,
                         news.getAuthorImageFile(), activity, "avatar");
                 image = null;

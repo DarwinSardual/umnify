@@ -401,7 +401,7 @@ public class PendingFeedManagerSuperAdmin<E extends PendingViewHolderSuperAdmin>
 
             if(json != null){
                 try{
-                    Log.e("Message", "Fetch pending - " + json);
+
                     JSONObject data = new JSONObject(json);
                     String jsonData = data.getString("data");
 
@@ -466,7 +466,6 @@ public class PendingFeedManagerSuperAdmin<E extends PendingViewHolderSuperAdmin>
         @Override
         public void processResult(String response) {
 
-            Log.e("Message", "Allow pending - " + response);
             int position = index.indexOf(key);
             index.remove(position);
             removeFromFeedList(key);

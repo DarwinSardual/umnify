@@ -27,12 +27,11 @@ public class WebServiceConnection{
 
     private String urlAddress;
     private final int READ_TIMEOUT = 10000;
-    private final int CONNECT_TIMEOUT = 10000;
+    private final int CONNECT_TIMEOUT = 5000;
     private final String REQUEST_METHOD = "POST";
 
     private URL url;
     private HttpsURLConnection urlConnection;
-    //private HttpURLConnection urlConnection;
     private Uri.Builder builder;
 
     private String crlf = "\r\n";
@@ -107,7 +106,6 @@ public class WebServiceConnection{
             Certificate ca;
             try{
                 ca = cf.generateCertificate(caInput);
-                //System.out.println("ca=" + ((X509Certificate) ca).getSubjectDN());
             }finally {
                 caInput.close();
             }
@@ -137,24 +135,6 @@ public class WebServiceConnection{
         }catch (KeyManagementException e){
             e.printStackTrace();
         }
-    }
-
-    private void setUpConnection(boolean doInput, boolean doOuput, boolean useCaches) throws IOException{
-
-
-        //urlConnection = (HttpsURLConnection) url.openConnection();
-
-        //urlConnection.setSSLSocketFactory(context.getSocketFactory());
-        /*urlConnection.setHostnameVerifier(new HostnameVerifier()
-        {
-            public boolean verify(String hostname, SSLSession session)
-            {
-                return true;
-            }
-        });*/
-
-
-
     }
 
     protected final void setRequest(String query){
@@ -258,10 +238,7 @@ public class WebServiceConnection{
         return builder;
     }
 
-    /*protected final HttpsURLConnection getUrlConnection(){
-        return urlConnection;
-    }*/
-    protected final HttpURLConnection getUrlConnection(){
+    protected final HttpsURLConnection getUrlConnection(){
         return urlConnection;
     }
 

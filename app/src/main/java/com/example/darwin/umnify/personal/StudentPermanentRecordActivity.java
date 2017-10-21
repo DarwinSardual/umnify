@@ -54,7 +54,6 @@ public class StudentPermanentRecordActivity extends AppCompatActivity{
     }
 
     public void displayData(String jsonData) throws JSONException{
-       Log.e("Fetch", "SPR - " + jsonData);
 
         JSONArray jsonArray = new JSONArray(jsonData);
         TableRow row;

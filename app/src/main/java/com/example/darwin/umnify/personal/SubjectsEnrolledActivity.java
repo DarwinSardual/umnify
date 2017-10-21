@@ -55,7 +55,6 @@ public class SubjectsEnrolledActivity extends AppCompatActivity {
     }
 
     public void displayData(String jsonDataArray) throws JSONException{
-        Log.e("Fetch", "SPR - " + jsonDataArray);
 
         JSONArray jsonArray = new JSONArray(jsonDataArray);
         TableRow row;
