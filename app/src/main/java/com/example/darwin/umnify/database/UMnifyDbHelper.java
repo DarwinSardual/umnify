@@ -61,6 +61,7 @@ public class UMnifyDbHelper extends SQLiteOpenHelper{
                     UMnifyContract.UMnifyColumns.Blog.CONTENT.toString() + " TEXT," +
                     UMnifyContract.UMnifyColumns.Blog.IMAGE.toString() + " TEXT," +
                     UMnifyContract.UMnifyColumns.Blog.AUTHOR.toString() + " INTEGER," +
+                    UMnifyContract.UMnifyColumns.Blog.CREATED_DATE.toString() + " TEXT," +
                     UMnifyContract.UMnifyColumns.Blog.PUBLISHED_DATE.toString() + " TEXT," +
                     UMnifyContract.UMnifyColumns.Blog.SIGNATURE.toString() + " INTEGER," +
                     UMnifyContract.UMnifyColumns.Blog.AUTHOR_FIRSTNAME.toString() + " TEXT," +

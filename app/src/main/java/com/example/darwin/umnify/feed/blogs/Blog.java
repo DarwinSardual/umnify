@@ -10,6 +10,7 @@ public class Blog {
     private int id;
     private String heading;
     private String content;
+    private String createdDate;
     private String publishedDate;
     private int signature;
     private Bitmap image;
@@ -23,13 +24,14 @@ public class Blog {
     private int index;
 
 
-    public Blog(int id, String heading, String content, int author, String publishedDate, String imageFile, Bitmap image, int signature,
+    public Blog(int id, String heading, String content, int author, String createdDate, String publishedDate, String imageFile, Bitmap image, int signature,
                 int index, String authorFirstname, String authorLastname, String authorImage){
 
         this.id = id;
         this.content = content;
         this.heading = heading;
         this.author = author;
+        this.createdDate = createdDate;
         this.publishedDate = publishedDate;
         this.image = image;
         this.signature = signature;
@@ -64,6 +66,10 @@ public class Blog {
     public int getAuthor(){return author;}
 
     public String getPublishedDate(){ return publishedDate; }
+
+    public String getCreatedDate() {
+        return createdDate;
+    }
 
     public Bitmap getImage(){
         return image;

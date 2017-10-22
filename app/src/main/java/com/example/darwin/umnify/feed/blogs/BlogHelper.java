@@ -38,18 +38,19 @@ public class BlogHelper {
     public static Blog createBlogFromJSON(JSONObject data, int index) throws JSONException{
 
         int id = data.getInt("id");
-        String heading = data.getString("heading");
-        String content = data.getString("content");
-        String imageFile = data.getString("image");
+        String heading = data.isNull("heading")? null: data.getString("heading");
+        String content = data.isNull("content")? null:data.getString("content");
+        String imageFile = data.isNull("image")? null: data.getString("image");
         int author = data.getInt("author");
-        String published_date = data.getString("published_date");
+        String createdDate = data.isNull("created_date")? null:data.getString("created_date");
+        String publishedDate = data.isNull("published_date")? null:data.getString("published_date");
         int signature = data.getInt("signature");
 
         String authorFirstname = data.getString("author_firstname");
         String authorLastname = data.getString("author_lastname");
         String authorImage = data.getString("author_image");
 
-        Blog blog = new Blog(id, heading, content, author, published_date, imageFile, null,
+        Blog blog = new Blog(id, heading, content, author,createdDate, publishedDate, imageFile, null,
                 signature, index, authorFirstname, authorLastname, authorImage);
 
         return blog;
@@ -99,6 +100,7 @@ public class BlogHelper {
             values.put(UMnifyContract.UMnifyColumns.Blog.CONTENT.toString(), blog.getContent());
             values.put(UMnifyContract.UMnifyColumns.Blog.IMAGE.toString(), blog.getImageFile());
             values.put(UMnifyContract.UMnifyColumns.Blog.AUTHOR.toString(), blog.getAuthor());
+            values.put(UMnifyContract.UMnifyColumns.Blog.CREATED_DATE.toString(), blog.getCreatedDate());
             values.put(UMnifyContract.UMnifyColumns.Blog.PUBLISHED_DATE.toString(), blog.getPublishedDate());
             values.put(UMnifyContract.UMnifyColumns.Blog.SIGNATURE.toString(), blog.getSignature());
 
@@ -121,6 +123,7 @@ public class BlogHelper {
         values.put(UMnifyContract.UMnifyColumns.Blog.CONTENT.toString(), blog.getContent());
         values.put(UMnifyContract.UMnifyColumns.Blog.IMAGE.toString(), blog.getImageFile());
         values.put(UMnifyContract.UMnifyColumns.Blog.AUTHOR.toString(), blog.getAuthor());
+        values.put(UMnifyContract.UMnifyColumns.Blog.CREATED_DATE.toString(), blog.getCreatedDate());
         values.put(UMnifyContract.UMnifyColumns.Blog.PUBLISHED_DATE.toString(), blog.getPublishedDate());
         values.put(UMnifyContract.UMnifyColumns.Blog.SIGNATURE.toString(),blog.getSignature());
 
