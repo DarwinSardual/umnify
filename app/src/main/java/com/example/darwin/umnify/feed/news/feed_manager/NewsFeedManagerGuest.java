@@ -106,7 +106,7 @@ public class NewsFeedManagerGuest<E extends NewsViewHolderGuest> extends FeedMan
             }
         }
 
-        if(news.getImageFile() != null && !news.getImageFile().equalsIgnoreCase("null")){
+        if(news.getImageFile() != null){
             Bitmap newsImage = GalleryHelper.loadImageFromInternal(news.getImageFile(), super.getActivity(), "feed/news");
             if(newsImage != null){
                 news.setImage(DataHelper.resizeImageAspectRatio(newsImage, 640, 360));
@@ -231,7 +231,6 @@ public class NewsFeedManagerGuest<E extends NewsViewHolderGuest> extends FeedMan
             if(hasConnection){
 
                 params.put("offset", offset + "");
-                //params.put("offset", super.getFeedListSize() + "");
                 params.put("limit", "3");
                 params.put("id", "-1");
 

@@ -63,9 +63,9 @@ public final class UMnifyContract {
 
             TABLE_NAME("News"),
             ID("id"),
-            CONTENT("course"),
-            IMAGE("year"),
-            AUTHOR("type"),
+            CONTENT("content"),
+            IMAGE("image"),
+            AUTHOR("author"),
             PUBLISHED_DATE("published_date"),
             SIGNATURE("signature"),
             AUTHOR_FIRSTNAME("author_firstname"),
@@ -83,10 +83,10 @@ public final class UMnifyContract {
 
             TABLE_NAME("Blog"),
             ID("id"),
-            HEADING("course"),
+            HEADING("heading"),
             CONTENT("content"),
-            IMAGE("year"),
-            AUTHOR("type"),
+            IMAGE("image"),
+            AUTHOR("author"),
             PUBLISHED_DATE("published_date"),
             SIGNATURE("signature"),
             AUTHOR_FIRSTNAME("author_firstname"),
@@ -96,6 +96,27 @@ public final class UMnifyContract {
             private String str;
 
             Blog(String str){ this.str = str; }
+
+            public String toString(){ return str;}
+        }
+
+        public enum Announcement{
+
+            TABLE_NAME("Announcement"),
+            ID("id"),
+            TITLE("title"),
+            CONTENT("content"),
+            IMAGE("image"),
+            AUTHOR("author"),
+            CREATED_DATE("created_date"),
+            PUBLISHED_DATE("published_date"),
+            SIGNATURE("signature"),
+            AUTHOR_FIRSTNAME("author_firstname"),
+            AUTHOR_LASTNAME("author_lastname");
+
+            private String str;
+
+            Announcement(String str){ this.str = str; }
 
             public String toString(){ return str;}
         }

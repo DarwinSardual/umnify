@@ -2,15 +2,20 @@ package com.example.darwin.umnify.feed.announcements.feed_manager;
 
 import android.app.Activity;
 import android.content.Intent;
+import android.database.Cursor;
+import android.database.sqlite.SQLiteDatabase;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.support.v4.widget.SwipeRefreshLayout;
 import android.view.LayoutInflater;
+import android.view.View;
 import android.view.ViewGroup;
 
 import com.example.darwin.umnify.*;
 import com.example.darwin.umnify.async.WebServiceAsync;
 import com.example.darwin.umnify.authentication.AuthenticationAddress;
+import com.example.darwin.umnify.database.UMnifyContract;
+import com.example.darwin.umnify.database.UMnifyDbHelper;
 import com.example.darwin.umnify.feed.FeedManager;
 import com.example.darwin.umnify.feed.PostAsyncAction;
 import com.example.darwin.umnify.feed.PostAsyncImageAction;
@@ -20,6 +25,8 @@ import com.example.darwin.umnify.feed.announcements.data_action_wrapper.FetchAnn
 import com.example.darwin.umnify.feed.announcements.data_action_wrapper.FetchAnnouncementImageDataActionWrapper;
 import com.example.darwin.umnify.feed.announcements.view_holder.AnnouncementViewHolder;
 import com.example.darwin.umnify.gallery.GalleryHelper;
+import com.example.darwin.umnify.gallery.ViewImageActivity;
+import com.example.darwin.umnify.wrapper.DataHelper;
 import com.example.darwin.umnify.wrapper.WebServiceAction;
 
 import org.json.JSONArray;
@@ -42,6 +49,9 @@ public class AnnouncementFeedManager <E extends AnnouncementViewHolder> extends 
     private boolean hasConnection = true;
     private int offset;
 
+    private SQLiteDatabase databaseRead;
+    private UMnifyDbHelper databaseConnection;
+
     public AnnouncementFeedManager(Activity activity, SwipeRefreshLayout swipeRefreshLayout,
                                 Class<E> cls, int layoutId){
         super(activity, swipeRefreshLayout, 30);
@@ -50,8 +60,8 @@ public class AnnouncementFeedManager <E extends AnnouncementViewHolder> extends 
         this.cls = cls;
         this.index = new ArrayList<>();
         offset = 0;
-        //databaseConnection = UMnifyDbHelper.getInstance(super.getActivity());
-        //databaseRead = databaseConnection.getReadableDatabase();
+        databaseConnection = UMnifyDbHelper.getInstance(super.getActivity());
+        databaseRead = databaseConnection.getReadableDatabase();
 
         updateFeed(-1);
 
@@ -85,6 +95,17 @@ public class AnnouncementFeedManager <E extends AnnouncementViewHolder> extends 
             holder.getTitleView().setText(announcement.getTitle());
             holder.getContentView().setText(announcement.getContent());
             holder.getImageView().setImageBitmap(announcement.getImage());
+
+            holder.getImageView().setOnClickListener(new View.OnClickListener() {
+                @Override
+                public void onClick(View v) {
+                    Intent intent = new Intent(getActivity(), ViewImageActivity.class);
+                    intent.putExtra("ROOT_LOCATION", AuthenticationAddress.ANNOUNCEMENT_IMAGE_FOLDER_NON);
+                    intent.putExtra("FOLDER", "feed/announcement");
+                    intent.putExtra("IMAGE_FILE", announcement.getImageFile());
+                    getActivity().startActivity(intent);
+                }
+            });
         }
 
     }
@@ -153,6 +174,51 @@ public class AnnouncementFeedManager <E extends AnnouncementViewHolder> extends 
                 addFeedEntry(dataList.getString(i));
             }
             dataList = null;
+        }else{
+            //fetch from local db
+            hasConnection = false;
+            Cursor cursor;
+
+            if(super.getFeedListSize() > 0){
+                String query = "select * from Announcement where published_date < ? and id != ? order by datetime(published_date) desc limit 3";
+                //String query = "select * from News where id < ? order by datetime(published_date) desc limit 3";
+
+                int position = index.size() - 1;
+
+                String key = index.get(position);
+                Announcement announcement = super.getEntryFromFeedList(key);
+
+                String date = announcement.getPublishedDate();
+                String idKey = Integer.toString(announcement.getId());
+
+                String[] selectionArgs = {date, idKey};
+                cursor = databaseRead.rawQuery(query, selectionArgs);
+
+            }else{
+                String query = "select * from Announcement order by datetime(published_date) desc limit 5";
+                cursor = databaseRead.rawQuery(query, null);
+            }
+
+            while(cursor.moveToNext()){
+
+                int id = cursor.getInt(cursor.getColumnIndexOrThrow(UMnifyContract.UMnifyColumns.News.ID.toString()));
+
+                if(index.indexOf(id) > 0) continue;
+
+                String content = cursor.getString(cursor.getColumnIndexOrThrow(UMnifyContract.UMnifyColumns.Announcement.CONTENT.toString()));
+                String title = cursor.getString(cursor.getColumnIndexOrThrow(UMnifyContract.UMnifyColumns.Announcement.TITLE.toString()));
+                String imageFile = cursor.getString(cursor.getColumnIndexOrThrow(UMnifyContract.UMnifyColumns.Announcement.IMAGE.toString()));
+                int authorId = cursor.getInt(cursor.getColumnIndexOrThrow(UMnifyContract.UMnifyColumns.Announcement.AUTHOR.toString()));
+                String publishedDate = cursor.getString(cursor.getColumnIndexOrThrow(UMnifyContract.UMnifyColumns.Announcement.PUBLISHED_DATE.toString()));
+                int signature = cursor.getInt(cursor.getColumnIndexOrThrow(UMnifyContract.UMnifyColumns.Announcement.SIGNATURE.toString()));
+
+                String authorFirstname = cursor.getString(cursor.getColumnIndexOrThrow(UMnifyContract.UMnifyColumns.Announcement.AUTHOR_FIRSTNAME.toString()));
+                String authorLastname = cursor.getString(cursor.getColumnIndexOrThrow(UMnifyContract.UMnifyColumns.Announcement.AUTHOR_LASTNAME.toString()));
+
+                Announcement announcement = new Announcement(id, title, content, imageFile, null, authorId, null, publishedDate, signature, authorFirstname, authorLastname);
+
+                addFeedEntry(announcement);
+            }
         }
     }
 
@@ -160,6 +226,7 @@ public class AnnouncementFeedManager <E extends AnnouncementViewHolder> extends 
     public void addFeedEntry(String jsonData) throws JSONException {
         JSONObject newsData = new JSONObject(jsonData);
         Announcement announcement = AnnouncementHelper.createAnnouncementFromJSON(newsData);
+        AnnouncementHelper.addToLocalDB(announcement, getActivity());
 
         String key = Integer.toString(announcement.getId());
         int position = index.size();
@@ -169,15 +236,39 @@ public class AnnouncementFeedManager <E extends AnnouncementViewHolder> extends 
         offset++;
         notifyItemInserted(position);
 
-        WebServiceAction imageAction;
-        WebServiceAsync async;
+        if(announcement.getImageFile() != null){
+            Bitmap image = GalleryHelper.loadImageFromInternal(announcement.getImageFile(), getActivity(), "feed/annoucement");
+            if(image != null){
+                announcement.setImage(image);
+                notifyItemChanged(position);
+            }else{
+                WebServiceAction imageAction;
+                WebServiceAsync async;
 
-        PostAsyncImageAction postProcess =
-                new ProcessPostFetchImage(announcement, super.getActivity(), position);
+                PostAsyncImageAction postProcess =
+                        new ProcessPostFetchImage(announcement, super.getActivity(), position);
 
-        imageAction = new ImageActionWrapper(super.getActivity(), AuthenticationAddress.ANNOUNCEMENT_IMAGE_FOLDER + "/preview/" + announcement.getImageFile(), postProcess);
-        async = new WebServiceAsync();
-        async.execute(imageAction);
+                imageAction = new ImageActionWrapper(super.getActivity(), AuthenticationAddress.ANNOUNCEMENT_IMAGE_FOLDER + "/preview/" + announcement.getImageFile(), postProcess);
+                async = new WebServiceAsync();
+                async.execute(imageAction);
+            }
+        }
+    }
+
+    public void addFeedEntry(Announcement announcement){
+
+        Bitmap newsImage = GalleryHelper.loadImageFromInternal(announcement.getImageFile(), super.getActivity(), "feed/announcement");
+        if(newsImage != null){
+            announcement.setImage(DataHelper.resizeImageAspectRatio(newsImage, 640, 360));
+        }
+
+        String key = Integer.toString(announcement.getId());
+        int position = index.size();
+
+        super.addToFeedList(key, announcement);
+        index.add(key);
+        offset++;
+        notifyItemInserted(position);
 
     }
 
@@ -255,16 +346,12 @@ public class AnnouncementFeedManager <E extends AnnouncementViewHolder> extends 
             if(image != null){
                 if(image != null){
                     announcement.setImage(image);
-                    //GalleryHelper.saveImageToInternal(image,
-                            //announcement.getImageFile(), activity, "avatar");
-                    image = null;
-                }else{
-
-                    announcement.setImage(BitmapFactory.decodeResource(activity.getResources(), R.drawable.missing_avatar));
-
+                    GalleryHelper.saveImageToInternal(image,
+                            announcement.getImageFile(), activity, "feed/announcement");
+                    notifyItemChanged(position);
                 }
+                image = null;
 
-                notifyItemChanged(position);
             }
         }
 

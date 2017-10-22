@@ -66,6 +66,19 @@ public class UMnifyDbHelper extends SQLiteOpenHelper{
                     UMnifyContract.UMnifyColumns.Blog.AUTHOR_LASTNAME.toString() + " TEXT," +
                     UMnifyContract.UMnifyColumns.Blog.AUTHOR_IMAGE.toString() + " TEXT);";
 
+    private static final String CREATE_TABLE_ANNOUNCEMENT =
+            "CREATE TABLE " + UMnifyContract.UMnifyColumns.Announcement.TABLE_NAME.toString() + "(" +
+                    UMnifyContract.UMnifyColumns.Announcement.ID.toString() + " INTEGER PRIMARY KEY," +
+                    UMnifyContract.UMnifyColumns.Announcement.TITLE.toString() + " TEXT," +
+                    UMnifyContract.UMnifyColumns.Announcement.CONTENT.toString() + " TEXT," +
+                    UMnifyContract.UMnifyColumns.Announcement.IMAGE.toString() + " TEXT," +
+                    UMnifyContract.UMnifyColumns.Announcement.AUTHOR.toString() + " INTEGER," +
+                    UMnifyContract.UMnifyColumns.Announcement.CREATED_DATE.toString() + " TEXT," +
+                    UMnifyContract.UMnifyColumns.Announcement.PUBLISHED_DATE.toString() + " TEXT," +
+                    UMnifyContract.UMnifyColumns.Announcement.SIGNATURE.toString() + " INTEGER," +
+                    UMnifyContract.UMnifyColumns.Announcement.AUTHOR_FIRSTNAME.toString() + " TEXT," +
+                    UMnifyContract.UMnifyColumns.Announcement.AUTHOR_LASTNAME.toString() + " TEXT);";
+
     public static synchronized UMnifyDbHelper getInstance(Context context){
 
         if(databaseConnection == null){
@@ -83,6 +96,7 @@ public class UMnifyDbHelper extends SQLiteOpenHelper{
         db.execSQL(CREATE_TABLE_ACADEME_PERSON);
         db.execSQL(CREATE_TABLE_NEWS);
         db.execSQL(CREATE_TABLE_BLOG);
+        db.execSQL(CREATE_TABLE_ANNOUNCEMENT);
     }
 
     @Override
