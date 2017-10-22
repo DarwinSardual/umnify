@@ -75,10 +75,12 @@ public class GalleryNewsFeedManager<E extends GalleryViewHolder> extends FeedMan
             super.addToFeedList(key, wrapper);
             index.add(key);
             offset++;
+            notifyItemInserted(position);
 
             Bitmap image = GalleryHelper.loadImageFromInternal(wrapper.getImageFile(), super.getActivity(), "feed/news", options);
             if(image != null){
                 wrapper.setImage(image);
+                notifyItemInserted(position);
             }else{
                 WebServiceAction imageAction;
                 WebServiceAsync async;
@@ -90,8 +92,6 @@ public class GalleryNewsFeedManager<E extends GalleryViewHolder> extends FeedMan
                 async = new WebServiceAsync();
                 async.execute(imageAction);
             }
-
-            notifyItemInserted(position);
 
         }
 

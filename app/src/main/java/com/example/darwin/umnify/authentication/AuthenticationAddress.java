@@ -2,7 +2,7 @@ package com.example.darwin.umnify.authentication;
 
 public final class AuthenticationAddress {
 
-    public static final String DOMAIN_NAME = "https://174.138.20.165";
+    public static final String DOMAIN_NAME = "https://darwin-dev.com";
     public static final String DOMAIN_NAME_NON = "http://174.138.20.165";
     //public static final String DOMAIN_NAME = "http://192.168.122.1/~darwin";
     //public static final String DOMAIN_NAME = "http://192.168.122.1/~darwin";

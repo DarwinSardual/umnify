@@ -61,15 +61,15 @@ public class WebServiceConnection{
             url = new URL(urlAddress);
 
             urlConnection = (HttpsURLConnection) url.openConnection();
-            trustCertificate();
-            urlConnection.setSSLSocketFactory(context.getSocketFactory());
+            //trustCertificate();
+            /*/urlConnection.setSSLSocketFactory(context.getSocketFactory());
             urlConnection.setHostnameVerifier(new HostnameVerifier()
             {
                 public boolean verify(String hostname, SSLSession session)
                 {
                     return true;
                 }
-            });
+            });*/
 
 
             urlConnection.setRequestProperty("Connection", "Keep-Alive");

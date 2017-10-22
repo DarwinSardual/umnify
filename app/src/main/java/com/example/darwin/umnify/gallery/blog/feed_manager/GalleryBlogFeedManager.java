@@ -3,17 +3,21 @@ package com.example.darwin.umnify.gallery.blog.feed_manager;
 import android.app.Activity;
 import android.content.Intent;
 import android.graphics.Bitmap;
+import android.graphics.BitmapFactory;
 import android.os.Bundle;
 import android.support.v4.widget.SwipeRefreshLayout;
 import android.view.LayoutInflater;
 import android.view.ViewGroup;
 
 import com.example.darwin.umnify.DataActionWrapper;
+import com.example.darwin.umnify.ImageActionWrapper;
+import com.example.darwin.umnify.LeastRecentlyUsedCache;
 import com.example.darwin.umnify.PostResultAction;
 import com.example.darwin.umnify.async.WebServiceAsync;
 import com.example.darwin.umnify.authentication.AuthenticationAddress;
 import com.example.darwin.umnify.feed.FeedManager;
 import com.example.darwin.umnify.feed.PostAsyncAction;
+import com.example.darwin.umnify.feed.PostAsyncImageAction;
 import com.example.darwin.umnify.gallery.GalleryHelper;
 import com.example.darwin.umnify.gallery.ImageWrapper;
 import com.example.darwin.umnify.gallery.ViewImageListener;
@@ -21,12 +25,14 @@ import com.example.darwin.umnify.gallery.blog.data_action_wrapper.FetchBlogImage
 import com.example.darwin.umnify.gallery.blog.data_action_wrapper.FetchBlogImageFileDataActionWrapper;
 import com.example.darwin.umnify.gallery.news.feed_manager.GalleryNewsFeedManager;
 import com.example.darwin.umnify.gallery.view_holder.GalleryViewHolder;
+import com.example.darwin.umnify.wrapper.DataHelper;
 import com.example.darwin.umnify.wrapper.WebServiceAction;
 
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 
+import java.util.ArrayList;
 import java.util.HashMap;
 
 /**
@@ -36,11 +42,19 @@ import java.util.HashMap;
 public class GalleryBlogFeedManager<E extends GalleryViewHolder> extends FeedManager<E, ImageWrapper> {
 
     private Class<E> cls;
+    private ArrayList<String> index;
+    private int offset;
+    private BitmapFactory.Options options;
 
     public GalleryBlogFeedManager(Activity activity, SwipeRefreshLayout swipeRefreshLayout,
                                   Class<E> cls){
 
         super(activity, swipeRefreshLayout, 100);
+        super.setOnRemoveFromCache(new RemoveFromCache());
+        offset = 0;
+        options = new BitmapFactory.Options();
+        options.inSampleSize = 6;
+        this.index = new ArrayList<>();
         this.cls = cls;
 
         updateFeed(-1);
@@ -49,20 +63,34 @@ public class GalleryBlogFeedManager<E extends GalleryViewHolder> extends FeedMan
 
     @Override
     public void addFeedEntry(String jsonData) throws JSONException {
-        FetchBlogImageDataActionWrapper fetchBlogImageDataActionWrapper;
-        WebServiceAsync async;
-
         JSONObject imageData = new JSONObject(jsonData);
         ImageWrapper wrapper = GalleryHelper.createImageWrapperFromJSON(imageData, super.getFeedListSize());
 
         if(wrapper.getImageFile() != null){
+            int position = index.size();
+            String key = position + "";
+            super.addToFeedList(key, wrapper);
+            index.add(key);
+            offset++;
+            notifyItemInserted(position);
 
+            Bitmap image = GalleryHelper.loadImageFromInternal(wrapper.getImageFile(), super.getActivity(), "feed/news", options);
+            if(image != null){
+                wrapper.setImage(image);
+                notifyItemInserted(position);
+            }else{
+
+            }
+
+            WebServiceAction imageAction;
+            WebServiceAsync async;
+
+            PostAsyncImageAction postProcess =
+                    new ProcessPostFetchImage(wrapper, position, super.getActivity());
+
+            imageAction = new ImageActionWrapper(super.getActivity(), AuthenticationAddress.BLOG_IMAGE_FOLDER + "/preview/" + wrapper.getImageFile(), postProcess);
             async = new WebServiceAsync();
-            fetchBlogImageDataActionWrapper = new FetchBlogImageDataActionWrapper(wrapper, super.getActivity(),
-                    this);
-            super.addToFeedList(super.getFeedListSize() + "", wrapper);
-            notifyItemInserted(wrapper.getIndex());
-            async.execute(fetchBlogImageDataActionWrapper);
+            async.execute(imageAction);
         }
     }
 
@@ -204,7 +232,46 @@ public class GalleryBlogFeedManager<E extends GalleryViewHolder> extends FeedMan
         }
     }
 
+    private class ProcessPostFetchImage implements PostAsyncImageAction {
 
+        private ImageWrapper wrapper;
+        private Activity activity;
+        private int position;
+
+        public ProcessPostFetchImage(ImageWrapper wrapper, int position, Activity activity){
+            this.wrapper = wrapper;
+            this.activity = activity;
+            this.position = position;
+        }
+
+        @Override
+        public String getImageFile() {
+            return wrapper.getImageFile();
+        }
+
+        @Override
+        public void processResult(Bitmap image) {
+
+            if(image != null){
+                GalleryHelper.saveImageToInternal(image, wrapper.getImageFile(), activity, "feed/news");
+                Bitmap resizeImage = DataHelper.resizeImageAspectRatio(image, image.getWidth() / 4, image.getHeight() / 8);
+                image = null;
+                wrapper.setImage(resizeImage);
+                notifyItemChanged(position);
+            }
+        }
+    }
+
+    private class RemoveFromCache implements LeastRecentlyUsedCache.OnRemoveFromCache{
+
+        @Override
+        public void onRemove(Object key) {
+            String k = (String) key;
+            int position = index.indexOf(k);
+            index.remove(position);
+            notifyItemRemoved(position);
+        }
+    }
 
 }
 
