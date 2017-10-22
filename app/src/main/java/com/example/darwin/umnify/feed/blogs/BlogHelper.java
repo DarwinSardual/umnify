@@ -23,18 +23,6 @@ import java.io.IOException;
 
 public class BlogHelper {
 
-    public static BlogTile createBlogTileFromJSON(JSONObject data, int index) throws JSONException{
-
-        int id = data.getInt("id");
-        String heading = data.getString("heading");
-        String imageFile = data.getString("image");
-        int author = data.getInt("author");
-
-        BlogTile blog = new BlogTile(id, heading, imageFile, author,index);
-
-        return blog;
-    }
-
     public static Blog createBlogFromJSON(JSONObject data, int index) throws JSONException{
 
         int id = data.getInt("id");
@@ -54,19 +42,6 @@ public class BlogHelper {
                 signature, index, authorFirstname, authorLastname, authorImage);
 
         return blog;
-    }
-
-    public static Blog createBlogFromJSON(String data){
-
-        try{
-
-            JSONObject json = new JSONObject(data);
-
-        }catch (JSONException e){
-            e.printStackTrace();
-        }
-
-        return null;
     }
 
     public static long addBlogToLocalDb(Blog blog, Context context){
