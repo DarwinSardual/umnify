@@ -209,13 +209,14 @@ public class AnnouncementFeedManager <E extends AnnouncementViewHolder> extends 
                 String title = cursor.getString(cursor.getColumnIndexOrThrow(UMnifyContract.UMnifyColumns.Announcement.TITLE.toString()));
                 String imageFile = cursor.getString(cursor.getColumnIndexOrThrow(UMnifyContract.UMnifyColumns.Announcement.IMAGE.toString()));
                 int authorId = cursor.getInt(cursor.getColumnIndexOrThrow(UMnifyContract.UMnifyColumns.Announcement.AUTHOR.toString()));
+                String createdDate = cursor.getString(cursor.getColumnIndexOrThrow(UMnifyContract.UMnifyColumns.Announcement.CREATED_DATE.toString()));
                 String publishedDate = cursor.getString(cursor.getColumnIndexOrThrow(UMnifyContract.UMnifyColumns.Announcement.PUBLISHED_DATE.toString()));
                 int signature = cursor.getInt(cursor.getColumnIndexOrThrow(UMnifyContract.UMnifyColumns.Announcement.SIGNATURE.toString()));
 
                 String authorFirstname = cursor.getString(cursor.getColumnIndexOrThrow(UMnifyContract.UMnifyColumns.Announcement.AUTHOR_FIRSTNAME.toString()));
                 String authorLastname = cursor.getString(cursor.getColumnIndexOrThrow(UMnifyContract.UMnifyColumns.Announcement.AUTHOR_LASTNAME.toString()));
 
-                Announcement announcement = new Announcement(id, title, content, imageFile, null, authorId, null, publishedDate, signature, authorFirstname, authorLastname);
+                Announcement announcement = new Announcement(id, title, content, imageFile, null, authorId, createdDate, publishedDate, signature, authorFirstname, authorLastname);
 
                 addFeedEntry(announcement);
             }

@@ -64,6 +64,7 @@ public class AnnouncementHelper {
 
             ContentValues values = new ContentValues();
             values.put(UMnifyContract.UMnifyColumns.Announcement.ID.toString(), announcement.getId());
+            values.put(UMnifyContract.UMnifyColumns.Announcement.TITLE.toString(), announcement.getTitle());
             values.put(UMnifyContract.UMnifyColumns.Announcement.CONTENT.toString(), announcement.getContent());
             values.put(UMnifyContract.UMnifyColumns.Announcement.IMAGE.toString(), announcement.getImageFile());
             values.put(UMnifyContract.UMnifyColumns.Announcement.AUTHOR.toString(), announcement.getAuthorId());
@@ -84,6 +85,7 @@ public class AnnouncementHelper {
         SQLiteDatabase databaseWrite = databaseConnection.getWritableDatabase();
 
         ContentValues values = new ContentValues();
+        values.put(UMnifyContract.UMnifyColumns.Announcement.TITLE.toString(), announcement.getTitle());
         values.put(UMnifyContract.UMnifyColumns.Announcement.CONTENT.toString(), announcement.getContent());
         values.put(UMnifyContract.UMnifyColumns.Announcement.IMAGE.toString(), announcement.getImageFile());
         values.put(UMnifyContract.UMnifyColumns.Announcement.AUTHOR.toString(), announcement.getAuthorId());
