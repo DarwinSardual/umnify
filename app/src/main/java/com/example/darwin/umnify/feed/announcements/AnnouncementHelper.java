@@ -68,6 +68,7 @@ public class AnnouncementHelper {
             values.put(UMnifyContract.UMnifyColumns.Announcement.CONTENT.toString(), announcement.getContent());
             values.put(UMnifyContract.UMnifyColumns.Announcement.IMAGE.toString(), announcement.getImageFile());
             values.put(UMnifyContract.UMnifyColumns.Announcement.AUTHOR.toString(), announcement.getAuthorId());
+            values.put(UMnifyContract.UMnifyColumns.Announcement.CREATED_DATE.toString(), announcement.getPublishedDate());
             values.put(UMnifyContract.UMnifyColumns.Announcement.PUBLISHED_DATE.toString(), announcement.getPublishedDate());
             values.put(UMnifyContract.UMnifyColumns.Announcement.SIGNATURE.toString(), announcement.getSignature());
             values.put(UMnifyContract.UMnifyColumns.Announcement.AUTHOR_FIRSTNAME.toString(), announcement.getAuthorFirstname());
@@ -89,6 +90,7 @@ public class AnnouncementHelper {
         values.put(UMnifyContract.UMnifyColumns.Announcement.CONTENT.toString(), announcement.getContent());
         values.put(UMnifyContract.UMnifyColumns.Announcement.IMAGE.toString(), announcement.getImageFile());
         values.put(UMnifyContract.UMnifyColumns.Announcement.AUTHOR.toString(), announcement.getAuthorId());
+        values.put(UMnifyContract.UMnifyColumns.Announcement.CREATED_DATE.toString(), announcement.getPublishedDate());
         values.put(UMnifyContract.UMnifyColumns.Announcement.PUBLISHED_DATE.toString(), announcement.getPublishedDate());
         values.put(UMnifyContract.UMnifyColumns.Announcement.SIGNATURE.toString(), announcement.getSignature());
 
