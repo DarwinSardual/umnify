@@ -9,6 +9,7 @@ public class News {
     private String imageFile;
     private Bitmap image;
     private String publishedDate;
+    private String createdDate;
     private int signature;
 
     private int authorId;
@@ -23,13 +24,14 @@ public class News {
     private int index;
 
 
-    public News(int id, String content, String imageFile, int authorId, String publishedDate, int signature, int stars, boolean isStarred,
+    public News(int id, String content, String imageFile, int authorId, String createdDate, String publishedDate, int signature, int stars, boolean isStarred,
                 int index, String authorFirstname, String authorLastname,  String authorImageFile){
 
         this.id = id;
         this.content = content;
         this.imageFile = imageFile;
         this.authorId = authorId;
+        this.createdDate = createdDate;
         this.publishedDate = publishedDate;
         this.signature = signature;
         this.stars = stars;
@@ -96,6 +98,10 @@ public class News {
 
     public String getPublishedDate() {
         return publishedDate;
+    }
+
+    public String getCreatedDate() {
+        return createdDate;
     }
 
     public String getAuthorFirstname(){ return authorFirstname;}

@@ -198,14 +198,15 @@ public class NewsFeedManagerGuest<E extends NewsViewHolderGuest> extends FeedMan
                 String content = cursor.getString(cursor.getColumnIndexOrThrow(UMnifyContract.UMnifyColumns.News.CONTENT.toString()));
                 String imageFile = cursor.getString(cursor.getColumnIndexOrThrow(UMnifyContract.UMnifyColumns.News.IMAGE.toString()));
                 int author = cursor.getInt(cursor.getColumnIndexOrThrow(UMnifyContract.UMnifyColumns.News.AUTHOR.toString()));
-                String publshedDate = cursor.getString(cursor.getColumnIndexOrThrow(UMnifyContract.UMnifyColumns.News.PUBLISHED_DATE.toString()));
+                String createdDate = cursor.getString(cursor.getColumnIndexOrThrow(UMnifyContract.UMnifyColumns.News.CREATED_DATE.toString()));
+                String publishedDate = cursor.getString(cursor.getColumnIndexOrThrow(UMnifyContract.UMnifyColumns.News.PUBLISHED_DATE.toString()));
                 int signature = cursor.getInt(cursor.getColumnIndexOrThrow(UMnifyContract.UMnifyColumns.News.SIGNATURE.toString()));
 
                 String authorFirstname = cursor.getString(cursor.getColumnIndexOrThrow(UMnifyContract.UMnifyColumns.News.AUTHOR_FIRSTNAME.toString()));
                 String authorLastname = cursor.getString(cursor.getColumnIndexOrThrow(UMnifyContract.UMnifyColumns.News.AUTHOR_LASTNAME.toString()));
                 String authorImageFile = cursor.getString(cursor.getColumnIndexOrThrow(UMnifyContract.UMnifyColumns.News.AUTHOR_IMAGE.toString()));
 
-                News news = new News(id, content, imageFile, author, publshedDate, signature, 0, false,
+                News news = new News(id, content, imageFile, author,createdDate, publishedDate, signature, 0, false,
                         super.getFeedListSize(), authorFirstname, authorLastname, authorImageFile);
 
                 addFeedEntry(news);

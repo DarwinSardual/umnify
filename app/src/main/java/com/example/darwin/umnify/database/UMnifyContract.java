@@ -66,6 +66,7 @@ public final class UMnifyContract {
             CONTENT("content"),
             IMAGE("image"),
             AUTHOR("author"),
+            CREATED_DATE("created_date"),
             PUBLISHED_DATE("published_date"),
             SIGNATURE("signature"),
             AUTHOR_FIRSTNAME("author_firstname"),
