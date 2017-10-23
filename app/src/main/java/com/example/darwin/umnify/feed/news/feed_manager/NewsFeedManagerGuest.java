@@ -90,7 +90,7 @@ public class NewsFeedManagerGuest<E extends NewsViewHolderGuest> extends FeedMan
         if(news.getAuthorImageFile() != null){
             Bitmap authorImage = GalleryHelper.loadImageFromInternal(news.getAuthorImageFile(), super.getActivity(), "avatar", options);
             if(authorImage != null){
-                news.setAuthorImage(DataHelper.resizeImageAspectRatio(authorImage, authorImage.getWidth(), authorImage.getHeight()));
+                news.setAuthorImage(authorImage);
                 notifyItemChanged(position);
             }else {
 
@@ -109,8 +109,8 @@ public class NewsFeedManagerGuest<E extends NewsViewHolderGuest> extends FeedMan
         if(news.getImageFile() != null){
             Bitmap newsImage = GalleryHelper.loadImageFromInternal(news.getImageFile(), super.getActivity(), "feed/news");
             if(newsImage != null){
-                news.setImage(DataHelper.resizeImageAspectRatio(newsImage, 640, 360));
-                //news.setImage(newsImage);
+                //news.setImage(DataHelper.resizeImageAspectRatio(newsImage, 640, 360));
+                news.setImage(newsImage);
                 notifyItemChanged(position);
             }else{
                 WebServiceAction imageAction;

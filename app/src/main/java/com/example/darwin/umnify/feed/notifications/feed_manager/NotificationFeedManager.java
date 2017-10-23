@@ -177,6 +177,7 @@ public class NotificationFeedManager<E extends NotificationViewHolder> extends F
         }else if(direction == -1){
             super.clearFeedList();
             index.clear();
+            offset = 0;
             notifyDataSetChanged();
             super.setFetchingFeedEntry(true);
             hasConnection = true;

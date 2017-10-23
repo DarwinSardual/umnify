@@ -466,10 +466,10 @@ public class PendingFeedManagerSuperAdmin<E extends PendingViewHolderSuperAdmin>
         @Override
         public void processResult(String response) {
 
-            int position = index.indexOf(key);
-            index.remove(position);
+            //int position = index.indexOf(key);
+            //index.remove(position);
             removeFromFeedList(key);
-            notifyItemRemoved(position);
+            //notifyItemRemoved(position);
         }
     }
 

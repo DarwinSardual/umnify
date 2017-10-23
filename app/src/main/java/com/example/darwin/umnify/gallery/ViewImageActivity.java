@@ -89,13 +89,13 @@ public class ViewImageActivity extends AppCompatActivity {
 
             DataActionWrapper wrapper;
 
-            if(type.equalsIgnoreCase("news")){
+            /*if(type.equalsIgnoreCase("news")){
 
             }else if(type.equalsIgnoreCase("blog")){
 
             }else if(type.equalsIgnoreCase("announcement")){
 
-            }
+            }*/
         }
 
     }

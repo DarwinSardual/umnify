@@ -53,7 +53,7 @@ public class GalleryBlogFeedManager<E extends GalleryViewHolder> extends FeedMan
         super.setOnRemoveFromCache(new RemoveFromCache());
         offset = 0;
         options = new BitmapFactory.Options();
-        options.inSampleSize = 6;
+        options.inSampleSize = 4;
         this.index = new ArrayList<>();
         this.cls = cls;
 
@@ -253,8 +253,8 @@ public class GalleryBlogFeedManager<E extends GalleryViewHolder> extends FeedMan
         public void processResult(Bitmap image) {
 
             if(image != null){
-                GalleryHelper.saveImageToInternal(image, wrapper.getImageFile(), activity, "feed/news");
-                Bitmap resizeImage = DataHelper.resizeImageAspectRatio(image, image.getWidth() / 4, image.getHeight() / 8);
+                GalleryHelper.saveImageToInternal(image, wrapper.getImageFile(), activity, "feed/blog");
+                Bitmap resizeImage = DataHelper.resizeImageAspectRatio(image, image.getWidth() / 4, image.getHeight() / 4);
                 image = null;
                 wrapper.setImage(resizeImage);
                 notifyItemChanged(position);
