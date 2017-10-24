@@ -137,7 +137,7 @@ public class NewsFeedManagerGuest<E extends NewsViewHolderGuest> extends FeedMan
         Bitmap newsImage = GalleryHelper.loadImageFromInternal(news.getImageFile(), super.getActivity(), "feed/news");
 
         if(newsImage != null){
-            news.setImage(DataHelper.resizeImageAspectRatio(newsImage, 640, 360));
+            news.setImage(newsImage);
         }
 
         String key = Integer.toString(news.getId());
@@ -325,7 +325,7 @@ public class NewsFeedManagerGuest<E extends NewsViewHolderGuest> extends FeedMan
                     @Override
                     public void onClick(View view) {
                         Intent intent = new Intent(NewsFeedManagerGuest.this.getActivity(), ViewImageActivity.class);
-                        intent.putExtra("ROOT_LOCATION", AuthenticationAddress.NEWS_IMAGE_FOLDER_NON);
+                        intent.putExtra("ROOT_LOCATION", AuthenticationAddress.NEWS_IMAGE_FOLDER);
                         intent.putExtra("FOLDER", "feed/news");
                         intent.putExtra("IMAGE_FILE", news.getImageFile());
                         NewsFeedManagerGuest.this.getActivity().startActivity(intent);
@@ -390,7 +390,8 @@ public class NewsFeedManagerGuest<E extends NewsViewHolderGuest> extends FeedMan
         @Override
         public void processResult(Bitmap image) {
             if(image != null){
-                news.setImage(DataHelper.resizeImageAspectRatio(image, 640, 360));
+                //news.setImage(DataHelper.resizeImageAspectRatio(image, 640, 360));
+                news.setImage(image);
                 GalleryHelper.saveImageToInternal(image,
                         news.getImageFile(), activity, "feed/news");
                 notifyItemChanged(position);

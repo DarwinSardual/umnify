@@ -90,11 +90,13 @@ public class LeastRecentlyUsedCache<K, V>{
         if(mostUsed != null && node.getKey() == mostUsed.getKey()){
 
             mostUsed = node.getPrevious();
-            mostUsed.setNext(null);
+            if(mostUsed != null)
+                mostUsed.setNext(null);
         }else if(leastUsed != null && node.getKey() == leastUsed.getKey()){
 
             leastUsed = node.getNext();
-            leastUsed.setPrevious(null);
+            if(leastUsed != null)
+                leastUsed.setPrevious(null);
         }else{
 
             Node<K, V> prevNode = node.getPrevious();

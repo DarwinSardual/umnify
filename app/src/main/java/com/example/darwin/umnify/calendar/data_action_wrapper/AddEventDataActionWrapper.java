@@ -2,6 +2,7 @@ package com.example.darwin.umnify.calendar.data_action_wrapper;
 
 import android.app.Activity;
 
+import android.widget.Toast;
 import com.example.darwin.umnify.authentication.AuthenticationAddress;
 import com.example.darwin.umnify.connection.WebServiceConnection;
 import com.example.darwin.umnify.wrapper.DataHelper;
@@ -47,6 +48,10 @@ public class AddEventDataActionWrapper implements WebServiceAction{
 
     @Override
     public void processResult() {
-
+        if(response != null){
+            Toast.makeText(activity, "Adding event successful.", Toast.LENGTH_LONG).show();
+        }else{
+            Toast.makeText(activity, "Failed to add new event.", Toast.LENGTH_LONG).show();
+        }
     }
 }

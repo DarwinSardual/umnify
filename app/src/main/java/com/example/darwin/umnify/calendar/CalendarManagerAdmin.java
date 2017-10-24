@@ -7,6 +7,7 @@ import android.support.annotation.NonNull;
 import android.support.design.widget.FloatingActionButton;
 import android.view.View;
 
+import android.widget.Toast;
 import com.example.darwin.umnify.DateHelper;
 import com.example.darwin.umnify.R;
 import com.example.darwin.umnify.async.WebServiceAsync;
@@ -55,6 +56,7 @@ public class CalendarManagerAdmin extends CalendarManager {
                 new AddEventDataActionWrapper(textDataOutput, super.getActivity());
 
         async.execute(addEventDataActionWrapper);
+        Toast.makeText(getActivity(), "Adding new event. Please wait for it to finish.", Toast.LENGTH_LONG).show();
 
     }
 

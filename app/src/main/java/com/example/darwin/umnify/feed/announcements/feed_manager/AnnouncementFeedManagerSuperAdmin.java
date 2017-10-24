@@ -125,6 +125,7 @@ public class AnnouncementFeedManagerSuperAdmin<E extends AnnouncementViewHolderS
 
         WebServiceAsync async = new WebServiceAsync();
         async.execute(action);
+        Toast.makeText(getActivity(), "Adding announcement in process. Please wait for it to finish.", Toast.LENGTH_LONG).show();
     }
 
     @Override
@@ -188,6 +189,7 @@ public class AnnouncementFeedManagerSuperAdmin<E extends AnnouncementViewHolderS
 
         WebServiceAsync async = new WebServiceAsync();
         async.execute(action);
+        Toast.makeText(getActivity(), "Updating announcement in process. Please wait for it to finish.", Toast.LENGTH_LONG).show();
 
     }
 
@@ -205,6 +207,7 @@ public class AnnouncementFeedManagerSuperAdmin<E extends AnnouncementViewHolderS
                 new DataActionWrapper(textDataOutput, super.getActivity(), AuthenticationAddress.DELETE_ANNOUNCEMENT, postProcess);
 
         async.execute(action);
+        Toast.makeText(getActivity(), "Deleting announcement in process. Please wait for it to finish.", Toast.LENGTH_LONG).show();
         textDataOutput = null;
     }
 
@@ -230,7 +233,11 @@ public class AnnouncementFeedManagerSuperAdmin<E extends AnnouncementViewHolderS
 
         @Override
         public void processResult(String jsonResponse) {
-
+            if(jsonResponse != null){
+                Toast.makeText(getActivity(), "Updating the selected announcement is successful.", Toast.LENGTH_LONG).show();
+            }else{
+                Toast.makeText(getActivity(), "Failed to update the selected announcement.", Toast.LENGTH_SHORT).show();
+            }
         }
     }
 
@@ -238,7 +245,11 @@ public class AnnouncementFeedManagerSuperAdmin<E extends AnnouncementViewHolderS
 
         @Override
         public void processResult(String jsonResponse) {
-
+            if(jsonResponse != null){
+                Toast.makeText(getActivity(), "Adding announcement successful.", Toast.LENGTH_LONG).show();
+            }else{
+                Toast.makeText(getActivity(), "Failed to add announcement.", Toast.LENGTH_SHORT).show();
+            }
         }
     }
 
@@ -257,9 +268,10 @@ public class AnnouncementFeedManagerSuperAdmin<E extends AnnouncementViewHolderS
                 //int position = getIndex().indexOf(key);
                 //getIndex().remove(position);
                 removeFromFeedList(key);
+                Toast.makeText(getActivity(), "Deleting the selected announcement is successful.", Toast.LENGTH_LONG).show();
                 //notifyItemRemoved(position);
             }else{
-                Toast.makeText(getActivity(), "Failed to delete.", Toast.LENGTH_SHORT).show();
+                Toast.makeText(getActivity(), "Failed to delete the selected announcement.", Toast.LENGTH_SHORT).show();
             }
 
         }

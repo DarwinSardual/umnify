@@ -1,20 +1,25 @@
 package com.example.darwin.umnify.feed.news;
 
 import android.app.Activity;
+import android.content.Intent;
 import android.graphics.Bitmap;
 import android.os.Bundle;
+import android.view.View;
 import android.widget.ImageView;
 import android.widget.TextView;
 
 import com.example.darwin.umnify.DateHelper;
 import com.example.darwin.umnify.R;
 import com.example.darwin.umnify.async.WebServiceAsync;
+import com.example.darwin.umnify.authentication.AuthenticationAddress;
 import com.example.darwin.umnify.feed.PostAsyncAction;
 import com.example.darwin.umnify.feed.PostAsyncImageAction;
 import com.example.darwin.umnify.feed.news.data_action_wrapper.FetchAuthorImageDataActionWrapper;
 import com.example.darwin.umnify.feed.news.data_action_wrapper.FetchNewsDataActionWrapper;
 import com.example.darwin.umnify.feed.news.data_action_wrapper.FetchNewsImageDataActionWrapper;
 
+import com.example.darwin.umnify.gallery.GalleryHelper;
+import com.example.darwin.umnify.gallery.ViewImageActivity;
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -86,7 +91,10 @@ public class NewsActivityControllerNormal{
         @Override
         public void processResult(Bitmap image) {
             if(image != null){
+                GalleryHelper.saveImageToInternal(image,
+                        imageFile, activity, "feed/news");
                 imageView.setImageBitmap(image);
+
             }
         }
     }
@@ -111,7 +119,10 @@ public class NewsActivityControllerNormal{
         @Override
         public void processResult(Bitmap image) {
             if(image != null){
+                GalleryHelper.saveImageToInternal(image,
+                        imageFile, activity, "avatar");
                 imageView.setImageBitmap(image);
+
             }
         }
     }
@@ -150,19 +161,47 @@ public class NewsActivityControllerNormal{
 
                         newsDateView.setText(str);
 
-                        WebServiceAsync asnycFetchNewsImage = new WebServiceAsync();
-                        ProcessPostFetchNewsImage processOnFetchNewsImage = new ProcessPostFetchNewsImage(newsJson.getString("image"), newsImageView, activity);
-                        FetchNewsImageDataActionWrapper fetchNewsImageDataActionWrapper =
-                                new FetchNewsImageDataActionWrapper(activity, processOnFetchNewsImage);
+                        final String newsImageFile = newsJson.isNull("image")? null: newsJson.getString("image");
 
-                        asnycFetchNewsImage.execute(fetchNewsImageDataActionWrapper);
+                        if(newsImageFile != null){
+                            Bitmap newsImage = GalleryHelper.loadImageFromInternal(newsImageFile, activity, "feed/news");
+                            if(newsImage != null){
+                                newsImageView.setImageBitmap(newsImage);
+                            }else{
+                                WebServiceAsync asnycFetchNewsImage = new WebServiceAsync();
+                                ProcessPostFetchNewsImage processOnFetchNewsImage = new ProcessPostFetchNewsImage(newsImageFile, newsImageView, activity);
+                                FetchNewsImageDataActionWrapper fetchNewsImageDataActionWrapper =
+                                        new FetchNewsImageDataActionWrapper(activity, processOnFetchNewsImage);
 
-                        WebServiceAsync asnycFetchAuthorImage = new WebServiceAsync();
-                        ProcessPostFetchAuthorImage processPostFetchAuthorImage = new ProcessPostFetchAuthorImage(newsJson.getString("author_image"), newsAuthorImageView, activity);
-                        FetchAuthorImageDataActionWrapper fetchAuthorImageDataActionWrapper =
-                                new FetchAuthorImageDataActionWrapper(activity, processPostFetchAuthorImage);
+                                asnycFetchNewsImage.execute(fetchNewsImageDataActionWrapper);
+                            }
+                        }
 
-                        asnycFetchAuthorImage.execute(fetchAuthorImageDataActionWrapper);
+                        String authorImageFile = newsJson.isNull("author_image")? null: newsJson.getString("author_image");
+                        if(authorImageFile != null){
+                            Bitmap authorImage = GalleryHelper.loadImageFromInternal(authorImageFile, activity, "avatar");
+                            if(authorImageFile != null){
+                                newsAuthorImageView.setImageBitmap(authorImage);
+                            }else{
+                                WebServiceAsync asnycFetchAuthorImage = new WebServiceAsync();
+                                ProcessPostFetchAuthorImage processPostFetchAuthorImage = new ProcessPostFetchAuthorImage(authorImageFile, newsAuthorImageView, activity);
+                                FetchAuthorImageDataActionWrapper fetchAuthorImageDataActionWrapper =
+                                        new FetchAuthorImageDataActionWrapper(activity, processPostFetchAuthorImage);
+
+                                asnycFetchAuthorImage.execute(fetchAuthorImageDataActionWrapper);
+                            }
+                        }
+
+                        newsImageView.setOnClickListener(new View.OnClickListener() {
+                            @Override
+                            public void onClick(View v) {
+                                Intent intent = new Intent(activity, ViewImageActivity.class);
+                                intent.putExtra("ROOT_LOCATION", AuthenticationAddress.NEWS_IMAGE_FOLDER);
+                                intent.putExtra("FOLDER", "feed/news");
+                                intent.putExtra("IMAGE_FILE", newsImageFile);
+                                activity.startActivity(intent);
+                            }
+                        });
 
                     }
                 }catch (JSONException e){

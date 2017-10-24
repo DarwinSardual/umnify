@@ -78,6 +78,7 @@ public class NewsFeedManagerAdmin<E extends NewsViewHolderAdmin> extends NewsFee
         WebServiceAction action = new DataActionWrapper(textDataOutput, super.getActivity(), AuthenticationAddress.DELETE_NEWS, postProcess);
 
         async.execute(action);
+        Toast.makeText(getActivity(), "Deleting news in process. Please wait for it to finish.", Toast.LENGTH_LONG).show();
         textDataOutput = null;
 
 
@@ -136,6 +137,8 @@ public class NewsFeedManagerAdmin<E extends NewsViewHolderAdmin> extends NewsFee
 
         WebServiceAsync async = new WebServiceAsync();
         async.execute(action);
+
+        Toast.makeText(getActivity(), "Adding news in process. Please wait for it to finish.", Toast.LENGTH_LONG).show();
 
     }
 
@@ -197,6 +200,7 @@ public class NewsFeedManagerAdmin<E extends NewsViewHolderAdmin> extends NewsFee
 
         WebServiceAsync async = new WebServiceAsync();
         async.execute(action);
+        Toast.makeText(getActivity(), "Updating news in process. Please wait for it to finish.", Toast.LENGTH_LONG).show();
     }
 
     private class ProcessDeleteFeed implements OnDeleteFeed{
@@ -223,7 +227,9 @@ public class NewsFeedManagerAdmin<E extends NewsViewHolderAdmin> extends NewsFee
         public void processResult(String jsonResponse) {
 
             if(jsonResponse != null){
-
+                Toast.makeText(getActivity(), "Adding news succesful.", Toast.LENGTH_LONG).show();
+            }else{
+                Toast.makeText(getActivity(), "Failed to add news.", Toast.LENGTH_SHORT).show();
             }
 
         }
@@ -247,8 +253,9 @@ public class NewsFeedManagerAdmin<E extends NewsViewHolderAdmin> extends NewsFee
                 removeFromFeedList(key);
                 notifyItemRemoved(position);*/
                 removeFromFeedList(key);
+                Toast.makeText(getActivity(), "Deleting the selected news is successful.", Toast.LENGTH_LONG).show();
             }else{
-                Toast.makeText(getActivity(), "Failed to delete.", Toast.LENGTH_SHORT).show();
+                Toast.makeText(getActivity(), "Failed to delete the selected news.", Toast.LENGTH_SHORT).show();
             }
 
         }
@@ -259,9 +266,9 @@ public class NewsFeedManagerAdmin<E extends NewsViewHolderAdmin> extends NewsFee
         @Override
         public void processResult(String jsonResponse) {
             if(jsonResponse != null){
-
+                Toast.makeText(getActivity(), "Updating the selected news is successful.", Toast.LENGTH_LONG).show();
             }else{
-
+                Toast.makeText(getActivity(), "Failed to update the selected news.", Toast.LENGTH_SHORT).show();
             }
         }
     }

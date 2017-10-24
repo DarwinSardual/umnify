@@ -145,6 +145,7 @@ public class BlogFeedManagerAdmin<E extends BlogTileViewHolderGuest> extends Blo
 
         WebServiceAsync async = new WebServiceAsync();
         async.execute(action);
+        Toast.makeText(getActivity(), "Adding blog in process. Please wait for it to finish.", Toast.LENGTH_LONG).show();
     }
 
     @Override
@@ -161,6 +162,7 @@ public class BlogFeedManagerAdmin<E extends BlogTileViewHolderGuest> extends Blo
                 new DataActionWrapper(textDataOutput, super.getActivity(), AuthenticationAddress.DELETE_BLOG,processPostDeleteBlog);
 
         async.execute(action);
+        Toast.makeText(getActivity(), "Deleting blog in process. Please wait for it to finish.", Toast.LENGTH_LONG).show();
         textDataOutput = null;
     }
 
@@ -226,6 +228,7 @@ public class BlogFeedManagerAdmin<E extends BlogTileViewHolderGuest> extends Blo
 
         WebServiceAsync async = new WebServiceAsync();
         async.execute(action);
+        Toast.makeText(getActivity(), "Updating blog in process. Please wait for it to finish.", Toast.LENGTH_LONG).show();
 
     }
 
@@ -237,7 +240,12 @@ public class BlogFeedManagerAdmin<E extends BlogTileViewHolderGuest> extends Blo
 
         @Override
         public void processResult(String jsonResponse) {
-            Log.e("Message", "Edit Blog - " + jsonResponse);
+
+            if(jsonResponse != null){
+                Toast.makeText(getActivity(), "Updating the selected blog is successful.", Toast.LENGTH_LONG).show();
+            }else{
+                Toast.makeText(getActivity(), "Failed to update the selected blog.", Toast.LENGTH_SHORT).show();
+            }
         }
     }
 
@@ -253,13 +261,13 @@ public class BlogFeedManagerAdmin<E extends BlogTileViewHolderGuest> extends Blo
         public void processResult(String jsonResponse) {
 
             if(jsonResponse != null){
-                Log.e("Message", "Delete blog - " + jsonResponse);
                 //int position = getIndex().indexOf(key);
                 //getIndex().remove(position);
                 removeFromFeedList(key);
+                Toast.makeText(getActivity(), "Deleting the selected blog is successful.", Toast.LENGTH_LONG).show();
                 //notifyItemRemoved(position);
             }else{
-                Toast.makeText(getActivity(), "Failed to delete.", Toast.LENGTH_SHORT).show();
+                Toast.makeText(getActivity(), "Failed to delete the selected blog.", Toast.LENGTH_SHORT).show();
             }
 
         }
@@ -270,9 +278,9 @@ public class BlogFeedManagerAdmin<E extends BlogTileViewHolderGuest> extends Blo
         @Override
         public void processResult(String jsonResponse) {
             if(jsonResponse != null){
-                Log.e("Message", "Add Blog - " + jsonResponse);
+                Toast.makeText(getActivity(), "Adding blog successful.", Toast.LENGTH_LONG).show();
             }else{
-
+                Toast.makeText(getActivity(), "Failed to add blog.", Toast.LENGTH_SHORT).show();
             }
         }
     }

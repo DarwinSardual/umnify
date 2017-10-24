@@ -58,7 +58,7 @@ public class BlogFeedManagerGuest<E extends BlogTileViewHolderGuest> extends Fee
 
     public BlogFeedManagerGuest(Activity activity, SwipeRefreshLayout swipeRefreshLayout,
                                 Class<E> cls, int layoutId){
-        super(activity, swipeRefreshLayout, 30);
+        super(activity, swipeRefreshLayout, 50);
         super.setOnRemoveFromCache(new RemoveFromCache());
         this.layoutId = layoutId;
         this.cls = cls;
@@ -107,8 +107,8 @@ public class BlogFeedManagerGuest<E extends BlogTileViewHolderGuest> extends Fee
 
         Bitmap image = GalleryHelper.loadImageFromInternal(blog.getImageFile() , super.getActivity(), "feed/blog");
         if(image != null){
-
-            blog.setImage(image);
+            Bitmap resizeImage = DataHelper.resizeImageAspectRatio(image, 512, 288);
+            blog.setImage(resizeImage);
         }
 
         int position = index.size();

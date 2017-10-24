@@ -10,6 +10,7 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 
+import com.example.darwin.umnify.DateHelper;
 import com.example.darwin.umnify.LeastRecentlyUsedCache;
 import com.example.darwin.umnify.R;
 import com.example.darwin.umnify.async.WebServiceAsync;
@@ -95,7 +96,8 @@ public class NotificationFeedManager<E extends NotificationViewHolder> extends F
             }
             holder.getNotificationTitleView().setText(title);
             holder.getNotificationContentView().setText(notification.getContent());
-            holder.getNotificationDateView().setText(notification.getPublishedDate());
+            String dateSplit[] = notification.getPublishedDate().split(" ");
+            holder.getNotificationDateView().setText(DateHelper.convertDateToMDY(dateSplit[0]) + " " + DateHelper.convert24Hourto12Hour(dateSplit[1]));
 
                 holder.getNotificationContainer().setOnClickListener(new View.OnClickListener() {
 
@@ -228,15 +230,23 @@ public class NotificationFeedManager<E extends NotificationViewHolder> extends F
         offset++;
         notifyItemInserted(position);
 
-        WebServiceAsync async = new WebServiceAsync();
+        if(notification.getAuthorImageFile() != null){
+            Bitmap authorImage = GalleryHelper.loadImageFromInternal(notification.getAuthorImageFile(), super.getActivity(), "avatar");
+            if(authorImage != null){
+                notification.setAuthorImage(authorImage);
+                notifyItemChanged(position);
+            }else{
+                WebServiceAsync async = new WebServiceAsync();
 
-        ProcessPostFetchAuthorImage processPostFetchAuthorImage = new ProcessPostFetchAuthorImage(notification, position, super.getActivity());
-        FetchAuthorImageDataActionWrapper fetchAuthorImageDataActionWrapper =
-                new FetchAuthorImageDataActionWrapper(super.getActivity(), processPostFetchAuthorImage);
-        async.execute(fetchAuthorImageDataActionWrapper);
+                ProcessPostFetchAuthorImage processPostFetchAuthorImage = new ProcessPostFetchAuthorImage(notification, position, super.getActivity());
+                FetchAuthorImageDataActionWrapper fetchAuthorImageDataActionWrapper =
+                        new FetchAuthorImageDataActionWrapper(super.getActivity(), processPostFetchAuthorImage);
+                async.execute(fetchAuthorImageDataActionWrapper);
 
-        notification = null;
-        fetchAuthorImageDataActionWrapper = null;
+                notification = null;
+                fetchAuthorImageDataActionWrapper = null;
+            }
+        }
     }
 
     @Override

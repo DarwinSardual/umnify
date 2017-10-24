@@ -54,7 +54,7 @@ public class AnnouncementFeedManager <E extends AnnouncementViewHolder> extends 
 
     public AnnouncementFeedManager(Activity activity, SwipeRefreshLayout swipeRefreshLayout,
                                 Class<E> cls, int layoutId){
-        super(activity, swipeRefreshLayout, 30);
+        super(activity, swipeRefreshLayout, 50);
         super.setOnRemoveFromCache(new RemoveFromCache());
         this.layoutId = layoutId;
         this.cls = cls;
@@ -100,7 +100,7 @@ public class AnnouncementFeedManager <E extends AnnouncementViewHolder> extends 
                 @Override
                 public void onClick(View v) {
                     Intent intent = new Intent(getActivity(), ViewImageActivity.class);
-                    intent.putExtra("ROOT_LOCATION", AuthenticationAddress.ANNOUNCEMENT_IMAGE_FOLDER_NON);
+                    intent.putExtra("ROOT_LOCATION", AuthenticationAddress.ANNOUNCEMENT_IMAGE_FOLDER);
                     intent.putExtra("FOLDER", "feed/announcement");
                     intent.putExtra("IMAGE_FILE", announcement.getImageFile());
                     getActivity().startActivity(intent);
@@ -260,7 +260,8 @@ public class AnnouncementFeedManager <E extends AnnouncementViewHolder> extends 
 
         Bitmap newsImage = GalleryHelper.loadImageFromInternal(announcement.getImageFile(), super.getActivity(), "feed/announcement");
         if(newsImage != null){
-            announcement.setImage(DataHelper.resizeImageAspectRatio(newsImage, 640, 360));
+            //announcement.setImage(DataHelper.resizeImageAspectRatio(newsImage, 640, 360));
+            announcement.setImage(newsImage);
         }
 
         String key = Integer.toString(announcement.getId());
