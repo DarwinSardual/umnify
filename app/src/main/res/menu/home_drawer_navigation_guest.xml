@@ -70,11 +70,11 @@
                     android:id="@+id/navigation_quick_facts"
                     android:title="Quick fact" />
 
-                <item
+                <!--<item
                     android:icon="@drawable/navigation_credits"
                     android:tint="@color/button_grey"
                     android:id="@+id/navigation_credits"
-                    android:title="Credits" />
+                    android:title="Credits" />-->
 
             </group>
         </menu>

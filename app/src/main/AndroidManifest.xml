@@ -42,13 +42,18 @@
             </intent-filter>
             -->
         </activity>
-        <activity android:name=".home.HomeActivity" />
+        <activity android:name=".home.HomeActivity" android:configChanges="orientation"
+            android:screenOrientation="portrait" />
         <!--<activity android:name=".groups.GroupsActivity" />-->
         <activity android:name=".preferences.PreferencesActivity" />
-        <activity android:name=".calendar.CalendarActivity" />
-        <activity android:name=".feed.blogs.BlogActivity" />
-        <activity android:name=".feed.news.NewsActivity" />
-        <activity android:name=".start.StartActivity">
+        <activity android:name=".calendar.CalendarActivity" android:configChanges="orientation"
+            android:screenOrientation="portrait" />
+        <activity android:name=".feed.blogs.BlogActivity" android:configChanges="orientation"
+            android:screenOrientation="portrait" />
+        <activity android:name=".feed.news.NewsActivity" android:configChanges="orientation"
+            android:screenOrientation="portrait" />
+        <activity android:name=".start.StartActivity" android:configChanges="orientation"
+            android:screenOrientation="portrait">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
 
@@ -61,20 +66,32 @@
             android:enabled="true"
             android:exported="false" />
 
-        <activity android:name=".feed.news.AddNewsActivity" />
-        <activity android:name=".feed.blogs.AddBlogActivity" />
+        <activity android:name=".feed.news.AddNewsActivity" android:configChanges="orientation"
+            android:screenOrientation="portrait"/>
+        <activity android:name=".feed.blogs.AddBlogActivity" android:configChanges="orientation"
+            android:screenOrientation="portrait" />
         <activity
             android:name=".feed.news.NewsCommentActivity"
-            android:theme="@style/NewsCommentThemeWithCorners" />
-        <activity android:name=".personal.EvaluationActivity" />
-        <activity android:name=".personal.StudentPermanentRecordActivity" />
-        <activity android:name=".personal.PersonalInformationActivity" />
-        <activity android:name=".personal.SubjectsEnrolledActivity" />
-        <activity android:name=".gallery.GalleryActivity" />
-        <activity android:name=".poseidon.PoseidonAlertActivity" />
-        <activity android:name=".gallery.news.GalleryNewsActivity" />
-        <activity android:name=".gallery.blog.GalleryBlogActivity" />
-        <activity android:name=".gallery.ViewImageActivity" />
+            android:theme="@style/NewsCommentThemeWithCorners" android:configChanges="orientation"
+            android:screenOrientation="portrait" />
+        <activity android:name=".personal.EvaluationActivity" android:configChanges="orientation"
+            android:screenOrientation="portrait" />
+        <activity android:name=".personal.StudentPermanentRecordActivity" android:configChanges="orientation"
+            android:screenOrientation="portrait" />
+        <activity android:name=".personal.PersonalInformationActivity" android:configChanges="orientation"
+            android:screenOrientation="portrait" />
+        <activity android:name=".personal.SubjectsEnrolledActivity" android:configChanges="orientation"
+            android:screenOrientation="portrait" />
+        <activity android:name=".gallery.GalleryActivity" android:configChanges="orientation"
+            android:screenOrientation="portrait" />
+        <activity android:name=".poseidon.PoseidonAlertActivity" android:configChanges="orientation"
+            android:screenOrientation="portrait" />
+        <activity android:name=".gallery.news.GalleryNewsActivity" android:configChanges="orientation"
+            android:screenOrientation="portrait" />
+        <activity android:name=".gallery.blog.GalleryBlogActivity" android:configChanges="orientation"
+            android:screenOrientation="portrait" />
+        <activity android:name=".gallery.ViewImageActivity" android:configChanges="orientation"
+            android:screenOrientation="portrait" />
 
         <meta-data
             android:name="com.google.android.gms.version"
@@ -83,23 +100,40 @@
             android:name="com.google.android.maps.v2.API_KEY"
             android:value="AIzaSyDzjdHhuyaG3B2apsRLTeWg6m1G2cl67Vk" />
 
-        <activity android:name=".maps.CampusMapActivity" />
-        <activity android:name=".calendar.AddEventActivity" />
-        <activity android:name=".personal.ProfileActivity" />
-        <activity android:name=".about.VisionMissionGoalsActivity" />
-        <activity android:name=".about.HistoryActivity" />
-        <activity android:name=".pending.PendingActivity" />
-        <activity android:name=".feed.news.EditNewsActivity" />
-        <activity android:name=".feed.blogs.EditBlogActivity" />
-        <activity android:name=".feed.announcements.AddAnnouncementActivity" />
-        <activity android:name=".feed.announcements.EditAnnouncementActivity" />
-        <activity android:name=".about.qoute_of_the_day.QouteOfTheDayActivity" />
-        <activity android:name=".about.trivia.TriviaActivity" />
-        <activity android:name=".about.qoute_of_the_day.AddQouteOfTheDayActivity" />
-        <activity android:name=".about.trivia.AddTrivia" />
-        <activity android:name=".about.quick_fact.QuickFactActivity" />
-        <activity android:name=".about.quick_fact.AddQuickFactActivity" />
-        <activity android:name=".feed.announcements.AnnouncementActivity"></activity>
+        <activity android:name=".maps.CampusMapActivity" android:configChanges="orientation"
+            android:screenOrientation="portrait" />
+        <activity android:name=".calendar.AddEventActivity" android:configChanges="orientation"
+            android:screenOrientation="portrait" />
+        <activity android:name=".personal.ProfileActivity" android:configChanges="orientation"
+            android:screenOrientation="portrait" />
+        <activity android:name=".about.VisionMissionGoalsActivity" android:configChanges="orientation"
+            android:screenOrientation="portrait" />
+        <activity android:name=".about.HistoryActivity" android:configChanges="orientation"
+            android:screenOrientation="portrait" />
+        <activity android:name=".pending.PendingActivity" android:configChanges="orientation"
+            android:screenOrientation="portrait" />
+        <activity android:name=".feed.news.EditNewsActivity" android:configChanges="orientation"
+            android:screenOrientation="portrait" />
+        <activity android:name=".feed.blogs.EditBlogActivity" android:configChanges="orientation"
+            android:screenOrientation="portrait" />
+        <activity android:name=".feed.announcements.AddAnnouncementActivity" android:configChanges="orientation"
+            android:screenOrientation="portrait" />
+        <activity android:name=".feed.announcements.EditAnnouncementActivity" android:configChanges="orientation"
+            android:screenOrientation="portrait" />
+        <activity android:name=".about.qoute_of_the_day.QouteOfTheDayActivity" android:configChanges="orientation"
+            android:screenOrientation="portrait" />
+        <activity android:name=".about.trivia.TriviaActivity" android:configChanges="orientation"
+            android:screenOrientation="portrait" />
+        <activity android:name=".about.qoute_of_the_day.AddQouteOfTheDayActivity" android:configChanges="orientation"
+            android:screenOrientation="portrait" />
+        <activity android:name=".about.trivia.AddTrivia" android:configChanges="orientation"
+            android:screenOrientation="portrait" />
+        <activity android:name=".about.quick_fact.QuickFactActivity" android:configChanges="orientation"
+            android:screenOrientation="portrait" />
+        <activity android:name=".about.quick_fact.AddQuickFactActivity" android:configChanges="orientation"
+            android:screenOrientation="portrait" />
+        <activity android:name=".feed.announcements.AnnouncementActivity" android:configChanges="orientation"
+            android:screenOrientation="portrait"></activity>
     </application>
 
 </manifest>

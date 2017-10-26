@@ -147,11 +147,12 @@ public class TriviaActivity extends AppCompatActivity {
             Bitmap rescaledImage = null;
             try{
                 image = MediaStore.Images.Media.getBitmap(this.getContentResolver(), uri);
+                rescaledImage = DataHelper.resizeImageAspectRatio(image, 896, 504);
             }catch (IOException e){
                 e.printStackTrace();
             }
 
-            byteArray = DataHelper.bitmapToByteArray(image, mimeType);
+            byteArray = DataHelper.bitmapToByteArray(rescaledImage, mimeType);
             textData.put("content", data.getStringExtra("ADD_TRIVIA_CONTENT"));
             textData.put("author", userData.getInt("USER_ID") +"");
             textData.put("image_file", imageFile);

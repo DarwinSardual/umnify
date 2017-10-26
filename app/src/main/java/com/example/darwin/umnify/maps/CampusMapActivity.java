@@ -89,7 +89,7 @@ public class CampusMapActivity extends AppCompatActivity implements OnMapReadyCa
                 BitmapFactory.decodeResource(getResources(), R.drawable.um_cafeteria)));
         umLocations.add( new CampusLocation("E-Car Terminal",
                 "E-Car terminal located at the main entrance", umMatinaECarTerminal1, BitmapFactory.decodeResource(getResources(), R.drawable.bus_terminal),
-                BitmapFactory.decodeResource(getResources(), R.drawable.um_be)));
+                BitmapFactory.decodeResource(getResources(), R.drawable.um_term1)));
         umLocations.add(new CampusLocation("HighSchool Department",
                 "Highschool section of the university", umMatinaHighSchool, BitmapFactory.decodeResource(getResources(), R.drawable.school_building),
                 BitmapFactory.decodeResource(getResources(), R.drawable.um_highschool)));
@@ -101,7 +101,7 @@ public class CampusMapActivity extends AppCompatActivity implements OnMapReadyCa
                 BitmapFactory.decodeResource(getResources(), R.drawable.um_dpt)));
         umLocations.add(new CampusLocation("Social Hall",
                 "An open hall located beside DPT", umMatinaSocialHall, BitmapFactory.decodeResource(getResources(), R.drawable.social),
-                BitmapFactory.decodeResource(getResources(), R.drawable.um_be)));
+                BitmapFactory.decodeResource(getResources(), R.drawable.um_social)));
         umLocations.add(new CampusLocation("Professional School Building",
                 "Graduate school", umMatinaProfessionalSchool, BitmapFactory.decodeResource(getResources(), R.drawable.school_building),
                 BitmapFactory.decodeResource(getResources(), R.drawable.um_ps)));

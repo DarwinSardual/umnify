@@ -156,11 +156,12 @@ public class AnnouncementFeedManagerSuperAdmin<E extends AnnouncementViewHolderS
 
             try{
                 image = MediaStore.Images.Media.getBitmap(super.getActivity().getContentResolver(), uri);
+                rescaledImage = DataHelper.resizeImageAspectRatio(image, 1920, 1080);
             }catch (IOException e){
                 e.printStackTrace();
             }
 
-            byteArray = DataHelper.bitmapToByteArray(image, mimeType);
+            byteArray = DataHelper.bitmapToByteArray(rescaledImage, mimeType);
 
 
             textData.put("id", data.getIntExtra("ANNOUNCEMENT_ID", -1) +"");
